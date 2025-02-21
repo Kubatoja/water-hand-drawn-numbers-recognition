@@ -25,7 +25,7 @@ def visualize_flooded_number(original_array, left_flooded, right_flooded, top_fl
 
     for i, flooded_array in enumerate([left_flooded, right_flooded, top_flooded, bottom_flooded], start=1):
         water_mask = (flooded_array == 0)  
-        images[i][water_mask] = [0, 0, 1] # Blue color for water
+        images[i][water_mask] = [0.27, 0.55, 0.85] # Blue color for water
         images[i][original_array == 1] = [1, 1, 1] # White color for number
     
     titles = [

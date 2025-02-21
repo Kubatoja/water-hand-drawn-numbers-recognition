@@ -5,7 +5,7 @@ from BFS.bfs import bfs_flood_from_side, flood_from_all_sides
 def visualize():
     pixels, labels = load_data("test")
 
-    data_number = 123
+    data_number = 1
     image_data = pixels[data_number]  
     label = labels[data_number] 
 
