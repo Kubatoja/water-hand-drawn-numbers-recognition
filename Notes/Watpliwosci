@@ -1,3 +1,5 @@
 jak wyświetlić i jak wgl interpretować dane. W jakim formacie.
 
-BFS zalewa także zamknięte obszary liczb. Zostawić czy zmienić?
+BFS zalewa także zamknięte obszary liczb. Zostawić czy zmienić? //zmienione
+
+W liczeniu otaczającej wody stosuje tablice która ma zapisane pixele i je porownuje - moze to spowolniac program.
