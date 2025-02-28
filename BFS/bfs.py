@@ -134,12 +134,12 @@ def calculate_perimeter(original_array, corrected_array_inverted):
             if combined_array[i, j] == 1: 
                 for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                     ni, nj = i + di, j + dj
-                    # Najpierw sprawdź, czy ni i nj są w granicach tablicy
+
                     if ni < 0 or ni >= rows or nj < 0 or nj >= cols:
-                        continue  # Pomijaj, jeśli indeksy są poza granicami
-                    # Następnie sprawdź, czy piksel sąsiedni jest równy 0 i nie był odwiedzony
+                        continue 
+
                     if combined_array[ni, nj] == 0 and not visited[ni, nj]:
                         perimeter += 1
                         visited[ni, nj] = 1 
     
-    return perimeter
+    return perimeter/784.0

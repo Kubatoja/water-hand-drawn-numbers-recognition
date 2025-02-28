@@ -34,7 +34,7 @@ def create_vector_for_one_number(number_index):
     return flooded_vector
 
 def DEBUG_calculate_speed():
-    for number_index in range(1000):
+    for number_index in range(10000):
         print(number_index, "  ", create_vector_for_one_number(number_index=number_index))
 
 if __name__ == '__main__':
@@ -45,3 +45,4 @@ if __name__ == '__main__':
 
 
     # cProfile.run('DEBUG_calculate_speed()')
+
