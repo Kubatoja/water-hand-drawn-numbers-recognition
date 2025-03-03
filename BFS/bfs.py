@@ -117,6 +117,7 @@ def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_fl
             else:
                 result_vector.append(max(0, corrected_zero_count) / segment_size)
     
+    result_vector.append(inverted_correction_array.sum() / 784.0)
     result_vector.append(perimeter)
     return np.array(result_vector).flatten().tolist()
 

@@ -15,4 +15,3 @@ def generate_vectors_for_n(n, numSegments, pixel, labels):
         for i in range (0, n-1):
             binarized_data, label = get_data(pixel, labels, i)
             file.write(str(create_vector_for_one_number(binarized_data, label, numSegments)).replace('[', '').replace(']','')+'\n')
-    print('generated')

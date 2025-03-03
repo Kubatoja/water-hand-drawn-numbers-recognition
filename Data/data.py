@@ -46,4 +46,4 @@ def load_vectors():
     return labels, data
 
 def binarize_data(pixels):
-    return np.where(pixels > 0.5, 1, 0)
+    return np.where(pixels > 0.314, 1, 0)
