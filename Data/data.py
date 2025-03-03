@@ -22,12 +22,12 @@ def load_data(file):
     pixels = data[:, 1:] / 255.0  # Normalize pixels to the range [0, 1]
     return pixels, labels
 
-def get_data(pixels, labels, data_index):
+def get_data(pixels, labels, data_index, pixelNormalizationRate):
 
     image_data = pixels[data_index]
     label = labels[data_index]
 
-    binarized_data = binarize_data(image_data).reshape(28, 28)
+    binarized_data = binarize_data(image_data, pixelNormalizationRate).reshape(28, 28)
 
     return binarized_data, label
 def load_vectors():
@@ -45,5 +45,5 @@ def load_vectors():
     labels = np.array(labels, dtype=float)
     return labels, data
 
-def binarize_data(pixels):
-    return np.where(pixels > 0.314, 1, 0)
+def binarize_data(pixels, pixelNormalizationRate):
+    return np.where(pixels > pixelNormalizationRate, 1, 0)

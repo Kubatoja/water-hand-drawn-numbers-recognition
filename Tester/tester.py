@@ -10,7 +10,32 @@ import csv
 # 3: knn range end
 # 4: Training set size (1-9999)
 # 5: num segments
-testCases = [[2, 4,6, 8572, 7]]
+testCases = [
+    [1, 1,7, 8572, 7, 0.15],
+    [4, 1,7, 8572, 7, 0.15],
+    [2, 1,7, 8572, 7, 0.15],   
+    [1, 1,7, 8572, 7, 0.25],
+    [4, 1,7, 8572, 7, 0.25],
+    [2, 1,7, 8572, 7, 0.25],
+    [1, 1,7, 8572, 7, 0.35],
+    [4, 1,7, 8572, 7, 0.35],
+    [2, 1,7, 8572, 7, 0.35],
+    [1, 1,7, 8572, 7, 0.45],
+    [4, 1,7, 8572, 7, 0.45],
+    [2, 1,7, 8572, 7, 0.45],
+    [1, 1,7, 8572, 7, 0.55],
+    [4, 1,7, 8572, 7, 0.55],
+    [2, 1,7, 8572, 7, 0.55],
+    [1, 1,7, 8572, 7, 0.65],
+    [4, 1,7, 8572, 7, 0.65],
+    [2, 1,7, 8572, 7, 0.65],
+    [1, 1,7, 8572, 7, 0.75],
+    [4, 1,7, 8572, 7, 0.75],
+    [2, 1,7, 8572, 7, 0.75],
+    [1, 1,7, 8572, 7, 0.85],
+    [4, 1,7, 8572, 7, 0.85],
+    [2, 1,7, 8572, 7, 0.85]
+    ]
 
 
 # load all data
@@ -20,9 +45,9 @@ train_labels = None
 train_vectors = None
 
 
-def train(trainingSetSize, numSegments):
+def train(trainingSetSize, numSegments, pixelNormalizationRate):
     global train_labels, train_vectors
-    generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels)
+    generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels, pixelNormalizationRate)
     train_labels, train_vectors = load_vectors()
     print("generated")
 
@@ -116,7 +141,8 @@ def test():
         knnRangeEnd = testCase[2]
         trainingSetSize = testCase[3]
         numSegments = testCase[4]
-        train(trainingSetSize, numSegments)
+        pixelNormalizationRate = testCase[5]
+        train(trainingSetSize, numSegments, pixelNormalizationRate)
 
         # test for different k values
         kSummary = []
@@ -130,7 +156,7 @@ def test():
             # iterate throu untrained data
             for i in range(trainingSetSize, 10000 - 1):
 
-                binarized_data, label = get_data(pixels, labels, i)
+                binarized_data, label = get_data(pixels, labels, i, pixelNormalizationRate)
                 vec = create_vector_for_one_number(binarized_data, label, numSegments)
 
                 # separate label
