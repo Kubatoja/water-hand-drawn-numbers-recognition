@@ -1,6 +1,7 @@
 from Data.data import load_data, binarize_data, load_vectors
 from VectorGeneration.vectors import *
-from KNN.knn import knn
+from VectorSearch.knn import knn
+from VectorSearch.annoy import *
 import csv
 
 
@@ -20,11 +21,12 @@ train_labels = None
 train_vectors = None
 
 
-def train(trainingSetSize, numSegments):
+def generate_training_vectors(trainingSetSize, numSegments):
+    print("Generating Vectors")
     global train_labels, train_vectors
     generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels)
     train_labels, train_vectors = load_vectors()
-    print("generated")
+    print(f"Generated vectors for {trainingSetSize} numbers")
 
 
 def generate_csv_from_test_summaries(testSummaries, filename="test_results.csv"):
@@ -116,7 +118,7 @@ def test():
         knnRangeEnd = testCase[2]
         trainingSetSize = testCase[3]
         numSegments = testCase[4]
-        train(trainingSetSize, numSegments)
+        generate_training_vectors(trainingSetSize, numSegments)
 
         # test for different k values
         kSummary = []
