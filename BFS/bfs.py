@@ -104,8 +104,6 @@ def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_fl
 
     result_vector = []
     
-    perimeter = calculate_perimeter(original_array, inverted_correction_array)
-    
     for flooded_segments in flooded_segments_list:
        
         for i in range(num_segments):
@@ -117,18 +115,34 @@ def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_fl
             else:
                 result_vector.append(max(0, corrected_zero_count) / segment_size)
     
-    result_vector.append(inverted_correction_array.sum() / 784.0)
-    result_vector.append(perimeter)
+    inverted_correction_array_segments = num_segments
+
+    parts = np.array_split(inverted_correction_array, inverted_correction_array_segments)
+
+    for part in parts:
+        part_sum = part.sum()
+        part_size = part.size
+        normalized_part_sum = part_sum / part_size
+        result_vector.append(normalized_part_sum)
+
+    # result_vector.append(inverted_correction_array.sum() / 784.0)
+
+    perimeter_array = calculate_perimeter(original_array, inverted_correction_array, num_segments)
+    for perimeter in perimeter_array:
+        result_vector.append(perimeter)
+
     return np.array(result_vector).flatten().tolist()
 
 
-def calculate_perimeter(original_array, corrected_array_inverted):
+def calculate_perimeter(original_array, corrected_array_inverted, num_segments):
     combined_array = np.zeros_like(original_array)
     combined_array[(original_array == 1) | (corrected_array_inverted == 1)] = 1
     
     perimeter = 0
     visited = np.zeros_like(combined_array)  
     
+    
+
     rows, cols = combined_array.shape
     for i in range(rows):
         for j in range(cols):
@@ -142,5 +156,13 @@ def calculate_perimeter(original_array, corrected_array_inverted):
                     if combined_array[ni, nj] == 0 and not visited[ni, nj]:
                         perimeter += 1
                         visited[ni, nj] = 1 
-    
-    return perimeter/784.0
+
+    perimeter_array = []
+    parts = np.array_split(visited, num_segments)
+    for part in parts:
+        part_sum = part.sum()
+        part_size = part.size
+        normalized_part_sum = part_sum / part_size
+        perimeter_array.append(normalized_part_sum)
+
+    return perimeter_array
