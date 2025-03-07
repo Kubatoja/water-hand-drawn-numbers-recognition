@@ -21,7 +21,7 @@ def create_vector_for_one_number(number_index):
 
     left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(binarized_data)
 
-    flooded_vector = calculate_flooded_vector(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2)
+    flooded_vector = calculate_flooded_vector(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2, floodSides="1001")
     flooded_vector.insert(0, label.flatten().tolist()[0]) # Add label to the beginning of the vector
 
     # label and 9 features
@@ -33,7 +33,7 @@ def testVector(data_index):
 
 
 if __name__ == "__main__":
-    test()
-    # testVector(3)
+    test(mode="ann")
+    # testVector(65)
     # visualize(number_index=number_index)
     # cProfile.run('DEBUG_calculate_speed()')

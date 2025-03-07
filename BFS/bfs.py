@@ -83,7 +83,7 @@ def flood_from_all_sides(array):
     
     return left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array
 
-def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2):
+def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2, floodSides="1111"):
     rows, cols = original_array.shape
     
     def split_array(array, num_segments):
@@ -99,7 +99,17 @@ def calculate_flooded_vector(original_array, left_flooded, right_flooded, top_fl
     
     correction_counts = [np.sum(segment == 1) for segment in correction_segments]
     
-    flooded_arrays = [left_flooded, right_flooded, top_flooded, bottom_flooded]
+    flooded_arrays = []
+
+    if floodSides[0] == "1":
+        flooded_arrays.append(left_flooded)
+    if floodSides[1] == "1":
+        flooded_arrays.append(right_flooded)
+    if floodSides[2] == "1":
+        flooded_arrays.append(top_flooded)
+    if floodSides[3] == "1":
+        flooded_arrays.append(bottom_flooded)
+    
     flooded_segments_list = [split_array(array, num_segments) for array in flooded_arrays]
 
     result_vector = []
