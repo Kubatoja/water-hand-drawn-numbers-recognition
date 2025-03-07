@@ -15,22 +15,18 @@ testCases = [
     [3, 5,7, 8572, 5, 0.314]
     ]
 
-def generate_training_vectors(pixels, labels, trainingSetSize, numSegments):
+
+def generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate):
     print("Generating Vectors")
-    #generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels)
-    print(f"Generated vectors for {trainingSetSize} numbers")
-
-
-
-def train(trainingSetSize, numSegments, pixelNormalizationRate):
     generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels, pixelNormalizationRate)
-    train_labels, train_vectors = load_vectors()
-    print("generated")
+    print(f"Generated vectors for {trainingSetSize} numbers")
 
     print("Loading Vectors")
     train_vectors, train_labels = load_vectors()
     print(f"Loaded {len(train_labels)} Vectors")
     return train_vectors, train_labels
+
+
 
 
 def generate_csv_from_test_summaries(testSummaries, filename="test_results.csv"):
@@ -124,19 +120,18 @@ def test():
         numSegments = testCase[4]
 
         pixelNormalizationRate = testCase[5]
-        train(trainingSetSize, numSegments, pixelNormalizationRate)
 
 
-        train_vectors, train_labels = generate_training_vectors(pixels, labels, trainingSetSize, numSegments)
+        train_vectors, train_labels = generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate)
 
         print("Generating Forest")
-        #forest = build_forest(train_vectors, train_labels, 1, 2, 0.95)
+        forest = build_forest(train_vectors, train_labels, 2, 32, 0.95)
         print("Forest Generated")
         # test for different k values
 
-        kSummary = test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate)
+        # kSummary = test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate)
 
-        #kSummary = test_annoy_singular(pixels,labels,forest,trainingSetSize,numSegments)
+        kSummary = test_annoy_singular(pixels,labels,forest,trainingSetSize,numSegments, pixelNormalizationRate)
 
 
         testSummaries.append(
