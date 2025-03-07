@@ -1,6 +1,6 @@
 from Data.data import load_data, binarize_data, load_vectors
 from VectorGeneration.vectors import *
-from VectorSearch.knn import knn
+from VectorSearch.knn import *
 from VectorSearch.annoy import *
 import csv
 
@@ -13,21 +13,15 @@ import csv
 # 5: num segments
 testCases = [[2, 4,6, 8572, 7]]
 
-
-# load all data
-pixels = None
-labels = None
-train_labels = None
-train_vectors = None
-
-
-def generate_training_vectors(trainingSetSize, numSegments):
+def generate_training_vectors(pixels, labels, trainingSetSize, numSegments):
     print("Generating Vectors")
-    global train_labels, train_vectors
-    generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels)
-    train_labels, train_vectors = load_vectors()
+    #generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels)
     print(f"Generated vectors for {trainingSetSize} numbers")
 
+    print("Loading Vectors")
+    train_vectors, train_labels = load_vectors()
+    print(f"Loaded {len(train_labels)} Vectors")
+    return train_vectors, train_labels
 
 def generate_csv_from_test_summaries(testSummaries, filename="test_results.csv"):
     with open(filename, "w", newline="", encoding="utf-8") as csvfile:
@@ -105,60 +99,30 @@ def generate_csv_from_test_summaries(testSummaries, filename="test_results.csv")
                     writer.writerow(matrix_row)
 
                 writer.writerow([])  # Blank row to separate the matrices.
-
+    print(f"Summary generated in {filename}")
 
 def test():
-    global pixels, labels, train_labels, train_vectors
     pixels, labels = load_data("test")
 
     testSummaries = []
-    for testCase in testCases:
+    for index, testCase in enumerate(testCases):
+        print(f"Testing case no.{index}")
         distanceMode = testCase[0]
         knnRangeStart = testCase[1]
         knnRangeEnd = testCase[2]
         trainingSetSize = testCase[3]
         numSegments = testCase[4]
-        generate_training_vectors(trainingSetSize, numSegments)
 
+        train_vectors, train_labels = generate_training_vectors(pixels, labels, trainingSetSize, numSegments)
+
+        print("Generating Forest")
+        #forest = build_forest(train_vectors, train_labels, 1, 2, 0.95)
+        print("Forest Generated")
         # test for different k values
-        kSummary = []
 
-        for k in range(knnRangeStart, knnRangeEnd + 1):
+        kSummary = test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode)
 
-            summaryMatrix = np.zeros((10, 10), dtype=int)
-            good_match = 0
-            bad_match = 0
-
-            # iterate throu untrained data
-            for i in range(trainingSetSize, 10000 - 1):
-
-                binarized_data, label = get_data(pixels, labels, i)
-                vec = create_vector_for_one_number(binarized_data, label, numSegments)
-
-                # separate label
-                label = vec[0]
-                # separate vector
-                vec = vec[1:]
-
-                # predict value
-                val = knn(vec, train_labels, train_vectors, k, distanceMode)
-
-                if val == label:
-                    good_match += 1
-                else:
-                    bad_match += 1
-                summaryMatrix[int(label)][int(val)] += 1
-
-            kSummary.append(
-                [
-                    k,
-                    good_match,
-                    bad_match,
-                    good_match / (good_match + bad_match),
-                    summaryMatrix,
-                ]
-            )
-            print(k, good_match, bad_match, good_match / (good_match + bad_match))
+        #kSummary = test_annoy_singular(pixels,labels,forest,trainingSetSize,numSegments)
 
         testSummaries.append(
             [
@@ -169,7 +133,83 @@ def test():
                 kSummary,
             ]
         )
-        print("test completed")
+        print(f"Test no.{index} Completed")
 
+    print("All test completed, generating summary")
     generate_csv_from_test_summaries(testSummaries)
-    print("summary generated")
+
+
+
+def test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode):
+    kSummary = []
+    for k in range(knnRangeStart, knnRangeEnd + 1):
+            print(f"Testing for k = {k}")
+            good_match, bad_match, summaryMatrix = test_knn_singular(pixels, labels, train_vectors, train_labels, k, trainingSetSize, numSegments, distanceMode)
+            kSummary.append(
+                [
+                    k,
+                    good_match,
+                    bad_match,
+                    good_match / (good_match + bad_match),
+                    summaryMatrix,
+                ]
+            )
+            print(k, good_match, bad_match, good_match / (good_match + bad_match))
+    return kSummary
+def test_knn_singular(pixels, labels, train_vectors, train_labels, k, trainingSetSize, numSegments, distanceMode):
+        summaryMatrix = np.zeros((10, 10), dtype=int)
+        good_match = 0
+        bad_match = 0
+
+        for i in range(trainingSetSize, 10000 - 1):
+
+            binarized_data, label = get_data(pixels, labels, i)
+            vec = create_vector_for_one_number(binarized_data, label, numSegments)
+
+            # separate label
+            label = vec[0]
+            # separate vector
+            vec = vec[1:]
+
+            # predict value
+            val = knn(vec, train_labels, train_vectors, k, distanceMode)
+
+            if val == label:
+                good_match += 1
+            else:
+                bad_match += 1
+            summaryMatrix[int(label)][int(val)] += 1
+
+        return good_match, bad_match, summaryMatrix
+
+
+def test_annoy_singular(pixels, labels, forest, trainingSetSize, numSegments):
+    summaryMatrix = np.zeros((10, 10), dtype=int)
+    good_match = 0
+    bad_match = 0
+
+    for i in range(trainingSetSize, 10000 - 1):
+
+        binarized_data, label = get_data(pixels, labels, i)
+        vec = create_vector_for_one_number(binarized_data, label, numSegments)
+
+        # separate label
+        label = vec[0]
+        # separate vector
+        vec = vec[1:]
+
+        # predict value
+        val = approximate_label(forest, vec, 10)
+
+        if val == label:
+            good_match += 1
+        else:
+            bad_match += 1
+        summaryMatrix[int(label)][int(val)] += 1
+    print(good_match, bad_match, good_match / (good_match + bad_match))
+    return   [[      0,
+                    good_match,
+                    bad_match,
+                    good_match / (good_match + bad_match),
+                    summaryMatrix,
+                ]]

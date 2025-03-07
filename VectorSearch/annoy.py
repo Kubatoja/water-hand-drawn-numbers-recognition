@@ -25,7 +25,7 @@ class Node():
         return self._right
 
     @property
-    def vectors(self):
+    def vecs(self):
         return self._vecs
 
     def split(self, k, imb):
@@ -42,8 +42,18 @@ class Node():
             right_labels = []
 
             # take two random indexes and set as left and right halves
-            left_ref = self._vecs.pop(np.random.randint(len(self._vecs)))
-            right_ref = self._vecs.pop(np.random.randint(len(self._vecs)))
+
+            rand_index = np.random.randint(len(self._vecs))
+            left_ref = self._vecs[rand_index]
+            left_label_ref = self._labels[rand_index]
+            self._vecs = np.delete(self._vecs, rand_index,axis=0)
+            self._labels = np.delete(self._labels, rand_index, axis=0)
+
+            rand_index = np.random.randint(len(self._vecs))
+            right_ref = self._vecs[rand_index]
+            right_label_ref = self._labels[rand_index]
+            self._vecs = np.delete(self._vecs, rand_index, axis=0)
+            self._labels = np.delete(self._labels, rand_index, axis=0)
 
             # split vectors into halves
             for i, vec in enumerate( self._vecs):
@@ -64,8 +74,10 @@ class Node():
                 return True
 
             # redo tree build process if imbalance is high
-            self._vecs.append(left_ref)
-            self._vecs.append(right_ref)
+            self._vecs = np.concatenate(([left_ref], self._vecs))
+            self._vecs = np.concatenate(([right_ref], self._vecs))
+            self._labels = np.concatenate(([left_label_ref], self._labels))
+            self._labels = np.concatenate(([right_label_ref], self._labels))
 
         return False
 def _select_nearby(node, q, thresh = 0):
@@ -84,7 +96,7 @@ def _select_nearby(node, q, thresh = 0):
 def _build_tree(node, K , imb):
     """Recurses on left and right halves to build a tree.
     """
-    node.split(K=K, imb=imb)
+    node.split(k=K, imb=imb)
     if node.left:
         _build_tree(node.left, K=K, imb=imb)
     if node.right:
@@ -102,8 +114,14 @@ def build_forest(vecs, labels, N: int = 32, K: int = 64, imb: float = 0.95):
     return forest
 
 
-def _query_linear(vecs, q: np.ndarray, k: int):
-    return sorted(vecs, key=lambda v: np.linalg.norm(q-v))[:k]
+def _query_linear(vecs, labels, q: np.ndarray, k: int):
+    labels = np.array(labels)
+    vecs = np.array(vecs)
+    sorted_indices = np.argsort([np.linalg.norm(q - v) for v in vecs])[:k]
+
+    nearest_vecs = vecs[sorted_indices]
+    nearest_labels = labels[sorted_indices]
+    return nearest_vecs, nearest_labels
 
 
 def _query_tree(root: Node, q: np.ndarray, k: int):
@@ -112,6 +130,7 @@ def _query_tree(root: Node, q: np.ndarray, k: int):
 
     pq = [root]
     nns = []
+    labels = []
     while pq:
         node = pq.pop(0)
         nearby = _select_nearby(node, q, thresh=0.05)
@@ -121,15 +140,48 @@ def _query_tree(root: Node, q: np.ndarray, k: int):
             pq.extend(nearby)
         else:
             nns.extend(node.vecs)
+            labels.extend(node.labels)
 
     # brute-force search the nearest neighbors
-    return _query_linear(nns, q, k)
+    return _query_linear(nns, labels, q, k)
 
 
 def query_forest(forest, q, k: int = 10):
     nns = set()
+    labels = []
     for root in forest:
+        nns_size_before_query = len(nns)
         # merge `nns` with query result
-        res = _query_tree(root, q, k)
-        nns.update(res)
-    return _query_linear(nns, q, k)
+        res, label = _query_tree(root, q, k)
+        nns.update(tuple(tuple(row.tolist()) for row in res))
+
+        if len(nns) > nns_size_before_query:
+            labels.extend(label.tolist())
+
+    nns = np.array(list(nns))
+    return _query_linear(nns, labels,q, k)
+
+
+def approximate_label(forest, q, k: int = 10):
+    query_vecs, query_labels = query_forest(forest, q, k)
+
+
+    label_dict = {}
+
+
+    # Iterate through the array and count occurrences of value1
+    for label in query_labels:
+        if label in label_dict:
+            label_dict[label] += 1
+        else:
+            label_dict[label] = 1
+
+    # Find the value1 with the highest count
+    most_common = None
+    max_count = 0
+    for label, count in label_dict.items():
+        if count > max_count:
+            most_common = label
+            max_count = count
+
+    return most_common

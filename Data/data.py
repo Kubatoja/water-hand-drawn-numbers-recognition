@@ -43,7 +43,7 @@ def load_vectors():
             labels.append(row[0])
     data = np.array(data, dtype=float)  # Conversion for float
     labels = np.array(labels, dtype=float)
-    return labels, data
+    return data, labels
 
 def binarize_data(pixels):
     return np.where(pixels > 0.314, 1, 0)

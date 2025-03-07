@@ -1,4 +1,4 @@
- from Visualization.visualize import display_image, visualize_flooded_number
+from Visualization.visualize import display_image, visualize_flooded_number
 from Tester.tester import *
 
 import cProfile  # remove later
