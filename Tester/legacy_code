@@ -1,0 +1,96 @@
+def generate_csv_from_test_summaries(testSummaries, date, filename_prefix="test_results",):
+    params_filename = f"{filename_prefix}_params_{date}.csv"
+    matrices_filename = f"{filename_prefix}_matrices_{date}.csv"
+
+    # First determine number of classes from the first available matrix
+    num_classes = 0
+    for test_summary in testSummaries:
+        k_summaries = test_summary[7]
+        first_matrix = k_summaries[0][5]  # [elapsedTime, k, ..., matrix]
+        num_classes = len(first_matrix[0])
+        break
+
+    with open(params_filename, "w", newline="", encoding="utf-8") as params_file, \
+         open(matrices_filename, "w", newline="", encoding="utf-8") as matrices_file:
+
+        params_writer = csv.writer(params_file)
+        matrices_writer = csv.writer(matrices_file)
+
+        # Parameters file header
+        params_writer.writerow([
+            "TestID",
+            "Training Set Size",
+            "Testing Set Size",
+            "Num Segments",
+            "Measure Method",
+            "Pixel Norm Rate",
+            "Food Sides",
+            "Training Time (s)",
+            "Elapsed Time (s)",
+            "k",
+            "Good Matches",
+            "Bad Matches",
+            "Accuracy",
+        ])
+
+        # Matrices file header (dynamic based on num_classes)
+        matrices_header = ["TestID", "Actual / Predicted"]
+        matrices_header += [f"{i}" for i in range(num_classes)]
+        matrices_writer.writerow(matrices_header)
+
+        test_id = 1
+
+        for test_summary in testSummaries:
+            (
+                training_set_size,
+                test_set_size,
+                num_segments,
+                measure_method,
+                pixel_norm_rate,
+                flood_sides,
+                training_time,
+                k_summaries,
+            ) = test_summary
+
+            for k_summary in k_summaries:
+                elapsed_time, k, good, bad, accuracy, matrix = k_summary
+
+                flood_sides_string = ""
+                if flood_sides[0] == "1":
+                    flood_sides_string += "left, "
+                if flood_sides[1] == "1":
+                    flood_sides_string += "right, "
+                if flood_sides[2] == "1":
+                    flood_sides_string += "top, "
+                if flood_sides[3] == "1":
+                    flood_sides_string += "bottom, "
+                flood_sides_string += flood_sides
+
+                # Write to parameters file
+                params_writer.writerow([
+                    test_id,
+                    training_set_size,
+                    test_set_size,
+                    num_segments,
+                    measure_method,
+                    pixel_norm_rate,
+                    flood_sides_string,
+                    round(training_time, 2),
+                    round(elapsed_time, 2),
+                    k,
+                    good,
+                    bad,
+                    round(accuracy, 4),
+                ])
+
+                # Write to matrices file
+                for actual_class, predictions in enumerate(matrix):
+                    matrices_writer.writerow([
+                        test_id,
+                        actual_class,
+                        *predictions
+                    ])
+
+                test_id += 1
+
+    print(f"Generated files: {params_filename} (parameters) and {matrices_filename} (confusion matrices)")

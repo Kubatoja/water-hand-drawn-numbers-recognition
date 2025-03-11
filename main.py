@@ -33,7 +33,8 @@ def testVector(data_index):
 
 
 if __name__ == "__main__":
-    test(mode="ann")
+    date_string = str(datetime.now()).replace(' ', "").replace(':', '_')
+    test(date_string, mode="ann")
     # testVector(65)
     # visualize(number_index=number_index)
     # cProfile.run('DEBUG_calculate_speed()')
