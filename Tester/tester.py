@@ -21,22 +21,22 @@ KNNtestCases = [
     ]
 
 
-def generateAllParameters():
-    # Definicja możliwych wartości dla każdego pola
-    treesNum = [1, 2, 8]
-    leavesNum = [8, 32, 128]
-    trainingSetSize = [8572]  # stała wartość
-    numOfSegments = list(range(2, 8))  # liczby od 2 do 7
-    pixelNormalizationRate = [0.2, 0.3, 0.5]
-    floodSides = ["1111"]  # stała wartość
-
-    # Generowanie wszystkich kombinacji
-    ANNtestCases = [
-        [p1, p2, trainingSetSize[0], p4, p5, floodSides[0]]
-        for p1, p2, p4, p5 in itertools.product(treesNum, leavesNum, numOfSegments, pixelNormalizationRate)
-    ]
-
-    return ANNtestCases
+# def generateAllParameters():
+#     # Definicja możliwych wartości dla każdego pola
+#     treesNum = [1, 2, 8]
+#     leavesNum = [8, 32, 128]
+#     trainingSetSize = [8572]  # stała wartość
+#     numOfSegments = list(range(2, 8))  # liczby od 2 do 7
+#     pixelNormalizationRate = [0.2, 0.3, 0.5]
+#     floodSides = ["1111"]  # stała wartość
+#
+#     # Generowanie wszystkich kombinacji
+#     ANNtestCases = [
+#         [p1, p2, trainingSetSize[0], p4, p5, floodSides[0]]
+#         for p1, p2, p4, p5 in itertools.product(treesNum, leavesNum, numOfSegments, pixelNormalizationRate)
+#     ]
+#
+#     return ANNtestCases
 
 
 
@@ -48,12 +48,37 @@ def generateAllParameters():
 # 5: pixelNormalizationRate
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
-ANNtestCases = [
-   [1, 32, 8572, 5, 0.34, "1111"],
-    [1, 32, 8572, 5, 0.34, "1010"]
-    ]
+# ANNtestCases = [
+#    [1, 32, 8572, 5, 0.34, "0000"],
+#     [1, 32, 8572, 5, 0.34, "1000"]
+#     ]
 
-#ANNtestCases = generateAllParameters()
+#Base
+#[1, 32, 8572, 5, 0.34, "1111"]
+ANNtestCases = []
+
+# trees
+for i in range(1, 32, 2):
+    ANNtestCases.append([i, 32, 8572, 5, 0.34, "1111"])
+
+# leaves
+for i in range(8, 256, 32):
+    ANNtestCases.append([1, i, 8572, 5, 0.34, "1111"])
+
+# pixelnormrate
+for i in np.arange(0.1, 0.7, 0.05):
+    ANNtestCases.append([1, 32, 8572, 5, i, "1111"])
+
+binary_strings = [''.join(bits) for bits in itertools.product('01', repeat=4)]
+# numgegments
+for i in range(2, 9, 1):
+    base_array = [1, 32, 8572, i, 0.34]
+    for binary in binary_strings:
+        ANNtestCases.append(base_array + [binary])
+
+
+
+
 
 def generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     print("Generating Vectors")
@@ -115,6 +140,8 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
         if not params_file_exists:
             params_writer.writerow([
                 "TestID",
+                "Number of trees",
+                "Number of members in leaf",
                 "Training Set Size",
                 "Testing Set Size",
                 "Num Segments",
@@ -131,6 +158,8 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
 
         # Unpack the single test_summary
         (
+            treesCount,
+            leavesCount,
             training_set_size,
             test_set_size,
             num_segments,
@@ -162,6 +191,8 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
             # Write to params CSV
             params_writer.writerow([
                 test_id,
+                treesCount,
+                leavesCount,
                 training_set_size,
                 test_set_size,
                 num_segments,
@@ -241,6 +272,8 @@ def test(date, mode="ann"):
         if(mode == "knn"):
             generate_csv_from_test_summary(
                 [
+                    'n/a',
+                    'n/a',
                     trainingSetSize,
                     10000 - trainingSetSize,
                     numSegments,
@@ -255,6 +288,8 @@ def test(date, mode="ann"):
         elif(mode == "ann"):
             generate_csv_from_test_summary(
                 [
+                    treesCount,
+                    leavesCount,
                     trainingSetSize,
                     10000 - trainingSetSize,
                     numSegments,
