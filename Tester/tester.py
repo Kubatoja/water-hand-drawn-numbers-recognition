@@ -48,34 +48,33 @@ KNNtestCases = [
 # 5: pixelNormalizationRate
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
-# ANNtestCases = [
-#    [1, 32, 8572, 5, 0.34, "0000"],
-#     [1, 32, 8572, 5, 0.34, "1000"]
-#     ]
+ANNtestCases = [
+   [2, 328, 8572, 7, 0.25, "1111"],
+    ]
 
 #Base
 #[1, 32, 8572, 5, 0.34, "1111"]
-ANNtestCases = []
+#ANNtestCases = []
 
-# trees
-for i in range(1, 32, 2):
-    ANNtestCases.append([i, 32, 8572, 5, 0.34, "1111"])
-
-# leaves
-for i in range(8, 256, 32):
-    ANNtestCases.append([1, i, 8572, 5, 0.34, "1111"])
-
-# pixelnormrate
-for i in np.arange(0.1, 0.7, 0.05):
-    ANNtestCases.append([1, 32, 8572, 5, i, "1111"])
-
-binary_strings = [''.join(bits) for bits in itertools.product('01', repeat=4)]
-# numgegments
-for i in range(2, 9, 1):
-    base_array = [1, 32, 8572, i, 0.34]
-    for binary in binary_strings:
-        ANNtestCases.append(base_array + [binary])
-
+# # trees
+# for i in range(1, 32, 2):
+#     ANNtestCases.append([i, 32, 8572, 5, 0.34, "1111"])
+#
+# # leaves
+# for i in range(8, 256, 32):
+#     ANNtestCases.append([1, i, 8572, 5, 0.34, "1111"])
+#
+# # pixelnormrate
+# for i in np.arange(0.1, 0.7, 0.05):
+#     ANNtestCases.append([1, 32, 8572, 5, i, "1111"])
+#
+# binary_strings = [''.join(bits) for bits in itertools.product('01', repeat=4)]
+# # numgegments
+# for i in range(2, 9, 1):
+#     base_array = [1, 32, 8572, i, 0.34]
+#     for binary in binary_strings:
+#         ANNtestCases.append(base_array + [binary])
+#
 
 
 
@@ -97,7 +96,7 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
     matrices_filename = f"{filename_prefix}_matrices_{date}.csv"
 
     # Extract k_summaries and determine num_classes from the current test_summary's matrix
-    k_summaries = test_summary[7]
+    k_summaries = test_summary[9]
     first_matrix = k_summaries[0][5]  # Assuming matrix is at index 5 in k_summary
     num_classes = len(first_matrix[0])
 
