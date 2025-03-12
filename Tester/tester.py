@@ -220,7 +220,8 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
     print(f"Appended data to {params_filename} and {matrices_filename}")
 
 def test(date, mode="ann"):
-    pixels, labels = load_data("test")
+    dataset = "train"
+    pixels, labels = load_data(dataset)
 
 
     testSummaries = []
@@ -246,6 +247,8 @@ def test(date, mode="ann"):
             floodSides = testCase[5]
 
         # training start
+        if (dataset == "train"):
+            trainingSetSize = 59999
         start_time = time.perf_counter()
         train_vectors, train_labels = generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides=floodSides)
 
@@ -257,6 +260,10 @@ def test(date, mode="ann"):
         end_time = time.perf_counter()
         training_time = end_time - start_time
         # training end
+
+        if (dataset == "train"):
+            trainingSetSize = 1
+
 
         #query start
         if(mode == "ann"):
