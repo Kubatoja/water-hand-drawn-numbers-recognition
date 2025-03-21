@@ -58,8 +58,8 @@ class DrawingApp:
         reshaped_array = flat_array.reshape((self.size, self.size))
 
         # Tworzymy wektor dla narysowanej liczby
-        vector = create_vector_for_one_number(reshaped_array, 7, floodSides="1111")
-
+        vector = create_vector_for_one_number(reshaped_array,0.0, 5, floodSides="1111")
+        print(vector)   
         # Przewidujemy etykietę za pomocą wytrenowanego lasu
         approximated_number = test_vector(forest=self.forest, vector=vector)
 
