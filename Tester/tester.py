@@ -49,7 +49,7 @@ KNNtestCases = [
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
 ANNtestCases = [
-   [2, 328, 8572, 7, 0.25, "1111"],
+    [2, 300, 8572, 7, 0.34, "1111"],
     ]
 
 #Base
@@ -263,6 +263,7 @@ def test(date, mode="ann"):
 
         if (dataset == "train"):
             trainingSetSize = 1
+            pixels, labels = load_data("test")
 
 
         #query start
