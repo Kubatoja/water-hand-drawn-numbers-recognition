@@ -2,9 +2,7 @@ from Data.data import get_data
 from BFS.bfs import *
 def create_vector_for_one_number(binarized_data, label, numSegments, floodSides="1111"):
 
-    left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(binarized_data)
-
-    flooded_vector = calculate_flooded_vector(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=numSegments, floodSides=floodSides)
+    flooded_vector = calculate_flooded_vector(binarized_data, num_segments=numSegments, floodSides=floodSides)
     flooded_vector.insert(0, label.flatten().tolist()[0]) # Add label to the beginning of the vector
 
     # label and 9 features
