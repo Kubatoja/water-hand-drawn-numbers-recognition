@@ -1,7 +1,7 @@
 from Data.data import load_data, binarize_data, load_vectors
 from VectorGeneration.vectors import *
 from VectorSearch.knn import *
-from VectorSearch.annoy import *
+from VectorSearch.annoy import Ann
 import csv
 import os
 import time
@@ -254,7 +254,7 @@ def test(date, mode="ann"):
 
         if(mode == "ann"):
             print("Generating Forest")
-            forest = build_forest(train_vectors, train_labels, treesCount, leavesCount, 0.95)
+            ann = Ann(train_vectors, train_labels, treesCount, leavesCount, 0.95)
             print("Forest Generated")
 
         end_time = time.perf_counter()
@@ -268,7 +268,7 @@ def test(date, mode="ann"):
 
         #query start
         if(mode == "ann"):
-            kSummary = test_annoy_singular(pixels,labels,forest,trainingSetSize,numSegments, pixelNormalizationRate, floodSides=floodSides)
+            kSummary = test_annoy_singular(ann, pixels,labels,trainingSetSize,numSegments, pixelNormalizationRate, floodSides=floodSides)
 
         elif(mode == "knn"):
             # test for different k values
@@ -362,7 +362,7 @@ def test_knn_singular(pixels, labels, train_vectors, train_labels, k, trainingSe
         return good_match, bad_match, summaryMatrix
 
 
-def test_annoy_singular(pixels, labels, forest, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
+def test_annoy_singular(ann, pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     summaryMatrix = np.zeros((10, 10), dtype=int)
     good_match = 0
     bad_match = 0
@@ -378,7 +378,7 @@ def test_annoy_singular(pixels, labels, forest, trainingSetSize, numSegments, pi
         vec = vec[1:]
 
         # predict value
-        val = approximate_label(forest, vec, 10)
+        val = ann.predict_label(vec, 10)
 
         if val == label:
             good_match += 1
