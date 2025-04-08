@@ -9,38 +9,6 @@ from datetime import datetime
 import itertools
 
 # testcases
-# 1: Distancemode
-# 2: knn range start
-# 3: knn range end
-# 4: Training set size (1-9999)
-# 5: num segments
-# 6: pixelNormalizationRate
-# 7: floodSides(Left, Right, Top, Bottom) STRING!!!
-KNNtestCases = [
-    [3, 5,7, 8572, 7, 0.34, "1111"]
-    ]
-
-
-# def generateAllParameters():
-#     # Definicja możliwych wartości dla każdego pola
-#     treesNum = [1, 2, 8]
-#     leavesNum = [8, 32, 128]
-#     trainingSetSize = [8572]  # stała wartość
-#     numOfSegments = list(range(2, 8))  # liczby od 2 do 7
-#     pixelNormalizationRate = [0.2, 0.3, 0.5]
-#     floodSides = ["1111"]  # stała wartość
-#
-#     # Generowanie wszystkich kombinacji
-#     ANNtestCases = [
-#         [p1, p2, trainingSetSize[0], p4, p5, floodSides[0]]
-#         for p1, p2, p4, p5 in itertools.product(treesNum, leavesNum, numOfSegments, pixelNormalizationRate)
-#     ]
-#
-#     return ANNtestCases
-
-
-
-# testcases
 # 1: Number of trees
 # 2: Number of leaves
 # 3: Training set size (1-9999)
@@ -49,36 +17,9 @@ KNNtestCases = [
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
 ANNtestCases = [
-    [2, 300, 8572, 7, 0.34, "1111"],
+    [1, 300, 100, 7, 0.34, "1111"],
+    [1, 300, 100, 5, 0.34, "1111"],
     ]
-
-#Base
-#[1, 32, 8572, 5, 0.34, "1111"]
-#ANNtestCases = []
-
-# # trees
-# for i in range(1, 32, 2):
-#     ANNtestCases.append([i, 32, 8572, 5, 0.34, "1111"])
-#
-# # leaves
-# for i in range(8, 256, 32):
-#     ANNtestCases.append([1, i, 8572, 5, 0.34, "1111"])
-#
-# # pixelnormrate
-# for i in np.arange(0.1, 0.7, 0.05):
-#     ANNtestCases.append([1, 32, 8572, 5, i, "1111"])
-#
-# binary_strings = [''.join(bits) for bits in itertools.product('01', repeat=4)]
-# # numgegments
-# for i in range(2, 9, 1):
-#     base_array = [1, 32, 8572, i, 0.34]
-#     for binary in binary_strings:
-#         ANNtestCases.append(base_array + [binary])
-#
-
-
-
-
 def generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     print("Generating Vectors")
     generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels, pixelNormalizationRate, floodSides=floodSides)
@@ -223,77 +164,43 @@ def test(date, mode="ann"):
     dataset = "train"
     pixels, labels = load_data(dataset)
 
-
     testSummaries = []
-    testCases = KNNtestCases if mode == "knn" else ANNtestCases
+    testCases =  ANNtestCases
     for index, testCase in enumerate(testCases):
         print(f"Testing case no.{index}")
-        if(mode == "knn"):
-            distanceMode = testCase[0]
-            knnRangeStart = testCase[1]
-            knnRangeEnd = testCase[2]
-            trainingSetSize = testCase[3]
-            numSegments = testCase[4]
-            pixelNormalizationRate = testCase[5]
-            floodSides = testCase[6]
 
 
-        elif(mode == "ann"):
-            treesCount = testCase[0]
-            leavesCount = testCase[1]
-            trainingSetSize = testCase[2]
-            numSegments = testCase[3]
-            pixelNormalizationRate = testCase[4]
-            floodSides = testCase[5]
+        treesCount = testCase[0]
+        leavesCount = testCase[1]
+        trainingSetSize = testCase[2]
+        numSegments = testCase[3]
+        pixelNormalizationRate = testCase[4]
+        floodSides = testCase[5]
 
-        # training start
-        if (dataset == "train"):
-            trainingSetSize = 59999
+        pixels = pixels[:trainingSetSize]
+        labels = labels[:trainingSetSize]
+
+
         start_time = time.perf_counter()
         train_vectors, train_labels = generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides=floodSides)
 
-        if(mode == "ann"):
-            print("Generating Forest")
-            ann = Ann(train_vectors, train_labels, treesCount, leavesCount, 0.95)
-            print("Forest Generated")
+        print("Generating Forest")
+        ann = Ann(train_vectors, train_labels, treesCount, leavesCount, 0.95)
+        print("Forest Generated")
 
         end_time = time.perf_counter()
         training_time = end_time - start_time
         # training end
 
-        if (dataset == "train"):
-            trainingSetSize = 1
-            pixels, labels = load_data("test")
+        pixels, labels = load_data("test")
 
 
         #query start
-        if(mode == "ann"):
-            kSummary = test_annoy_singular(ann, pixels,labels,trainingSetSize,numSegments, pixelNormalizationRate, floodSides=floodSides)
 
-        elif(mode == "knn"):
-            # test for different k values
-            kSummary = test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate, floodSides=floodSides)
-        #query end
+        kSummary = test_annoy_singular(ann, pixels,labels,trainingSetSize,numSegments, pixelNormalizationRate, floodSides=floodSides)
 
         print("Saving results")
-        if(mode == "knn"):
-            generate_csv_from_test_summary(
-                [
-                    'n/a',
-                    'n/a',
-                    trainingSetSize,
-                    10000 - trainingSetSize,
-                    numSegments,
-                    distanceMode,
-                    pixelNormalizationRate,
-                    floodSides,
-                    training_time,
-                    kSummary,
-                ],
-                date
-            )
-        elif(mode == "ann"):
-            generate_csv_from_test_summary(
+        generate_csv_from_test_summary(
                 [
                     treesCount,
                     leavesCount,
@@ -307,67 +214,17 @@ def test(date, mode="ann"):
                     kSummary,
                 ],
                 date
-            )
+        )
 
       
         print(f"Test no.{index} Completed")
     print("All test completed")
-
-
-def test_knn_range(pixels, labels, train_vectors, train_labels, knnRangeStart, knnRangeEnd, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate):
-    kSummary = []
-    for k in range(knnRangeStart, knnRangeEnd + 1):
-            print(f"Testing for k = {k}")
-            start_time = time.perf_counter()
-            good_match, bad_match, summaryMatrix = test_knn_singular(pixels, labels, train_vectors, train_labels, k, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate)
-            end_time = time.perf_counter()
-            kSummary.append(
-                [
-                    end_time -start_time,
-                    k,
-                    good_match,
-                    bad_match,
-                    good_match / (good_match + bad_match),
-                    summaryMatrix,
-                ]
-            )
-            print(k, good_match, bad_match, good_match / (good_match + bad_match))
-    return kSummary
-def test_knn_singular(pixels, labels, train_vectors, train_labels, k, trainingSetSize, numSegments, distanceMode, pixelNormalizationRate, floodSides="1111"):
-        summaryMatrix = np.zeros((10, 10), dtype=int)
-        good_match = 0
-        bad_match = 0
-
-        print("Performing Number Recogninion Test")
-        for i in range(trainingSetSize, 10000 - 1):
-
-            binarized_data, label = get_data(pixels, labels, i, pixelNormalizationRate)
-            vec = create_vector_for_one_number(binarized_data, label, numSegments, floodSides=floodSides)
-
-            # separate label
-            label = vec[0]
-            # separate vector
-            vec = vec[1:]
-
-            # predict value
-            val = knn(vec, train_labels, train_vectors, k, distanceMode)
-
-            if val == label:
-                good_match += 1
-            else:
-                bad_match += 1
-            summaryMatrix[int(label)][int(val)] += 1
-        print(
-            f"Test Completed: Good Matches: {good_match}, Bad matches {bad_match},  % {good_match / (good_match + bad_match)}")
-        return good_match, bad_match, summaryMatrix
-
-
 def test_annoy_singular(ann, pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     summaryMatrix = np.zeros((10, 10), dtype=int)
     good_match = 0
     bad_match = 0
     start_time = time.perf_counter()
-    for i in range(trainingSetSize, 10000 - 1):
+    for i in range(0, 10000):
 
         binarized_data, label = get_data(pixels, labels, i, pixelNormalizationRate)
         vec = create_vector_for_one_number(binarized_data, label, numSegments, floodSides=floodSides)

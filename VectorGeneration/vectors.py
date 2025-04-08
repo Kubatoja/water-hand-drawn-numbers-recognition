@@ -10,6 +10,6 @@ def create_vector_for_one_number(binarized_data, label, numSegments, floodSides=
 
 def generate_vectors_for_n(n, numSegments, pixel, labels, pixelNormalizationRate, floodSides="1111"):
     with open("Data/vectors.csv", 'w') as file:
-        for i in range (0, n-1):
+        for i in range (0, n):
             binarized_data, label = get_data(pixel, labels, i, pixelNormalizationRate)
             file.write(str(create_vector_for_one_number(binarized_data, label, numSegments, floodSides=floodSides)).replace('[', '').replace(']','')+'\n')
