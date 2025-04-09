@@ -17,8 +17,7 @@ import itertools
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
 ANNtestCases = [
-    [1, 300, 100, 7, 0.34, "1111"],
-    [1, 300, 100, 5, 0.34, "1111"],
+    [1, 300, 30000, 5, 0.34, "1111"],
     ]
 def generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     print("Generating Vectors")
@@ -205,7 +204,7 @@ def test(date, mode="ann"):
                     treesCount,
                     leavesCount,
                     trainingSetSize,
-                    10000 - trainingSetSize,
+                    10000,
                     numSegments,
                     "annoy",
                     pixelNormalizationRate,
@@ -224,7 +223,7 @@ def test_annoy_singular(ann, pixels, labels, trainingSetSize, numSegments, pixel
     good_match = 0
     bad_match = 0
     start_time = time.perf_counter()
-    for i in range(0, 10000):
+    for i in range(len(pixels)):
 
         binarized_data, label = get_data(pixels, labels, i, pixelNormalizationRate)
         vec = create_vector_for_one_number(binarized_data, label, numSegments, floodSides=floodSides)
