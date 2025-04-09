@@ -14,7 +14,6 @@ def load_data(file):
     data = []
     with open(file_path, 'r') as file:
         reader = csv.reader(file)
-        next(reader)  # Skip the headlines
         for row in reader:
             data.append(row)
     data = np.array(data, dtype=float)  # Conversion for float
@@ -37,7 +36,6 @@ def load_vectors():
     data = []
     with open(path, 'r') as file:
         reader = csv.reader(file)
-        next(reader)
         for row in reader:
             data.append(row[1:])
             labels.append(row[0])
