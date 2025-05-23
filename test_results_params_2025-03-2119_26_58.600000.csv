@@ -1,2 +1,0 @@
-TestID,Number of trees,Number of members in leaf,Training Set Size,Testing Set Size,Num Segments,Measure Method,Pixel Norm Rate,Food Sides,Training Time (s),Elapsed Time (s),k,Good Matches,Bad Matches,Accuracy
-1,2,300,1,9999,7,annoy,0.34,"left, right, top, bottom, 1111",278.22,907.56,n/a,9560,438,0.9562

@@ -17,8 +17,19 @@ import itertools
 # 6: floodSides(Left, Right, Top, Bottom) STRING!!!
 
 ANNtestCases = [
-    [1, 300, 30000, 5, 0.34, "1111"],
+    [2, 328, 60000, 11, 0.34, "1111"],
+    [2, 328, 60000, 12, 0.34, "1111"],
+    [2, 328, 60000, 13, 0.34, "1111"],
+    [2, 328, 60000, 14, 0.34, "1111"],
+    [2, 328, 60000, 15, 0.34, "1111"],
+    [2, 328, 60000, 16, 0.34, "1111"],
+    [2, 328, 60000, 17, 0.34, "1111"],
+    [2, 328, 60000, 18, 0.34, "1111"],
+    [2, 328, 60000, 19, 0.34, "1111"],
+    [2, 328, 60000, 20, 0.34, "1111"],
     ]
+
+
 def generate_training_vectors(pixels, labels, trainingSetSize, numSegments, pixelNormalizationRate, floodSides="1111"):
     print("Generating Vectors")
     generate_vectors_for_n(trainingSetSize, numSegments, pixels, labels, pixelNormalizationRate, floodSides=floodSides)
@@ -160,14 +171,14 @@ def generate_csv_from_test_summary(test_summary, date, filename_prefix="test_res
     print(f"Appended data to {params_filename} and {matrices_filename}")
 
 def test(date, mode="ann"):
-    dataset = "train"
-    pixels, labels = load_data(dataset)
+    
 
     testSummaries = []
     testCases =  ANNtestCases
     for index, testCase in enumerate(testCases):
         print(f"Testing case no.{index}")
-
+        dataset = "train"
+        pixels, labels = load_data(dataset)
 
         treesCount = testCase[0]
         leavesCount = testCase[1]
