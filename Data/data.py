@@ -3,8 +3,8 @@ import csv
 
 # Loading data file = "test" or file = "train"
 def load_data(file):
-    test_data = 'Data/mnist_test.csv'  
-    train_data = 'Data/mnist_train.csv'
+    test_data = 'Data/usps_test.csv'  
+    train_data = 'Data/usps_train.csv'
 
     if file == "test":
         file_path = test_data

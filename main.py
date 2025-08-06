@@ -15,13 +15,15 @@ def visualize(number_index):
 
     visualize_flooded_number(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array)
 
+    print(f"Label: {label}")
+
 def create_vector_for_one_number(number_index):
     pixels, labels = load_data("test")
     binarized_data, label = get_data(pixels, labels, number_index, pixelNormalizationRate=0.34)
 
     left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(binarized_data)
 
-    flooded_vector = calculate_flooded_vector(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2, floodSides="1001")
+    flooded_vector = calculate_flooded_vector(binarized_data, num_segments=7, floodSides="1111")
     flooded_vector.insert(0, label.flatten().tolist()[0]) # Add label to the beginning of the vector
 
     # label and 9 features
@@ -35,6 +37,6 @@ def testVector(data_index):
 if __name__ == "__main__":
     date_string = str(datetime.now()).replace(' ', "").replace(':', '_')
     test(date_string, mode="ann")
-    # testVector(65)
-    # visualize(number_index=number_index)
+    # testVector(1)
+    # visualize(number_index=4)
     # cProfile.run('DEBUG_calculate_speed()')
