@@ -1,40 +1,50 @@
-from Visualization.visualize import display_image, visualize_flooded_number
-from Tester.tester import *
-
-## Delete later
-from Data.data import load_data, binarize_data
-from BFS.bfs import bfs_flood_from_side, flood_from_all_sides, calculate_flooded_vector
-import cProfile  
-
-
-def visualize(number_index):
-    pixels, labels = load_data("test")
-    binarized_data, label = get_data(pixels, labels, number_index, pixelNormalizationRate=0.34)
-
-    left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(binarized_data)
-
-    visualize_flooded_number(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array)
-
-def create_vector_for_one_number(number_index):
-    pixels, labels = load_data("test")
-    binarized_data, label = get_data(pixels, labels, number_index, pixelNormalizationRate=0.34)
-
-    left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(binarized_data)
-
-    flooded_vector = calculate_flooded_vector(binarized_data, left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array, num_segments=2, floodSides="1001")
-    flooded_vector.insert(0, label.flatten().tolist()[0]) # Add label to the beginning of the vector
-
-    # label and 9 features
-    return flooded_vector
-
-def testVector(data_index):
-    print(create_vector_for_one_number(data_index))
-    visualize(data_index)
-
+from Tester.ANNTestRunner import ANNTestRunner
+from Tester.DataLoader import DataType
+from Tester.TestConfigFactory import create_ann_test_configs
+from Tester.configs import TestRunnerConfig, ANNTestConfig, FloodConfig, ANNTestConfigField, FieldConfig
 
 if __name__ == "__main__":
-    date_string = str(datetime.now()).replace(' ', "").replace(':', '_')
-    test(date_string, mode="ann")
-    # testVector(65)
-    # visualize(number_index=number_index)
-    # cProfile.run('DEBUG_calculate_speed()')
+    # Inicjalizacja test runnera
+    test_runner_config = TestRunnerConfig(skip_first_vector_generation=False, save_results_after_each_test=True)
+
+    train_dataset = 'Data/mnist_train.csv'
+    train_datatype = DataType.MNIST_FORMAT
+    test_dataset = 'Data/mnist_test.csv'
+    test_datatype = DataType.MNIST_FORMAT
+
+
+    ann_test_runner = ANNTestRunner(
+        train_dataset_path=train_dataset,
+        test_dataset_path=test_dataset,
+        train_data_type=train_datatype,
+        test_data_type=test_datatype,
+        config=test_runner_config
+    )
+
+    default_confg = ANNTestConfig(
+        trees_count=2,
+        leaves_count=328,
+        training_set_limit=100,
+        num_segments=7,
+        pixel_normalization_rate= 0.34,
+        flood_config= FloodConfig(True, True, True, True),
+
+        class_count=10 ## to jak będziemy inne datasety które nie mają 10 cyfr to tu zmioenić
+    )
+
+    # to ci wygeneruje wszystkie kombinacje tych parametrów, jeżeli nie chcesz kombinacji ustaw generate_combinations = False
+    configs_to_generate = [
+        FieldConfig(ANNTestConfigField.NUM_SEGMENTS, start=5, stop=10, step=2)
+    ]
+
+    generate_combinations = False
+
+    # Generujemy wszystkie możliwe kombinacje
+    generated_configs = create_ann_test_configs(configs_to_generate, generate_combinations, default_confg )
+
+    ann_test_runner.run_tests(generated_configs)
+
+
+
+
+

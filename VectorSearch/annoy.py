@@ -1,6 +1,15 @@
+from typing import List
+
 import numpy as np
+
+from Tester.otherModels import VectorNumberData
+
+
 class Ann:
-    def __init__(self, vecs, labels, N=32, K=64, imb=0.95):
+    def __init__(self, vectors: List[VectorNumberData], N=32, K=64, imb=0.95):
+        vecs = [v.vector for v in vectors]
+        labels = [v.label for v in vectors]
+
         self.forest = build_forest(np.array(vecs), np.array(labels), N, K, imb)
 
 

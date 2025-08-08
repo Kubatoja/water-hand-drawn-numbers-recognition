@@ -85,7 +85,6 @@ def flood_from_all_sides(array):
 def calculate_flooded_vector(original_array, num_segments=2, floodSides="1111"):
     # Get all flooded arrays at once
     left_flooded, right_flooded, top_flooded, bottom_flooded, inverted_correction_array = flood_from_all_sides(original_array)
-    
     rows, cols = original_array.shape
     result_vector = []
     
