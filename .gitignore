@@ -1,3 +1,10 @@
 __pycache__/
 
 mnist_train.csv
+/Datasets
+/Data/usps_train.csv
+/Data/usps_test.csv
+/Data/mnist_train.csv
+/Data/mnist_test.csv
+
+/results

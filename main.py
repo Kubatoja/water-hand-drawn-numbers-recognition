@@ -7,9 +7,13 @@ if __name__ == "__main__":
     # Inicjalizacja test runnera
     test_runner_config = TestRunnerConfig(skip_first_vector_generation=False, save_results_after_each_test=True)
 
-    train_dataset = 'Data/mnist_train.csv'
+    train_dataset = 'Datasets/FashionMnist/fashion-mnist_train.csv'
+    # train_dataset = 'Data/mnist_train.csv'
+    # train_dataset = 'Datasets/USPS/usps_train.csv'
     train_datatype = DataType.MNIST_FORMAT
-    test_dataset = 'Data/mnist_test.csv'
+    test_dataset = 'Datasets/FashionMnist/fashion-mnist_test.csv'
+    # test_dataset = 'Data/mnist_test.csv'
+    # test_dataset = 'Datasets/USPS/usps_test.csv'
     test_datatype = DataType.MNIST_FORMAT
 
 
@@ -24,7 +28,7 @@ if __name__ == "__main__":
     default_confg = ANNTestConfig(
         trees_count=2,
         leaves_count=328,
-        training_set_limit=100,
+        training_set_limit=8000,
         num_segments=7,
         pixel_normalization_rate= 0.34,
         flood_config= FloodConfig(True, True, True, True),
@@ -34,10 +38,11 @@ if __name__ == "__main__":
 
     # to ci wygeneruje wszystkie kombinacje tych parametrów, jeżeli nie chcesz kombinacji ustaw generate_combinations = False
     configs_to_generate = [
-        FieldConfig(ANNTestConfigField.NUM_SEGMENTS, start=5, stop=10, step=2)
+        FieldConfig(ANNTestConfigField.NUM_SEGMENTS, start=7, stop=7, step=1),
+        FieldConfig(ANNTestConfigField.PIXEL_NORMALIZATION_RATE, start=0.0, stop=0.2, step=0.05),
     ]
 
-    generate_combinations = False
+    generate_combinations = True
 
     # Generujemy wszystkie możliwe kombinacje
     generated_configs = create_ann_test_configs(configs_to_generate, generate_combinations, default_confg )

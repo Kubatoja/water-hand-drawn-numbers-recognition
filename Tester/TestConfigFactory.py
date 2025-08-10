@@ -32,7 +32,17 @@ def create_ann_test_configs(
     field_values = {}
     for config in field_configs:
         if isinstance(config.start, (int, float)):
-            values = list(range(int(config.start), int(config.stop) + 1, int(config.step)))
+            # Check if we're dealing with float values
+            if isinstance(config.start, float) or isinstance(config.stop, float) or isinstance(config.step, float):
+                # Handle float ranges
+                current = config.start
+                values = []
+                while current <= config.stop:
+                    values.append(round(current, 10))  # Round to avoid floating point precision issues
+                    current += config.step
+            else:
+                # Handle integer ranges
+                values = list(range(int(config.start), int(config.stop) + 1, int(config.step)))
         else:
             values = [config.start, config.stop]
         field_values[config.field_name.value] = values
