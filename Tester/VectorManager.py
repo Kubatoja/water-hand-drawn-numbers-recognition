@@ -1,10 +1,29 @@
 import csv
 from pathlib import Path
 from typing import List, Optional
+from multiprocessing import Pool, cpu_count
+import functools
 
 from BFS.bfs import calculate_flooded_vector
 from Tester.configs import ANNTestConfig
 from Tester.otherModels import RawNumberData, VectorNumberData
+
+def _process_single_image_worker(args):
+    """Worker function for multiprocessing - must be at module level for pickling"""
+    i, raw_data, config = args
+    
+    # Make a copy to avoid multiprocessing issues
+    raw_copy = RawNumberData(label=raw_data.label, pixels=raw_data.pixels.copy())
+    raw_copy.binarize_data(config.pixel_normalization_rate)
+    
+    # Calculate vector
+    flooded_vector = calculate_flooded_vector(
+        raw_copy.pixels,
+        num_segments=config.num_segments,
+        floodSides=config.flood_config.to_string()
+    )
+    
+    return VectorNumberData(label=raw_copy.label, vector=flooded_vector)
 
 
 class VectorManager:
@@ -13,9 +32,10 @@ class VectorManager:
     loading from/saving to CSV files, and validation
     """
 
-    def __init__(self, default_vectors_file: str = "Data/vectors.csv"):
+    def __init__(self, default_vectors_file: str = "Data/vectors.csv", use_multiprocessing: bool = True):
         """Initialize VectorManager"""
         self.default_vectors_file = default_vectors_file
+        self.use_multiprocessing = use_multiprocessing
         self._cached_vectors: Optional[List['VectorNumberData']] = None
         self._last_config: Optional['ANNTestConfig'] = None
 
@@ -59,18 +79,74 @@ class VectorManager:
 
     def generate_vectors(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig) -> List[VectorNumberData]:
         """
-        Generate vectors for training data and save to file
-
+        Generate vectors for training data with optional multiprocessing optimization
+        
         Args:
             rawNumberDataList: List
             config: Test configuration containing parameters
         """
-
-        print(f"Generating {max(len(rawNumberDataList), config.training_set_limit)} training vectors...")
+        import time
+        
+        limit = min(len(rawNumberDataList), config.training_set_limit)
+        print(f"Generating {limit} training vectors...")
+        
+        start_time = time.perf_counter()
+        
+        if self.use_multiprocessing and limit > 100:  # Use multiprocessing for larger datasets
+            print(f"Using multiprocessing with {cpu_count()} CPU cores...")
+            vectors = self._generate_vectors_multiprocess(rawNumberDataList, config, limit)
+        else:
+            print("Using single-threaded processing...")
+            vectors = self._generate_vectors_sequential(rawNumberDataList, config, limit)
+        
+        generation_time = time.perf_counter() - start_time
+        per_image_ms = generation_time/limit*1000
+        throughput = limit/generation_time
+        
+        print(f"✅ Vector generation completed in {generation_time:.2f}s ({per_image_ms:.3f}ms per image)")
+        print(f"🚀 Throughput: {throughput:.0f} images/sec")
+        
+        if per_image_ms < 1.0:
+            print(f"🎯 EXCELLENT: Sub-millisecond per image performance!")
+        elif per_image_ms < 5.0:
+            print(f"⚡ VERY GOOD: Under 5ms per image")
+        else:
+            print(f"⏱️  Standard performance: {per_image_ms:.1f}ms per image")
+        
+        return vectors
+    
+    def _generate_vectors_multiprocess(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
+        """Generate vectors using multiprocessing"""
+        # Prepare arguments for multiprocessing
+        args_list = [
+            (i, rawNumberDataList[i], config) 
+            for i in range(limit)
+        ]
+        
+        # Use multiprocessing for parallel execution
+        with Pool(processes=cpu_count()) as pool:
+            # Process with progress updates
+            total_tasks = len(args_list)
+            batch_size = max(1, total_tasks // 10)  # 10 progress updates
+            
+            vectors = []
+            for i in range(0, total_tasks, batch_size):
+                batch_args = args_list[i:i + batch_size]
+                batch_results = pool.map(_process_single_image_worker, batch_args)
+                vectors.extend(batch_results)
+                
+                progress = min(i + batch_size, total_tasks)
+                print(f"Processed {progress}/{total_tasks} samples...")
+        
+        print(f"Completed vector generation using multiprocessing!")
+        return vectors
+    
+    def _generate_vectors_sequential(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
+        """Generate vectors using single thread (original method)"""
         vectors = []
-        for i in range(config.training_set_limit):
+        for i in range(limit):
             if i % 1000 == 0:  # Progress indicator
-                print(f"Processing sample {i}/{config.training_set_limit}")
+                print(f"Processing sample {i}/{limit}")
 
             raw_number_data = rawNumberDataList[i]
             raw_number_data.binarize_data(config.pixel_normalization_rate)
