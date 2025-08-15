@@ -30,7 +30,7 @@ if __name__ == "__main__":
     default_confg = ANNTestConfig(
         trees_count=2,
         leaves_count=328,
-        training_set_limit=60000, 
+        training_set_limit=60000,  # Full test ultra-optimizations
         num_segments=7,
         pixel_normalization_rate= 0.34,
         flood_config= FloodConfig(True, True, True, True),

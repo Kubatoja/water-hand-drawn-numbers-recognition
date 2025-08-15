@@ -1,29 +1,11 @@
 import csv
 from pathlib import Path
 from typing import List, Optional
-from multiprocessing import Pool, cpu_count
-import functools
+import numpy as np
 
 from BFS.bfs import calculate_flooded_vector
 from Tester.configs import ANNTestConfig
 from Tester.otherModels import RawNumberData, VectorNumberData
-
-def _process_single_image_worker(args):
-    """Worker function for multiprocessing - must be at module level for pickling"""
-    i, raw_data, config = args
-    
-    # Make a copy to avoid multiprocessing issues
-    raw_copy = RawNumberData(label=raw_data.label, pixels=raw_data.pixels.copy())
-    raw_copy.binarize_data(config.pixel_normalization_rate)
-    
-    # Calculate vector
-    flooded_vector = calculate_flooded_vector(
-        raw_copy.pixels,
-        num_segments=config.num_segments,
-        floodSides=config.flood_config.to_string()
-    )
-    
-    return VectorNumberData(label=raw_copy.label, vector=flooded_vector)
 
 
 class VectorManager:
@@ -32,10 +14,9 @@ class VectorManager:
     loading from/saving to CSV files, and validation
     """
 
-    def __init__(self, default_vectors_file: str = "Data/vectors.csv", use_multiprocessing: bool = True):
+    def __init__(self, default_vectors_file: str = "Data/vectors.csv"):
         """Initialize VectorManager"""
         self.default_vectors_file = default_vectors_file
-        self.use_multiprocessing = use_multiprocessing
         self._cached_vectors: Optional[List['VectorNumberData']] = None
         self._last_config: Optional['ANNTestConfig'] = None
 
@@ -79,10 +60,10 @@ class VectorManager:
 
     def generate_vectors(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig) -> List[VectorNumberData]:
         """
-        Generate vectors for training data with optional multiprocessing optimization
+        Generate vectors for training data using ultra-optimized sequential processing
         
         Args:
-            rawNumberDataList: List
+            rawNumberDataList: List of raw image data
             config: Test configuration containing parameters
         """
         import time
@@ -92,12 +73,8 @@ class VectorManager:
         
         start_time = time.perf_counter()
         
-        if self.use_multiprocessing and limit > 100:  # Use multiprocessing for larger datasets
-            print(f"Using multiprocessing with {cpu_count()} CPU cores...")
-            vectors = self._generate_vectors_multiprocess(rawNumberDataList, config, limit)
-        else:
-            print("Using single-threaded processing...")
-            vectors = self._generate_vectors_sequential(rawNumberDataList, config, limit)
+        print("🚀 Using ULTRA-OPTIMIZED sequential processing...")
+        vectors = self._generate_vectors_sequential(rawNumberDataList, config, limit)
         
         generation_time = time.perf_counter() - start_time
         per_image_ms = generation_time/limit*1000
@@ -115,43 +92,90 @@ class VectorManager:
         
         return vectors
     
-    def _generate_vectors_multiprocess(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
-        """Generate vectors using multiprocessing"""
-        # Prepare arguments for multiprocessing
-        args_list = [
-            (i, rawNumberDataList[i], config) 
-            for i in range(limit)
-        ]
-        
-        # Use multiprocessing for parallel execution
-        with Pool(processes=cpu_count()) as pool:
-            # Process with progress updates
-            total_tasks = len(args_list)
-            batch_size = max(1, total_tasks // 10)  # 10 progress updates
-            
-            vectors = []
-            for i in range(0, total_tasks, batch_size):
-                batch_args = args_list[i:i + batch_size]
-                batch_results = pool.map(_process_single_image_worker, batch_args)
-                vectors.extend(batch_results)
-                
-                progress = min(i + batch_size, total_tasks)
-                print(f"Processed {progress}/{total_tasks} samples...")
-        
-        print(f"Completed vector generation using multiprocessing!")
-        return vectors
-    
     def _generate_vectors_sequential(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
-        """Generate vectors using single thread (original method)"""
+        """ULTRA-OPTIMIZED sequential vector generation with advanced techniques"""
+        import time
+        
+        print("🚀 ULTRA-OPTIMIZATION MODE ACTIVATED")
+        total_start = time.perf_counter()
+        
+        # OPTIMIZATION 1: Batch data preparation
+        print("📦 Phase 1: Batch data extraction...")
+        prep_start = time.perf_counter()
+        
+        # Extract all pixel arrays and labels in one go
+        all_pixels = np.array([rawNumberDataList[i].pixels for i in range(limit)])
+        all_labels = [rawNumberDataList[i].label for i in range(limit)]
+        
+        prep_time = time.perf_counter() - prep_start
+        print(f"   ✅ Data extraction: {prep_time:.3f}s")
+        
+        # OPTIMIZATION 2: Vectorized binarization
+        print("🔥 Phase 2: Vectorized binarization...")
+        bin_start = time.perf_counter()
+        
+        # Batch binarize ALL images at once using NumPy vectorization
+        binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
+        binarized_batch = binarized_batch.reshape(-1, 28, 28)
+        
+        bin_time = time.perf_counter() - bin_start
+        print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
+        
+        # OPTIMIZATION 3: Minimal JIT Pre-compilation
+        print("⚡ Phase 3: Minimal JIT warmup...")
+        warmup_start = time.perf_counter()
+        
+        # Single warmup call - Numba kompiluje przy pierwszym użyciu
+        calculate_flooded_vector(
+            binarized_batch[0],
+            num_segments=config.num_segments,
+            floodSides=config.flood_config.to_string()
+        )
+        
+        warmup_time = time.perf_counter() - warmup_start
+        print(f"   ✅ JIT compilation: {warmup_time:.3f}s")
+        
+        # OPTIMIZATION 4: Streamlined vector calculation
+        print("🎯 Phase 4: Ultra-fast vector generation...")
+        calc_start = time.perf_counter()
+        
         vectors = []
         for i in range(limit):
-            if i % 1000 == 0:  # Progress indicator
-                print(f"Processing sample {i}/{limit}")
-
-            raw_number_data = rawNumberDataList[i]
-            raw_number_data.binarize_data(config.pixel_normalization_rate)
-            vector = self.create_vector_for_single_sample(raw_number_data, config)
-            vectors.append(vector)
+            # Progress tracking for large datasets
+            if limit > 1000 and i % 5000 == 0 and i > 0:
+                elapsed = time.perf_counter() - calc_start
+                rate = i / elapsed
+                eta = (limit - i) / rate
+                print(f"   📈 Progress: {i}/{limit} ({rate:.0f} img/s, ETA: {eta:.1f}s)")
+            
+            # Direct vector calculation - no intermediate objects
+            flooded_vector = calculate_flooded_vector(
+                binarized_batch[i],
+                num_segments=config.num_segments,
+                floodSides=config.flood_config.to_string()
+            )
+            
+            # Minimal object creation
+            vectors.append(VectorNumberData(label=all_labels[i], vector=flooded_vector))
+        
+        calc_time = time.perf_counter() - calc_start
+        total_time = time.perf_counter() - total_start
+        
+        # Performance analysis
+        print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
+        print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
+        print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
+        print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
+        print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
+        print(f"   🚀 TOTAL:            {total_time:.3f}s")
+        print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")
+        print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
+        print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
+        
+        # Efficiency metrics
+        pure_calc_efficiency = calc_time / total_time * 100
+        print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
+        
         return vectors
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
