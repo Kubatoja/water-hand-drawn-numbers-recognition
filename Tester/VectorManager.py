@@ -6,6 +6,7 @@ import numpy as np
 from BFS.bfs import calculate_flooded_vector
 from Tester.configs import ANNTestConfig
 from Tester.otherModels import RawNumberData, VectorNumberData
+from Preprocessing.image_preprocessor import ImagePreprocessor
 
 
 class VectorManager:
@@ -110,16 +111,24 @@ class VectorManager:
         prep_time = time.perf_counter() - prep_start
         print(f"   ✅ Data extraction: {prep_time:.3f}s")
         
-        # OPTIMIZATION 2: Vectorized binarization
-        print("🔥 Phase 2: Vectorized binarization...")
+        # OPTIMIZATION 2: Vectorized binarization and centering
+        print("🔥 Phase 2: Vectorized binarization and centering...")
         bin_start = time.perf_counter()
         
         # Batch binarize ALL images at once using NumPy vectorization
         binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
         binarized_batch = binarized_batch.reshape(-1, 28, 28)
         
+        # Apply centering if enabled
+        if config.enable_centering:
+            print("   🎯 Centering digits...")
+            preprocessor = ImagePreprocessor()
+            for i in range(len(binarized_batch)):
+                binarized_batch[i] = preprocessor.center_digit(binarized_batch[i])
+        
         bin_time = time.perf_counter() - bin_start
-        print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
+        centering_info = " with centering" if config.enable_centering else ""
+        print(f"   ✅ Batch binarization{centering_info}: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
         
         # OPTIMIZATION 3: Minimal JIT Pre-compilation
         print("⚡ Phase 3: Minimal JIT warmup...")

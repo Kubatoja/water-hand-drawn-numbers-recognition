@@ -3,6 +3,7 @@ from typing import List
 
 import numpy as np
 from Tester.configs import ANNTestConfig
+from Preprocessing.image_preprocessor import ImagePreprocessor
 
 
 @dataclass
@@ -28,8 +29,14 @@ class RawNumberData:
     label: int
     pixels: np.ndarray = field(default_factory=lambda: np.array([]))
 
-    def binarize_data(self, pixelNormalizationRate: float):
+    def binarize_data(self, pixelNormalizationRate: float, enable_centering: bool = True):
+        # Binaryzacja
         self.pixels = np.where(self.pixels > pixelNormalizationRate, 1, 0).reshape(28, 28)
+        
+        # Centrowanie cyfry jeśli włączone
+        if enable_centering:
+            preprocessor = ImagePreprocessor()
+            self.pixels = preprocessor.center_digit(self.pixels)
 
 @dataclass
 class VectorNumberData:

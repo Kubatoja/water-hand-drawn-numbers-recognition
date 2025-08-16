@@ -76,6 +76,9 @@ class ANNTestConfig:
 
     #dataset info
     class_count: int
+    
+    #preprocessing
+    enable_centering: bool = True
 
     def __post_init__(self):
         """Validate configuration after initialization"""
@@ -98,6 +101,7 @@ class ANNTestConfigField(Enum):
     PIXEL_NORMALIZATION_RATE = "pixel_normalization_rate"
     TRAINING_SET_LIMIT = "training_set_limit"
     FLOOD_CONFIG = "flood_config"
+    ENABLE_CENTERING = "enable_centering"
 
 @dataclass
 class FieldConfig:
