@@ -2,6 +2,7 @@ import csv
 from pathlib import Path
 from typing import List, Optional
 import numpy as np
+import numba
 
 from BFS.bfs import calculate_flooded_vector
 from Tester.configs import ANNTestConfig
@@ -59,6 +60,58 @@ class VectorManager:
         )
         return VectorNumberData(label=rawNumberData.label, vector=flooded_vector)
 
+    @staticmethod
+    def reset_jit_cache():
+        """
+        Resetuje cache Numba JIT, aby wymusić rekompilację przy następnym użyciu.
+        Używane do rzetelnego porównania czasów wykonania między testami.
+        """
+        print("🔄 Resetowanie JIT cache dla niezależnych pomiarów...")
+        
+        try:
+            # Metoda 1: Wyczyść globalny cache Numba
+            import numba
+            import gc
+            
+            # Wyczyść wszystkie cache'e Numba
+            if hasattr(numba.core.registry.CPUTarget, 'cache'):
+                numba.core.registry.CPUTarget.cache.clear()
+            
+            # Wyczyść także cache typów
+            if hasattr(numba.types, 'typeof_impl'):
+                numba.types.typeof_impl.cache.clear()
+                
+            # Wyczyść cache dyspatchera
+            from numba.core import dispatcher
+            dispatcher._DISPATCHER_CACHE.clear()
+            
+            # Wymuś garbage collection
+            gc.collect()
+            
+            print("   ✅ JIT cache zresetowany (globalny)")
+            return True
+            
+        except Exception as e1:
+            print(f"   ⚠️ Globalny reset nie powiódł się: {e1}")
+            
+            try:
+                # Metoda 2: Restart modułu BFS
+                import sys
+                import importlib
+                
+                # Usuń moduł BFS z cache
+                modules_to_remove = [name for name in sys.modules.keys() if name.startswith('BFS')]
+                for module_name in modules_to_remove:
+                    del sys.modules[module_name]
+                
+                print("   ✅ Moduł BFS zresetowany")
+                return True
+                
+            except Exception as e2:
+                print(f"   ⚠️ Reset modułu nie powiódł się: {e2}")
+                print("   ℹ️ JIT będzie używał istniejącego cache")
+                return False
+
     def generate_vectors(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig) -> List[VectorNumberData]:
         """
         Generate vectors for training data using ultra-optimized sequential processing
@@ -66,6 +119,9 @@ class VectorManager:
         Args:
             rawNumberDataList: List of raw image data
             config: Test configuration containing parameters
+            
+        Returns:
+            List of VectorNumberData
         """
         import time
         
@@ -130,22 +186,8 @@ class VectorManager:
         centering_info = " with centering" if config.enable_centering else ""
         print(f"   ✅ Batch binarization{centering_info}: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
         
-        # OPTIMIZATION 3: Minimal JIT Pre-compilation
-        print("⚡ Phase 3: Minimal JIT warmup...")
-        warmup_start = time.perf_counter()
-        
-        # Single warmup call - Numba kompiluje przy pierwszym użyciu
-        calculate_flooded_vector(
-            binarized_batch[0],
-            num_segments=config.num_segments,
-            floodSides=config.flood_config.to_string()
-        )
-        
-        warmup_time = time.perf_counter() - warmup_start
-        print(f"   ✅ JIT compilation: {warmup_time:.3f}s")
-        
-        # OPTIMIZATION 4: Streamlined vector calculation
-        print("🎯 Phase 4: Ultra-fast vector generation...")
+        # OPTIMIZATION 3: Streamlined vector calculation (JIT już prekompilowany)
+        print("🎯 Phase 3: Ultra-fast vector generation...")
         calc_start = time.perf_counter()
         
         vectors = []
@@ -174,7 +216,6 @@ class VectorManager:
         print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
         print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
         print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
-        print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
         print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
         print(f"   🚀 TOTAL:            {total_time:.3f}s")
         print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")

@@ -31,6 +31,9 @@ class ANNTestRunner:
 
     def run_tests(self, test_configs: List['ANNTestConfig']) -> List['TestResult']:
         """Run all tests using the merged VectorManager"""
+        
+        # Prekompiluj JIT raz na początku dla sprawiedliwych pomiarów
+        self._precompile_jit(test_configs[0] if test_configs else None)
 
         for index, test_config in enumerate(test_configs):
             print(f"Starting test case #{index + 1}/{len(test_configs)}")
@@ -68,6 +71,37 @@ class ANNTestRunner:
             print("No results to create final report")
 
         return self.result_collector.results
+
+    def _precompile_jit(self, sample_config: ANNTestConfig):
+        """Prekompiluj wszystkie funkcje JIT z użyciem przykładowej konfiguracji"""
+        if sample_config is None:
+            print("⚠️ Brak konfiguracji do prekompilacji JIT")
+            return
+            
+        print("🔥 Prekompilacja JIT dla wszystkich testów...")
+        import time
+        precompile_start = time.perf_counter()
+        
+        try:
+            # Stwórz mały przykładowy obraz do prekompilacji
+            import numpy as np
+            sample_image = np.random.rand(28, 28).astype(np.float64)  # Poprawka: rand zamiast randint
+            
+            # Prekompiluj główną funkcję
+            from BFS.bfs import calculate_flooded_vector
+            calculate_flooded_vector(
+                sample_image,
+                num_segments=sample_config.num_segments,
+                floodSides=sample_config.flood_config.to_string()
+            )
+            
+            precompile_time = time.perf_counter() - precompile_start
+            print(f"   ✅ JIT prekompilacja ukończona: {precompile_time:.3f}s")
+            print("🚀 Wszystkie testy będą używać skompilowanego kodu")
+            
+        except Exception as e:
+            print(f"   ⚠️ Błąd prekompilacji JIT: {e}")
+            print("   ℹ️ JIT zostanie skompilowany przy pierwszym użyciu")
 
     def _run_single_test(self, test_config: ANNTestConfig, test_index: int) -> TestResult:
         """Run a single test"""
