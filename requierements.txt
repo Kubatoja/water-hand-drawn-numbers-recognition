@@ -1,2 +1,7 @@
 matplotlib
 numpy
+scikit-learn
+scikit-optimize>=0.9.0
+xgboost
+pandas
+numba

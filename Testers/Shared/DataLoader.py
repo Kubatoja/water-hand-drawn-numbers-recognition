@@ -5,12 +5,13 @@ from pathlib import Path
 import csv
 import numpy as np
 
-from Tester.otherModels import RawNumberData
+from Testers.Shared.models import RawNumberData
 
 
 class DataType(Enum):
     """Enum określający typ danych do wczytania"""
     MNIST_FORMAT = "mnist_format"
+
 
 class DataLoader:
     """Klasa do wczytywania różnych typów danych"""

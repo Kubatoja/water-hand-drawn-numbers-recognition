@@ -1,15 +1,25 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 
-from Tester.ResultSaver import ResultsSaver
+from Testers.Shared.ResultSaver import ResultsSaver
+
+if TYPE_CHECKING:
+    from Testers.Shared.models import TestResult
+
 
 class TestResultCollector:
     """Zbiera i zarządza wynikami testów"""
 
-    def __init__(self):
+    def __init__(self, algorithm_name: str = "model"):
+        """
+        Initialize TestResultCollector
+        
+        Args:
+            algorithm_name: Nazwa algorytmu (np. 'ANN', 'XGBoost')
+        """
         self.results: List['TestResult'] = []
         self.failed_tests: List[tuple] = []
-        self.saver = ResultsSaver()  # Single instance for incremental saves
+        self.saver = ResultsSaver(algorithm_name)
 
     def add_success(self, result: 'TestResult'):
         """
@@ -47,15 +57,11 @@ class TestResultCollector:
                 print(f"  Test #{index + 1}: {error}")
 
     def save_results(self, custom_path: str = None):
-        """Zapisuje wszystkie wyniki do pliku (final save) - POPRAWIONA WERSJA"""
+        """Zapisuje wszystkie wyniki do pliku (final save)"""
         if self.results:
-            # If we haven't been saving incrementally, use the existing saver instance
-            # If we have been saving incrementally, just finalize
             if not self.saver._initialized:
-                # First time save - initialize and save all
                 self.saver.save(self.results, custom_path)
             else:
-                # We've been saving incrementally, results are already saved
                 print(f"Results already saved incrementally to: {self.saver.get_output_directory()}")
         else:
             print("No results to save")

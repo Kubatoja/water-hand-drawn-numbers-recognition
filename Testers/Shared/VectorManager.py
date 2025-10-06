@@ -1,11 +1,10 @@
 import csv
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 import numpy as np
 
 from BFS.bfs import calculate_flooded_vector
-from Tester.configs import ANNTestConfig
-from Tester.otherModels import RawNumberData, VectorNumberData
+from Testers.Shared.models import RawNumberData, VectorNumberData
 
 
 class VectorManager:
@@ -17,13 +16,16 @@ class VectorManager:
     def __init__(self, default_vectors_file: str = "Data/vectors.csv"):
         """Initialize VectorManager"""
         self.default_vectors_file = default_vectors_file
-        self._cached_vectors: Optional[List['VectorNumberData']] = None
-        self._last_config: Optional['ANNTestConfig'] = None
+        self._cached_vectors: Optional[List[VectorNumberData]] = None
+        self._last_config: Optional[Any] = None
 
-    def get_training_vectors(self, raw_data: List['RawNumberData'],
-                             config: 'ANNTestConfig',
-                             force_regenerate: bool = False,
-                             auto_save: bool = True) -> List['VectorNumberData']:
+    def get_training_vectors(
+        self, 
+        raw_data: List[RawNumberData],
+        config: Any,
+        force_regenerate: bool = False,
+        auto_save: bool = True
+    ) -> List[VectorNumberData]:
         """Returns training vectors, regenerates only if needed"""
 
         if (self._cached_vectors is None or
@@ -40,41 +42,48 @@ class VectorManager:
         return self._cached_vectors
 
     @staticmethod
-    def create_vector_for_single_sample(rawNumberData: RawNumberData, config: ANNTestConfig) -> VectorNumberData:
+    def create_vector_for_single_sample(
+        raw_number_data: RawNumberData, 
+        config: Any
+    ) -> VectorNumberData:
         """
         Create a feature vector for a single data sample
 
         Args:
-            rawNumberData: Preprocessed image data
+            raw_number_data: Preprocessed image data
             config: Test configuration containing parameters
 
         Returns:
             VectorNumberData
         """
         flooded_vector = calculate_flooded_vector(
-            rawNumberData.pixels,
+            raw_number_data.pixels,
             num_segments=config.num_segments,
             floodSides=config.flood_config.to_string()
         )
-        return VectorNumberData(label=rawNumberData.label, vector=flooded_vector)
+        return VectorNumberData(label=raw_number_data.label, vector=flooded_vector)
 
-    def generate_vectors(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig) -> List[VectorNumberData]:
+    def generate_vectors(
+        self, 
+        raw_number_data_list: List[RawNumberData], 
+        config: Any
+    ) -> List[VectorNumberData]:
         """
         Generate vectors for training data using ultra-optimized sequential processing
         
         Args:
-            rawNumberDataList: List of raw image data
+            raw_number_data_list: List of raw image data
             config: Test configuration containing parameters
         """
         import time
         
-        limit = min(len(rawNumberDataList), config.training_set_limit)
+        limit = min(len(raw_number_data_list), config.training_set_limit)
         print(f"Generating {limit} training vectors...")
         
         start_time = time.perf_counter()
         
         print("🚀 Using ULTRA-OPTIMIZED sequential processing...")
-        vectors = self._generate_vectors_sequential(rawNumberDataList, config, limit)
+        vectors = self._generate_vectors_sequential(raw_number_data_list, config, limit)
         
         generation_time = time.perf_counter() - start_time
         per_image_ms = generation_time/limit*1000
@@ -92,7 +101,12 @@ class VectorManager:
         
         return vectors
     
-    def _generate_vectors_sequential(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
+    def _generate_vectors_sequential(
+        self, 
+        raw_number_data_list: List[RawNumberData], 
+        config: Any, 
+        limit: int
+    ) -> List[VectorNumberData]:
         """ULTRA-OPTIMIZED sequential vector generation with advanced techniques"""
         import time
         
@@ -103,9 +117,8 @@ class VectorManager:
         print("📦 Phase 1: Batch data extraction...")
         prep_start = time.perf_counter()
         
-        # Extract all pixel arrays and labels in one go
-        all_pixels = np.array([rawNumberDataList[i].pixels for i in range(limit)])
-        all_labels = [rawNumberDataList[i].label for i in range(limit)]
+        all_pixels = np.array([raw_number_data_list[i].pixels for i in range(limit)])
+        all_labels = [raw_number_data_list[i].label for i in range(limit)]
         
         prep_time = time.perf_counter() - prep_start
         print(f"   ✅ Data extraction: {prep_time:.3f}s")
@@ -114,7 +127,6 @@ class VectorManager:
         print("🔥 Phase 2: Vectorized binarization...")
         bin_start = time.perf_counter()
         
-        # Batch binarize ALL images at once using NumPy vectorization
         binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
         binarized_batch = binarized_batch.reshape(-1, 28, 28)
         
@@ -125,7 +137,6 @@ class VectorManager:
         print("⚡ Phase 3: Minimal JIT warmup...")
         warmup_start = time.perf_counter()
         
-        # Single warmup call - Numba kompiluje przy pierwszym użyciu
         calculate_flooded_vector(
             binarized_batch[0],
             num_segments=config.num_segments,
@@ -141,27 +152,23 @@ class VectorManager:
         
         vectors = []
         for i in range(limit):
-            # Progress tracking for large datasets
             if limit > 1000 and i % 5000 == 0 and i > 0:
                 elapsed = time.perf_counter() - calc_start
                 rate = i / elapsed
                 eta = (limit - i) / rate
                 print(f"   📈 Progress: {i}/{limit} ({rate:.0f} img/s, ETA: {eta:.1f}s)")
             
-            # Direct vector calculation - no intermediate objects
             flooded_vector = calculate_flooded_vector(
                 binarized_batch[i],
                 num_segments=config.num_segments,
                 floodSides=config.flood_config.to_string()
             )
             
-            # Minimal object creation
             vectors.append(VectorNumberData(label=all_labels[i], vector=flooded_vector))
         
         calc_time = time.perf_counter() - calc_start
         total_time = time.perf_counter() - total_start
         
-        # Performance analysis
         print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
         print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
         print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
@@ -172,7 +179,6 @@ class VectorManager:
         print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
         print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
         
-        # Efficiency metrics
         pure_calc_efficiency = calc_time / total_time * 100
         print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
         
@@ -197,18 +203,15 @@ class VectorManager:
         with open(file_path, 'r') as file:
             reader = csv.reader(file)
 
-            # Sprawdź czy pierwszy wiersz to nagłówek
             first_row = next(reader, None)
             if first_row and not first_row[0].isdigit():
-                # Pomiń nagłówek
                 pass
             else:
-                # Pierwszy wiersz to dane, cofnij pointer
                 file.seek(0)
                 reader = csv.reader(file)
 
             for row in reader:
-                if not row:  # Pomiń puste wiersze
+                if not row:
                     continue
 
                 try:
@@ -221,9 +224,12 @@ class VectorManager:
         print(f"Loaded {len(vectors)} vectors from {file_path}")
         return vectors
 
-    def save_vectors_to_csv(self, vectors: List[VectorNumberData],
-                            output_file: str = None,
-                            include_header: bool = True) -> None:
+    def save_vectors_to_csv(
+        self, 
+        vectors: List[VectorNumberData],
+        output_file: str = None,
+        include_header: bool = True
+    ) -> None:
         """
         Zapisuje VectorNumberData do pliku CSV
 
@@ -242,13 +248,11 @@ class VectorManager:
         with open(file_path, 'w', newline='') as file:
             writer = csv.writer(file)
 
-            # Zapisz nagłówek
             if include_header:
                 vector_size = len(vectors[0].vector)
                 header = ['label'] + [f'feature_{i}' for i in range(vector_size)]
                 writer.writerow(header)
 
-            # Zapisz dane
             for vector_data in vectors:
                 row = [vector_data.label] + list(vector_data.vector)
                 writer.writerow(row)
@@ -268,7 +272,6 @@ class VectorManager:
         if not vectors:
             return True
 
-        # Sprawdź czy wszystkie wektory mają ten sam rozmiar
         expected_size = len(vectors[0].vector)
         for i, vector in enumerate(vectors):
             if len(vector.vector) != expected_size:
@@ -276,19 +279,33 @@ class VectorManager:
                       f"expected {expected_size}")
                 return False
 
-        # Sprawdź czy etykiety są w dozwolonym zakresie
         labels = [v.label for v in vectors]
         unique_labels = set(labels)
         print(f"Found labels: {sorted(unique_labels)}")
 
         return True
-    def _should_regenerate(oldConfig: ANNTestConfig, newConfig: ANNTestConfig) -> bool:
-        if oldConfig.pixel_normalization_rate != newConfig.pixel_normalization_rate:
+    
+    def _should_regenerate(self, new_config: Any) -> bool:
+        """Sprawdza czy należy regenerować wektory"""
+        if self._last_config is None:
             return True
-        if oldConfig.flood_config != newConfig.flood_config:
-            return True
-        if oldConfig.training_set_limit != newConfig.training_set_limit:
-            return True
-        if oldConfig.num_segments != newConfig.num_segments:
-            return True
+            
+        old_config = self._last_config
+        
+        if hasattr(old_config, 'pixel_normalization_rate') and hasattr(new_config, 'pixel_normalization_rate'):
+            if old_config.pixel_normalization_rate != new_config.pixel_normalization_rate:
+                return True
+                
+        if hasattr(old_config, 'flood_config') and hasattr(new_config, 'flood_config'):
+            if old_config.flood_config != new_config.flood_config:
+                return True
+                
+        if hasattr(old_config, 'training_set_limit') and hasattr(new_config, 'training_set_limit'):
+            if old_config.training_set_limit != new_config.training_set_limit:
+                return True
+                
+        if hasattr(old_config, 'num_segments') and hasattr(new_config, 'num_segments'):
+            if old_config.num_segments != new_config.num_segments:
+                return True
+                
         return False

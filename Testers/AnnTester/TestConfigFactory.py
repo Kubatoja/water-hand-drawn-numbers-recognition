@@ -1,13 +1,8 @@
-# Enum dla nazw pól
 import copy
 import itertools
-from dataclasses import asdict
 from typing import List
 
-from Tester.ANNTester import ANNTestConfig
-from Tester.configs import FieldConfig
-
-
+from Testers.AnnTester.configs import ANNTestConfig, FieldConfig
 
 
 def create_ann_test_configs(

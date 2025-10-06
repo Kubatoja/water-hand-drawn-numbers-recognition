@@ -1,13 +1,15 @@
 import time
 from typing import List
 
-from Tester.ANNTester import ANNTestConfig, ANNTester
-from Tester.DataLoader import DataType, DataLoader
-from Tester.otherModels import TestResult
-from Tester.TestResultCollector import TestResultCollector
-from Tester.VectorManager import VectorManager
-from Tester.configs import TestRunnerConfig
+from Testers.AnnTester.configs import ANNTestConfig
+from Testers.AnnTester.ANNTester import ANNTester
+from Testers.Shared.DataLoader import DataLoader, DataType
+from Testers.Shared.models import TestResult
+from Testers.Shared.TestResultCollector import TestResultCollector
+from Testers.Shared.VectorManager import VectorManager
+from Testers.Shared.configs import TestRunnerConfig
 from VectorSearch.annoy import Ann
+
 
 class ANNTestRunner:
     """Updated test runner using the merged VectorManager"""
@@ -20,7 +22,7 @@ class ANNTestRunner:
 
         self.config = config
         self.loader = DataLoader()
-        self.result_collector = TestResultCollector()
+        self.result_collector = TestResultCollector(algorithm_name="ANN")
 
         # Use merged VectorManager
         self.vector_manager = VectorManager(vectors_file)
@@ -29,7 +31,7 @@ class ANNTestRunner:
         self.train_data = self.loader.load_data(train_dataset_path, train_data_type)
         self.test_data = self.loader.load_data(test_dataset_path, test_data_type)
 
-    def run_tests(self, test_configs: List['ANNTestConfig']) -> List['TestResult']:
+    def run_tests(self, test_configs: List[ANNTestConfig]) -> List[TestResult]:
         """Run all tests using the merged VectorManager"""
 
         for index, test_config in enumerate(test_configs):

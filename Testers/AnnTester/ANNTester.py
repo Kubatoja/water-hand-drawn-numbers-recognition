@@ -2,16 +2,19 @@ import time
 from typing import List
 
 import numpy as np
-from Tester.VectorManager import VectorManager
-from Tester.configs import ANNTestConfig
-from Tester.otherModels import TestResult, RawNumberData
+from Testers.Shared.VectorManager import VectorManager
+from Testers.Shared.MetricsCalculator import MetricsCalculator
+from Testers.Shared.models import TestResult, RawNumberData
+from Testers.AnnTester.configs import ANNTestConfig
 from VectorSearch.annoy import Ann
+
 
 class ANNTester:
     """Klasa odpowiedzialna za testowanie modeli ANN."""
 
     def __init__(self, num_classes: int = 10):
         self.num_classes = num_classes
+        self.metrics_calculator = MetricsCalculator()
 
     def test_model(
             self,
@@ -59,12 +62,26 @@ class ANNTester:
         incorrect_predictions = total_predictions - correct_predictions
         accuracy = correct_predictions / total_predictions if total_predictions > 0 else 0.0
 
+        # Oblicz rozszerzone metryki
+        actual_labels_np = np.array(actual_labels)
+        predicted_labels_np = np.array(predicted_labels)
+        
+        metrics = self.metrics_calculator.calculate_all_metrics(
+            actual_labels_np, predicted_labels_np, self.num_classes
+        )
+
         results = TestResult(
             execution_time=execution_time,
             correct_predictions=correct_predictions,
             incorrect_predictions=incorrect_predictions,
             accuracy=accuracy,
             confusion_matrix=confusion_matrix_data,
+            precision=metrics['precision'],
+            recall=metrics['recall'],
+            f1_score=metrics['f1_score'],
+            per_class_precision=metrics['per_class_precision'],
+            per_class_recall=metrics['per_class_recall'],
+            per_class_f1=metrics['per_class_f1'],
             config=None,
             training_time=None,
             train_set_size=None,
@@ -101,4 +118,7 @@ class ANNTester:
         print(f"  Poprawne predykcje: {results.correct_predictions}")
         print(f"  Niepoprawne predykcje: {results.incorrect_predictions}")
         print(f"  Dokładność: {results.accuracy:.2%}")
+        print(f"  Precision: {results.precision:.4f}")
+        print(f"  Recall: {results.recall:.4f}")
+        print(f"  F1-Score: {results.f1_score:.4f}")
         print(f"  Czas wykonania: {results.execution_time:.3f}s")
