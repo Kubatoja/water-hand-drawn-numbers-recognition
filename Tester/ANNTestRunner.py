@@ -71,6 +71,12 @@ class ANNTestRunner:
 
     def _run_single_test(self, test_config: ANNTestConfig, test_index: int) -> TestResult:
         """Run a single test"""
+        # Start measuring total execution time
+        total_execution_start = time.perf_counter()
+        
+        # Measure vector generation time separately
+        vector_generation_start = time.perf_counter()
+        
         # Get training vectors using merged VectorManager
         is_first_test = (test_index == 0)
         force_regenerate = not (self.config.skip_first_vector_generation and is_first_test)
@@ -86,9 +92,8 @@ class ANNTestRunner:
         if not self.vector_manager.validate_vectors(training_vectors):
             raise ValueError("Vector validation failed")
 
-        # Rest of the test logic...
-        start_time = time.perf_counter()
-
+        vector_generation_time = time.perf_counter() - vector_generation_start
+        
         print("Building ANN forest...")
         ann_forest = Ann(
             training_vectors,
@@ -97,16 +102,28 @@ class ANNTestRunner:
             0.95
         )
 
-        training_time = time.perf_counter() - start_time
+        print(f"📊 Vector generation time: {vector_generation_time:.3f}s")
+        print(f"📊 ANN building completed")
 
         print("Running test evaluation...")
         tester = ANNTester(num_classes=test_config.class_count)
         result = tester.test_model(ann_forest, self.test_data, test_config)
 
-        # Fill result
+        # Calculate total execution time
+        total_execution_time = time.perf_counter() - total_execution_start
+        
+        print(f"📊 Total execution time: {total_execution_time:.3f}s")
+        print(f"📊 Testing time: {result.execution_time:.3f}s")
+
+        # Fill result with corrected times
         result.train_set_size = len(training_vectors)
         result.test_set_size = len(self.test_data)
-        result.training_time = training_time
+        result.training_time = vector_generation_time    # Only vector generation time
+        # Keep original result.execution_time from tester (testing time)
+        # Store total execution time separately if needed
+        
+        # For now, override execution_time to be total time as requested
+        result.execution_time = total_execution_time     # Total time (vectors + ANN + testing)
         result.config = test_config
 
         return result

@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 from typing import List, Optional
+import numpy as np
 
 from BFS.bfs import calculate_flooded_vector
 from Tester.configs import ANNTestConfig
@@ -59,23 +60,122 @@ class VectorManager:
 
     def generate_vectors(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig) -> List[VectorNumberData]:
         """
-        Generate vectors for training data and save to file
-
+        Generate vectors for training data using ultra-optimized sequential processing
+        
         Args:
-            rawNumberDataList: List
+            rawNumberDataList: List of raw image data
             config: Test configuration containing parameters
         """
-
-        print(f"Generating {max(len(rawNumberDataList), config.training_set_limit)} training vectors...")
+        import time
+        
+        limit = min(len(rawNumberDataList), config.training_set_limit)
+        print(f"Generating {limit} training vectors...")
+        
+        start_time = time.perf_counter()
+        
+        print("🚀 Using ULTRA-OPTIMIZED sequential processing...")
+        vectors = self._generate_vectors_sequential(rawNumberDataList, config, limit)
+        
+        generation_time = time.perf_counter() - start_time
+        per_image_ms = generation_time/limit*1000
+        throughput = limit/generation_time
+        
+        print(f"✅ Vector generation completed in {generation_time:.2f}s ({per_image_ms:.3f}ms per image)")
+        print(f"🚀 Throughput: {throughput:.0f} images/sec")
+        
+        if per_image_ms < 1.0:
+            print(f"🎯 EXCELLENT: Sub-millisecond per image performance!")
+        elif per_image_ms < 5.0:
+            print(f"⚡ VERY GOOD: Under 5ms per image")
+        else:
+            print(f"⏱️  Standard performance: {per_image_ms:.1f}ms per image")
+        
+        return vectors
+    
+    def _generate_vectors_sequential(self, rawNumberDataList: List[RawNumberData], config: ANNTestConfig, limit: int) -> List[VectorNumberData]:
+        """ULTRA-OPTIMIZED sequential vector generation with advanced techniques"""
+        import time
+        
+        print("🚀 ULTRA-OPTIMIZATION MODE ACTIVATED")
+        total_start = time.perf_counter()
+        
+        # OPTIMIZATION 1: Batch data preparation
+        print("📦 Phase 1: Batch data extraction...")
+        prep_start = time.perf_counter()
+        
+        # Extract all pixel arrays and labels in one go
+        all_pixels = np.array([rawNumberDataList[i].pixels for i in range(limit)])
+        all_labels = [rawNumberDataList[i].label for i in range(limit)]
+        
+        prep_time = time.perf_counter() - prep_start
+        print(f"   ✅ Data extraction: {prep_time:.3f}s")
+        
+        # OPTIMIZATION 2: Vectorized binarization
+        print("🔥 Phase 2: Vectorized binarization...")
+        bin_start = time.perf_counter()
+        
+        # Batch binarize ALL images at once using NumPy vectorization
+        binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
+        binarized_batch = binarized_batch.reshape(-1, 28, 28)
+        
+        bin_time = time.perf_counter() - bin_start
+        print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
+        
+        # OPTIMIZATION 3: Minimal JIT Pre-compilation
+        print("⚡ Phase 3: Minimal JIT warmup...")
+        warmup_start = time.perf_counter()
+        
+        # Single warmup call - Numba kompiluje przy pierwszym użyciu
+        calculate_flooded_vector(
+            binarized_batch[0],
+            num_segments=config.num_segments,
+            floodSides=config.flood_config.to_string()
+        )
+        
+        warmup_time = time.perf_counter() - warmup_start
+        print(f"   ✅ JIT compilation: {warmup_time:.3f}s")
+        
+        # OPTIMIZATION 4: Streamlined vector calculation
+        print("🎯 Phase 4: Ultra-fast vector generation...")
+        calc_start = time.perf_counter()
+        
         vectors = []
-        for i in range(config.training_set_limit):
-            if i % 1000 == 0:  # Progress indicator
-                print(f"Processing sample {i}/{config.training_set_limit}")
-
-            raw_number_data = rawNumberDataList[i]
-            raw_number_data.binarize_data(config.pixel_normalization_rate)
-            vector = self.create_vector_for_single_sample(raw_number_data, config)
-            vectors.append(vector)
+        for i in range(limit):
+            # Progress tracking for large datasets
+            if limit > 1000 and i % 5000 == 0 and i > 0:
+                elapsed = time.perf_counter() - calc_start
+                rate = i / elapsed
+                eta = (limit - i) / rate
+                print(f"   📈 Progress: {i}/{limit} ({rate:.0f} img/s, ETA: {eta:.1f}s)")
+            
+            # Direct vector calculation - no intermediate objects
+            flooded_vector = calculate_flooded_vector(
+                binarized_batch[i],
+                num_segments=config.num_segments,
+                floodSides=config.flood_config.to_string()
+            )
+            
+            # Minimal object creation
+            vectors.append(VectorNumberData(label=all_labels[i], vector=flooded_vector))
+        
+        calc_time = time.perf_counter() - calc_start
+        total_time = time.perf_counter() - total_start
+        
+        # Performance analysis
+        print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
+        print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
+        print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
+        print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
+        print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
+        print(f"   🚀 TOTAL:            {total_time:.3f}s")
+        print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")
+        print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
+        print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
+        
+        # Efficiency metrics
+        pure_calc_efficiency = calc_time / total_time * 100
+        print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
+        
         return vectors
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
