@@ -81,23 +81,12 @@ class VectorManager:
         print(f"Generating {limit} training vectors...")
         
         start_time = time.perf_counter()
-        
-        print("🚀 Using ULTRA-OPTIMIZED sequential processing...")
         vectors = self._generate_vectors_sequential(raw_number_data_list, config, limit)
         
         generation_time = time.perf_counter() - start_time
         per_image_ms = generation_time/limit*1000
         throughput = limit/generation_time
         
-        print(f"✅ Vector generation completed in {generation_time:.2f}s ({per_image_ms:.3f}ms per image)")
-        print(f"🚀 Throughput: {throughput:.0f} images/sec")
-        
-        if per_image_ms < 1.0:
-            print(f"🎯 EXCELLENT: Sub-millisecond per image performance!")
-        elif per_image_ms < 5.0:
-            print(f"⚡ VERY GOOD: Under 5ms per image")
-        else:
-            print(f"⏱️  Standard performance: {per_image_ms:.1f}ms per image")
         
         return vectors
     
@@ -107,11 +96,12 @@ class VectorManager:
         config: Any, 
         limit: int
     ) -> List[VectorNumberData]:
-        """ULTRA-OPTIMIZED sequential vector generation with advanced techniques"""
         import time
         
-        print("🚀 ULTRA-OPTIMIZATION MODE ACTIVATED")
         total_start = time.perf_counter()
+        
+        # Get image size from config (default to 28 if not present)
+        image_size = getattr(config, 'image_size', 28)
         
         # OPTIMIZATION 1: Batch data preparation
         print("📦 Phase 1: Batch data extraction...")
@@ -128,10 +118,11 @@ class VectorManager:
         bin_start = time.perf_counter()
         
         binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
-        binarized_batch = binarized_batch.reshape(-1, 28, 28)
+        binarized_batch = binarized_batch.reshape(-1, image_size, image_size)
         
         bin_time = time.perf_counter() - bin_start
         print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
+        print(f"   📏 Image dimensions: {image_size}x{image_size}")
         
         # OPTIMIZATION 3: Minimal JIT Pre-compilation
         print("⚡ Phase 3: Minimal JIT warmup...")
@@ -169,18 +160,18 @@ class VectorManager:
         calc_time = time.perf_counter() - calc_start
         total_time = time.perf_counter() - total_start
         
-        print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
-        print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
-        print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
-        print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
-        print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
-        print(f"   🚀 TOTAL:            {total_time:.3f}s")
-        print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")
-        print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
-        print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
+        # print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
+        # print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
+        # print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
+        # print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
+        # print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
+        # print(f"   🚀 TOTAL:            {total_time:.3f}s")
+        # print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")
+        # print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
+        # print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
         
         pure_calc_efficiency = calc_time / total_time * 100
-        print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
+        # print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
         
         return vectors
 

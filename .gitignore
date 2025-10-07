@@ -1,10 +1,8 @@
-__pycache__/
+﻿__pycache__/
 
-mnist_train.csv
-/Datasets
-/Data/usps_train.csv
-/Data/usps_test.csv
-/Data/mnist_train.csv
-/Data/mnist_test.csv
-
+# Ignoruj cały folder Data z wyjątkiem plików .md
+Data/*
+!Data/*.md
+!Data/**/*.md
 /results
+!/results/important

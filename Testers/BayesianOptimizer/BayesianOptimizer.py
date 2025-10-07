@@ -21,7 +21,6 @@ class OptimizationResult:
     all_iterations: List[Dict[str, Any]] = field(default_factory=list)
     dataset_name: str = ""
     
-    @property
     def top_results(self, n: int = 5) -> List[Dict[str, Any]]:
         """Zwraca top N wyników."""
         return sorted(self.all_iterations, key=lambda x: x['accuracy'], reverse=True)[:n]
@@ -77,6 +76,12 @@ class BayesianOptimizer:
         if self.verbose:
             self._print_header()
         
+        # dataset_name do raportu, nie do XGBTestConfig
+        dataset_name = self.fixed_params.get('dataset_name', 'Unknown')
+        # Usuń dataset_name z fixed_params przekazywanych do XGBTestConfig
+        fixed_params_clean = {k: v for k, v in self.fixed_params.items() if k != 'dataset_name'}
+        self.fixed_params = fixed_params_clean
+        
         # Tworzymy funkcję celu z zamknięciem
         objective_fn = self._create_objective_function()
         
@@ -97,7 +102,7 @@ class BayesianOptimizer:
             best_accuracy=self._best_accuracy,
             best_params=self._best_params,
             all_iterations=self._all_results,
-            dataset_name=self.fixed_params.get('dataset_name', 'Unknown')
+            dataset_name=dataset_name
         )
     
     def _create_objective_function(self) -> Callable:
@@ -118,11 +123,14 @@ class BayesianOptimizer:
             # Wykonaj test
             accuracy = self._run_single_test(config)
             
-            # Zapisz wynik
+            # Zapisz poprzedni best przed aktualizacją
+            previous_best = self._best_accuracy
+            
+            # Zapisz wynik (aktualizuje _best_accuracy)
             self._record_result(optimized_params, accuracy)
             
             if self.verbose:
-                self._print_iteration_result(accuracy)
+                self._print_iteration_result(accuracy, previous_best)
             
             # Zwróć negatywną accuracy (minimalizacja)
             return -accuracy
@@ -140,7 +148,11 @@ class BayesianOptimizer:
         """Uruchamia pojedynczy test i zwraca accuracy."""
         try:
             results: List[TestResult] = self.test_runner.run_tests([config])
-            return results[0].accuracy if results else 0.0
+            # results zawiera WSZYSTKIE dotychczasowe wyniki, więc bierzemy OSTATNI
+            accuracy = results[-1].accuracy if results else 0.0
+            
+            # DEBUG: Sprawdź czy accuracy jest poprawnie wyciągnięte
+            return accuracy
         except Exception as e:
             print(f"❌ Error in test: {e}")
             return 0.0
@@ -173,19 +185,26 @@ class BayesianOptimizer:
     
     def _print_iteration_start(self, params: Dict[str, Any]):
         """Wyświetla start iteracji."""
-        print(f"\n🧪 Iteration {self._iteration_count}/{self.n_iterations}")
+        print(f"\n{'─'*80}")
+        print(f"🧪 Iteration {self._iteration_count}/{self.n_iterations}")
+        print(f"{'─'*80}")
         for key, value in params.items():
             if isinstance(value, float):
                 print(f"   {key}: {value:.3f}")
             else:
                 print(f"   {key}: {value}")
     
-    def _print_iteration_result(self, accuracy: float):
+    def _print_iteration_result(self, accuracy: float, previous_best: float):
         """Wyświetla wynik iteracji."""
-        if accuracy > self._best_accuracy:
-            print(f"   ✨ NEW BEST! Accuracy: {accuracy:.4f}")
+        if self._iteration_count == 1:
+            # Pierwsza iteracja
+            print(f"\n   ✅ Iteration {self._iteration_count} completed: Accuracy = {accuracy:.4f} (First iteration)")
+        elif accuracy > previous_best:
+            # Nowy rekord
+            print(f"\n   ✨ Iteration {self._iteration_count} completed: NEW BEST! Accuracy = {accuracy:.4f} (previous: {previous_best:.4f})")
         else:
-            print(f"   📊 Accuracy: {accuracy:.4f} (Best: {self._best_accuracy:.4f})")
+            # Gorszy niż najlepszy - użyj self._best_accuracy bo mogło się zmienić
+            print(f"\n   ✅ Iteration {self._iteration_count} completed: Current = {accuracy:.4f} | Best = {self._best_accuracy:.4f}")
     
     def _print_summary(self):
         """Wyświetla podsumowanie optymalizacji."""
@@ -203,8 +222,13 @@ class BayesianOptimizer:
         
         print(f"\n📊 Total iterations: {self._iteration_count}")
         
-        # Top 5
+        # Top 5 z parametrami
         top_5 = sorted(self._all_results, key=lambda x: x['accuracy'], reverse=True)[:5]
         print(f"\n🥇 TOP 5 RESULTS:")
         for i, result in enumerate(top_5, 1):
             print(f"   {i}. Accuracy: {result['accuracy']:.4f} | Iteration: {result['iteration']}")
+            # Pokaż kluczowe parametry
+            if 'learning_rate' in result:
+                print(f"      LR: {result['learning_rate']:.4f}, Depth: {result.get('max_depth', 'N/A')}, "
+                      f"N_est: {result.get('n_estimators', 'N/A')}")
+

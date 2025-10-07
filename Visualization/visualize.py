@@ -1,8 +1,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def display_image(image_data, label):
-    image = image_data.reshape(28, 28) 
+def display_image(image_data, label, image_size=None):
+    """
+    Wyświetla obraz z etykietą.
+    
+    Args:
+        image_data: Dane obrazu (1D array)
+        label: Etykieta obrazu
+        image_size: Rozmiar obrazu (np. 28 dla 28x28). Jeśli None, automatycznie wykrywa z długości danych
+    """
+    if image_size is None:
+        # Automatyczne wykrycie rozmiaru na podstawie długości danych
+        total_pixels = len(image_data)
+        image_size = int(np.sqrt(total_pixels))
+        if image_size * image_size != total_pixels:
+            raise ValueError(f"Dane obrazu muszą być kwadratem (otrzymano {total_pixels} pikseli)")
+    
+    image = image_data.reshape(image_size, image_size) 
     plt.imshow(image, cmap='gray')
     plt.title(f"Etykieta: {label}")
     plt.axis('off')  

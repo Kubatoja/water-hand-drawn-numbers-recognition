@@ -1,5 +1,5 @@
 import time
-from typing import List
+from typing import List, Optional
 
 from Testers.AnnTester.configs import ANNTestConfig
 from Testers.AnnTester.ANNTester import ANNTester
@@ -17,6 +17,8 @@ class ANNTestRunner:
     def __init__(self, train_dataset_path: str, test_dataset_path: str,
                  train_data_type: DataType = DataType.MNIST_FORMAT,
                  test_data_type: DataType = DataType.MNIST_FORMAT,
+                 train_labels_path: Optional[str] = None,  # Dla SEPARATED_FORMAT
+                 test_labels_path: Optional[str] = None,   # Dla SEPARATED_FORMAT
                  config: TestRunnerConfig = TestRunnerConfig(),
                  vectors_file: str = "Data/vectors.csv"):
 
@@ -28,8 +30,16 @@ class ANNTestRunner:
         self.vector_manager = VectorManager(vectors_file)
 
         # Load data using DataLoader
-        self.train_data = self.loader.load_data(train_dataset_path, train_data_type)
-        self.test_data = self.loader.load_data(test_dataset_path, test_data_type)
+        self.train_data = self.loader.load_data(
+            train_dataset_path, 
+            train_data_type,
+            labels_path=train_labels_path
+        )
+        self.test_data = self.loader.load_data(
+            test_dataset_path, 
+            test_data_type,
+            labels_path=test_labels_path
+        )
 
     def run_tests(self, test_configs: List[ANNTestConfig]) -> List[TestResult]:
         """Run all tests using the merged VectorManager"""

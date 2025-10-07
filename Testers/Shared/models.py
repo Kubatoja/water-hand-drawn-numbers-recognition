@@ -47,11 +47,17 @@ class RawNumberData:
     label: int
     pixels: np.ndarray = field(default_factory=lambda: np.array([]))
 
-    def binarize_data(self, pixel_normalization_rate: float):
-        """Binaryzuje piksele na podstawie progu normalizacji"""
+    def binarize_data(self, pixel_normalization_rate: float, image_size: int = 28):
+        """
+        Binaryzuje piksele na podstawie progu normalizacji
+        
+        Args:
+            pixel_normalization_rate: Próg binaryzacji (0.0-1.0)
+            image_size: Rozmiar obrazu (domyślnie 28 dla 28x28)
+        """
         self.pixels = np.where(
             self.pixels > pixel_normalization_rate, 1, 0
-        ).reshape(28, 28)
+        ).reshape(image_size, image_size)
 
 
 @dataclass

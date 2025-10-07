@@ -99,12 +99,15 @@ class OptimizationOrchestrator:
             test_dataset_path=dataset.test_path,
             train_data_type=dataset.data_type,
             test_data_type=dataset.data_type,
+            train_labels_path=dataset.train_labels_path,
+            test_labels_path=dataset.test_labels_path,
             config=self.test_runner_config
         )
     
     def _create_fixed_params(self, dataset: DatasetConfig) -> Dict:
-        """Tworzy słownik stałych parametrów."""
-        fixed_config = FixedParamsConfig(class_count=dataset.class_count)
-        params = fixed_config.to_dict()
-        params['dataset_name'] = dataset.name
-        return params
+        """Tworzy słownik stałych parametrów (bez dataset_name)."""
+        fixed_config = FixedParamsConfig(
+            class_count=dataset.class_count,
+            image_size=dataset.image_size
+        )
+        return fixed_config.to_dict()

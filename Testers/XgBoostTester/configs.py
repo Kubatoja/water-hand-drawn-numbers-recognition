@@ -28,6 +28,7 @@ class XGBTestConfig:
 
     # Informacje o datasecie
     class_count: int
+    image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
 
     def __post_init__(self):
         """Walidacja konfiguracji po inicjalizacji"""

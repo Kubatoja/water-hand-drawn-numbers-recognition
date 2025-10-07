@@ -13,6 +13,13 @@ from Testers.Shared.configs import FloodConfig
 class SearchSpaceConfig:
     """Konfiguracja przestrzeni przeszukiwania."""
     
+    # Vectorization parameters (NOWE - teraz optymalizowane!)
+    num_segments_min: int = 3
+    num_segments_max: int = 10
+    
+    pixel_normalization_rate_min: float = 0.1
+    pixel_normalization_rate_max: float = 0.5
+    
     # XGBoost hyperparameters ranges
     learning_rate_min: float = 0.01
     learning_rate_max: float = 0.3
@@ -44,6 +51,11 @@ class SearchSpaceConfig:
     def to_search_space(self) -> List[Dimension]:
         """Konwertuje konfigurację do formatu skopt."""
         return [
+            # Vectorization parameters (NOWE!)
+            Integer(self.num_segments_min, self.num_segments_max, name='num_segments'),
+            Real(self.pixel_normalization_rate_min, self.pixel_normalization_rate_max, name='pixel_normalization_rate'),
+            
+            # XGBoost parameters
             Real(self.learning_rate_min, self.learning_rate_max, name='learning_rate'),
             Integer(self.n_estimators_min, self.n_estimators_max, name='n_estimators'),
             Integer(self.max_depth_min, self.max_depth_max, name='max_depth'),
@@ -60,11 +72,13 @@ class SearchSpaceConfig:
 class FixedParamsConfig:
     """Parametry stałe (nie optymalizowane)."""
     
-    num_segments: int = 7
-    pixel_normalization_rate: float = 0.34
+    # UWAGA: num_segments i pixel_normalization_rate są teraz OPTYMALIZOWANE
+    # i znajdują się w SearchSpaceConfig!
+    
     training_set_limit: int = 999999
     flood_config: FloodConfig = None
     class_count: int = 10
+    image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
     
     def __post_init__(self):
         if self.flood_config is None:
@@ -73,16 +87,22 @@ class FixedParamsConfig:
     def to_dict(self) -> Dict[str, Any]:
         """Konwertuje do słownika."""
         return {
-            'num_segments': self.num_segments,
-            'pixel_normalization_rate': self.pixel_normalization_rate,
             'training_set_limit': self.training_set_limit,
             'flood_config': self.flood_config,
-            'class_count': self.class_count
+            'class_count': self.class_count,
+            'image_size': self.image_size
         }
 
 
 # Predefiniowane konfiguracje
 QUICK_SEARCH_SPACE = SearchSpaceConfig(
+    # Vectorization (zredukowane dla quick mode)
+    num_segments_min=5,
+    num_segments_max=8,
+    pixel_normalization_rate_min=0.2,
+    pixel_normalization_rate_max=0.4,
+    
+    # XGBoost
     learning_rate_min=0.05,
     learning_rate_max=0.2,
     n_estimators_min=50,
@@ -91,7 +111,7 @@ QUICK_SEARCH_SPACE = SearchSpaceConfig(
     max_depth_max=8,
 )
 
-FULL_SEARCH_SPACE = SearchSpaceConfig()
+FULL_SEARCH_SPACE = SearchSpaceConfig()  # Używa domyślnych wartości (pełny zakres)
 
-MNIST_FIXED_PARAMS = FixedParamsConfig(class_count=10)
-EMNIST_FIXED_PARAMS = FixedParamsConfig(class_count=47)
+MNIST_FIXED_PARAMS = FixedParamsConfig(class_count=10, image_size=28)
+EMNIST_FIXED_PARAMS = FixedParamsConfig(class_count=47, image_size=28)
