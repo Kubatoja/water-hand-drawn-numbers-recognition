@@ -92,7 +92,8 @@ class MultiDatasetTestRunner:
                 results = runner.run_tests([test_config])
                 
                 if results and len(results) > 0:
-                    accuracy = results[0].accuracy
+                    # Bierz OSTATNI wynik (bo runner akumuluje wyniki z wszystkich iteracji)
+                    accuracy = results[-1].accuracy
                     accuracies.append(accuracy)
                     print(f"  [{i}/{len(self.datasets)}] {dataset.display_name:30s} Accuracy: {accuracy:.4f}")
                 else:
