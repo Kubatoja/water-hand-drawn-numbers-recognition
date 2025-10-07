@@ -108,7 +108,7 @@ class ANNTester:
         Returns:
             int: Przewidziana etykieta
         """
-        test_number.binarize_data(config.pixel_normalization_rate)
+        test_number.binarize_data(config.pixel_normalization_rate, config.image_size)
         vector = VectorManager.create_vector_for_single_sample(test_number, config)
         return ann_forest.predict_label(vector.vector, self.num_classes)
 

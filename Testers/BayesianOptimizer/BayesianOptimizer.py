@@ -1,6 +1,11 @@
 """
 Bayesian Optimizer dla hiperparametrów XGBoost.
-Odpowiedzialność: Orchestracja procesu optymalizacji.
+Odpowied        # État optymalizacji
+        self._best_accuracy = 0.0
+        self._best_params = {}
+        self._iteration_count = 0
+        self._all_results = []
+        self._dataset_name = ""ość: Orchestracja procesu optymalizacji.
 """
 from typing import Dict, List, Tuple, Any, Callable
 from dataclasses import dataclass, field
@@ -78,6 +83,7 @@ class BayesianOptimizer:
         
         # dataset_name do raportu, nie do XGBTestConfig
         dataset_name = self.fixed_params.get('dataset_name', 'Unknown')
+        self._dataset_name = dataset_name  # Zapisz dla późniejszego użycia w print
         # Usuń dataset_name z fixed_params przekazywanych do XGBTestConfig
         fixed_params_clean = {k: v for k, v in self.fixed_params.items() if k != 'dataset_name'}
         self.fixed_params = fixed_params_clean
@@ -196,15 +202,18 @@ class BayesianOptimizer:
     
     def _print_iteration_result(self, accuracy: float, previous_best: float):
         """Wyświetla wynik iteracji."""
+        # Format: [Dataset] message
+        dataset_prefix = f"[{self._dataset_name}] " if self._dataset_name else ""
+        
         if self._iteration_count == 1:
             # Pierwsza iteracja
-            print(f"\n   ✅ Iteration {self._iteration_count} completed: Accuracy = {accuracy:.4f} (First iteration)")
+            print(f"\n   ✅ {dataset_prefix}Iteration {self._iteration_count} completed: Accuracy = {accuracy:.4f} (First iteration)")
         elif accuracy > previous_best:
             # Nowy rekord
-            print(f"\n   ✨ Iteration {self._iteration_count} completed: NEW BEST! Accuracy = {accuracy:.4f} (previous: {previous_best:.4f})")
+            print(f"\n   ✨ {dataset_prefix}Iteration {self._iteration_count} completed: NEW BEST! Accuracy = {accuracy:.4f} (previous: {previous_best:.4f})")
         else:
             # Gorszy niż najlepszy - użyj self._best_accuracy bo mogło się zmienić
-            print(f"\n   ✅ Iteration {self._iteration_count} completed: Current = {accuracy:.4f} | Best = {self._best_accuracy:.4f}")
+            print(f"\n   ✅ {dataset_prefix}Iteration {self._iteration_count} completed: Current = {accuracy:.4f} | Best = {self._best_accuracy:.4f}")
     
     def _print_summary(self):
         """Wyświetla podsumowanie optymalizacji."""

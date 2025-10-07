@@ -11,6 +11,36 @@ if TYPE_CHECKING:
     from Testers.Shared.models import TestResult
 
 
+def convert_numpy_types_to_native(obj: Any) -> Any:
+    """
+    Konwertuje numpy typy na natywne typy Pythona (dla JSON/CSV).
+    Rekurencyjnie przetwarza dict i list.
+    
+    Args:
+        obj: Obiekt do konwersji (może być numpy type, dict, list, etc.)
+        
+    Returns:
+        Obiekt z przekonwertowanymi typami
+        
+    Examples:
+        >>> convert_numpy_types_to_native(np.int64(42))
+        42
+        >>> convert_numpy_types_to_native({'a': np.float64(3.14)})
+        {'a': 3.14}
+    """
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types_to_native(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_numpy_types_to_native(item) for item in obj]
+    return obj
+
+
 class ResultsSaver:
     """Klasa odpowiedzialna za eksport wyników testów do plików CSV."""
 
@@ -147,12 +177,16 @@ class ResultsSaver:
             params['num_segments'] = config.num_segments
         if hasattr(config, 'training_set_limit'):
             params['training_set_limit'] = config.training_set_limit
+        
+        # Dataset name - zawsze jako jeden z pierwszych
+        if hasattr(config, 'dataset_name'):
+            params['dataset_name'] = config.dataset_name
             
         # Parametry specyficzne dla algorytmu - dynamiczne dodawanie
         for attr in dir(config):
             if not attr.startswith('_') and attr not in [
                 'pixel_normalization_rate', 'num_segments', 
-                'training_set_limit', 'class_count', 'flood_config'
+                'training_set_limit', 'class_count', 'flood_config', 'dataset_name'
             ]:
                 value = getattr(config, attr, None)
                 if value is not None and not callable(value):
@@ -317,6 +351,11 @@ class ResultsSaver:
             f.write(f"RAPORT KOŃCOWY TESTÓW {self.algorithm_name.upper()}\n")
             f.write("=" * 50 + "\n\n")
 
+            # Informacja o datasecie jeśli dostępna
+            if 'dataset_name' in df.columns and pd.notna(df['dataset_name'].iloc[0]):
+                dataset_name = df['dataset_name'].iloc[0]
+                f.write(f"Dataset: {dataset_name}\n")
+            
             f.write(f"Liczba przeprowadzonych testów: {len(df)}\n")
             f.write(f"Data wygenerowania: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 

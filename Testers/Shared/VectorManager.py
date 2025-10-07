@@ -56,10 +56,16 @@ class VectorManager:
         Returns:
             VectorNumberData
         """
+        # Obsłuż zarówno FloodConfig obiekt jak i string
+        if isinstance(config.flood_config, str):
+            flood_str = config.flood_config
+        else:
+            flood_str = config.flood_config.to_string()
+            
         flooded_vector = calculate_flooded_vector(
             raw_number_data.pixels,
             num_segments=config.num_segments,
-            floodSides=config.flood_config.to_string()
+            floodSides=flood_str
         )
         return VectorNumberData(label=raw_number_data.label, vector=flooded_vector)
 
@@ -117,12 +123,38 @@ class VectorManager:
         print("🔥 Phase 2: Vectorized binarization...")
         bin_start = time.perf_counter()
         
+        # Walidacja rozmiaru danych
+        expected_pixels = image_size * image_size
+        actual_pixels = all_pixels.shape[1] if len(all_pixels.shape) > 1 else all_pixels.shape[0]
+        
+        if actual_pixels != expected_pixels:
+            # Próbuj wykryć rzeczywisty rozmiar
+            detected_size = int(np.sqrt(actual_pixels))
+            error_msg = (
+                f"\n❌ IMAGE SIZE MISMATCH:\n"
+                f"   Config expects: {image_size}x{image_size} = {expected_pixels} pixels\n"
+                f"   Data contains:  {actual_pixels} pixels"
+            )
+            if detected_size * detected_size == actual_pixels:
+                error_msg += f" ({detected_size}x{detected_size})"
+            error_msg += (
+                f"\n   → Check dataset configuration: image_size must match actual data!\n"
+                f"   → USPS uses 16x16, MNIST/EMNIST use 28x28"
+            )
+            raise ValueError(error_msg)
+        
         binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
         binarized_batch = binarized_batch.reshape(-1, image_size, image_size)
         
         bin_time = time.perf_counter() - bin_start
         print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
         print(f"   📏 Image dimensions: {image_size}x{image_size}")
+        
+        # Obsłuż zarówno FloodConfig obiekt jak i string
+        if isinstance(config.flood_config, str):
+            flood_str = config.flood_config
+        else:
+            flood_str = config.flood_config.to_string()
         
         # OPTIMIZATION 3: Minimal JIT Pre-compilation
         print("⚡ Phase 3: Minimal JIT warmup...")
@@ -131,7 +163,7 @@ class VectorManager:
         calculate_flooded_vector(
             binarized_batch[0],
             num_segments=config.num_segments,
-            floodSides=config.flood_config.to_string()
+            floodSides=flood_str
         )
         
         warmup_time = time.perf_counter() - warmup_start
@@ -152,7 +184,7 @@ class VectorManager:
             flooded_vector = calculate_flooded_vector(
                 binarized_batch[i],
                 num_segments=config.num_segments,
-                floodSides=config.flood_config.to_string()
+                floodSides=flood_str
             )
             
             vectors.append(VectorNumberData(label=all_labels[i], vector=flooded_vector))

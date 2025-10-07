@@ -35,12 +35,14 @@ class XGBTestRunner:
         self.train_data = self.loader.load_data(
             train_dataset_path, 
             train_data_type,
-            labels_path=train_labels_path
+            labels_path=train_labels_path,
+            is_training_data=True
         )
         self.test_data = self.loader.load_data(
             test_dataset_path, 
             test_data_type,
-            labels_path=test_labels_path
+            labels_path=test_labels_path,
+            is_training_data=False
         )
 
     def run_tests(self, test_configs: List[XGBTestConfig]) -> List[TestResult]:
@@ -106,7 +108,7 @@ class XGBTestRunner:
         print("Preparing test vectors...")
         test_vectors = []
         for test_number in self.test_data:
-            test_number.binarize_data(test_config.pixel_normalization_rate)
+            test_number.binarize_data(test_config.pixel_normalization_rate, test_config.image_size)
             vector = VectorManager.create_vector_for_single_sample(test_number, test_config)
             test_vectors.append(vector)
 

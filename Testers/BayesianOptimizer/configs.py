@@ -14,24 +14,24 @@ class SearchSpaceConfig:
     """Konfiguracja przestrzeni przeszukiwania."""
     
     # Vectorization parameters (NOWE - teraz optymalizowane!)
-    num_segments_min: int = 3
+    num_segments_min: int = 2
     num_segments_max: int = 10
     
     pixel_normalization_rate_min: float = 0.1
-    pixel_normalization_rate_max: float = 0.5
+    pixel_normalization_rate_max: float = 0.8
     
     # XGBoost hyperparameters ranges
     learning_rate_min: float = 0.01
     learning_rate_max: float = 0.3
     
     n_estimators_min: int = 50
-    n_estimators_max: int = 300
+    n_estimators_max: int = 500
     
     max_depth_min: int = 3
-    max_depth_max: int = 10
+    max_depth_max: int = 20
     
     min_child_weight_min: float = 1.0
-    min_child_weight_max: float = 5.0
+    min_child_weight_max: float = 10.0
     
     gamma_min: float = 0.0
     gamma_max: float = 0.5
@@ -79,6 +79,7 @@ class FixedParamsConfig:
     flood_config: FloodConfig = None
     class_count: int = 10
     image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
+    dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
     
     def __post_init__(self):
         if self.flood_config is None:
@@ -90,7 +91,8 @@ class FixedParamsConfig:
             'training_set_limit': self.training_set_limit,
             'flood_config': self.flood_config,
             'class_count': self.class_count,
-            'image_size': self.image_size
+            'image_size': self.image_size,
+            'dataset_name': self.dataset_name
         }
 
 
@@ -100,7 +102,7 @@ QUICK_SEARCH_SPACE = SearchSpaceConfig(
     num_segments_min=5,
     num_segments_max=8,
     pixel_normalization_rate_min=0.2,
-    pixel_normalization_rate_max=0.4,
+    pixel_normalization_rate_max=0.7,
     
     # XGBoost
     learning_rate_min=0.05,

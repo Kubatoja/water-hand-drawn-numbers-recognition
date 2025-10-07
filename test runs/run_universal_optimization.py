@@ -19,6 +19,7 @@ from Testers.BayesianOptimizer import (
 from Testers.XgBoostTester.XGBTestRunner import XGBTestRunner
 from Testers.Shared.configs import TestRunnerConfig
 from Testers.BayesianOptimizer.configs import FixedParamsConfig
+from Testers.Shared import convert_numpy_types_to_native
 
 
 class MultiDatasetTestRunner:
@@ -72,15 +73,19 @@ class MultiDatasetTestRunner:
                     num_segments=params['num_segments'],
                     pixel_normalization_rate=params['pixel_normalization_rate'],
                     training_set_limit=params['training_set_limit'],
-                    flood_config_str=params['flood_config'],
+                    flood_config=params['flood_config'],
                     class_count=dataset.class_count,
                     image_size=dataset.image_size,
-                    # XGBoost params - użyj domyślnych jeśli nie ma w params
-                    n_estimators=params.get('n_estimators', 100),
-                    max_depth=params.get('max_depth', 6),
-                    learning_rate=params.get('learning_rate', 0.1),
-                    subsample=params.get('subsample', 0.8),
-                    colsample_bytree=params.get('colsample_bytree', 0.8),
+                    # XGBoost params (wszystkie optymalizowane!)
+                    n_estimators=params['n_estimators'],
+                    max_depth=params['max_depth'],
+                    learning_rate=params['learning_rate'],
+                    subsample=params['subsample'],
+                    colsample_bytree=params['colsample_bytree'],
+                    min_child_weight=params['min_child_weight'],
+                    gamma=params['gamma'],
+                    reg_lambda=params['reg_lambda'],
+                    reg_alpha=params['reg_alpha'],
                 )
                 
                 # Uruchom test
@@ -146,62 +151,52 @@ def optimize_universal_params(datasets: List[DatasetConfig],
     # Utwórz multi-dataset runner
     multi_runner = MultiDatasetTestRunner(datasets)
     
-    # Dostosuj search space - używamy tego samego co w FULL_SEARCH_SPACE
-    from Testers.BayesianOptimizer.configs import SearchSpaceConfig, ParamRange
-    
+    # Użyj FULL_SEARCH_SPACE z configs.py (DRY principle!)
     search_space = FULL_SEARCH_SPACE.to_search_space()
+    param_names = [dim.name for dim in search_space]
     
-    # Utwórz fixed params - używamy wartości z pierwszego datasetu jako bazowe
-    # (będą nadpisane przez optymalizację)
-    fixed_params = FixedParamsConfig(
-        class_count=10,  # Wszystkie nasze datasety mają 10 klas
-        image_size=28    # Większość ma 28x28 (USPS 16x16 będzie skalowany)
-    ).to_dict()
+    # Utwórz fixed params
+    fixed_params = {
+        'training_set_limit': 9999999999,  # Zawsze max
+        'flood_config': '1111',            # Zawsze wszystkie strony
+    }
     
     # Utwórz wrapper funkcji objective
     def objective_function(params: Dict) -> float:
-        # Dodaj fixed params
+        """Ewaluuje parametry na wszystkich datasetach i zwraca średnią accuracy"""
         full_params = {**fixed_params, **params}
         return multi_runner.evaluate_params(full_params)
     
     # Ręczna optymalizacja bayesowska
     from skopt import gp_minimize
-    from skopt.space import Real, Integer, Categorical
-    
-    # Definiuj przestrzeń przeszukiwania
-    space = [
-        Integer(3, 10, name='num_segments'),
-        Real(0.1, 0.5, name='pixel_normalization_rate'),
-        Integer(10000, 60000, name='training_set_limit'),
-        Categorical(['1111', '1110', '1101', '1011'], name='flood_config'),
-    ]
     
     print("\n" + "=" * 80)
-    print("Starting Bayesian Optimization...")
+    print("BAYESIAN OPTIMIZATION - Multi-Dataset Universal Parameters")
+    print("=" * 80)
+    print(f"\nDatasets ({len(datasets)}):")
+    for ds in datasets:
+        print(f"  - {ds.display_name}")
+    print(f"\nFixed parameters:")
+    print(f"  training_set_limit: {fixed_params['training_set_limit']}")
+    print(f"  flood_config: {fixed_params['flood_config']}")
+    print(f"\nOptimizing {len(param_names)} parameters:")
+    for i, (dim, name) in enumerate(zip(search_space, param_names), 1):
+        print(f"  {i:2d}. {name:30s} [{dim.low}, {dim.high}]")
     print("=" * 80 + "\n")
     
     # Uruchom optymalizację
     result = gp_minimize(
-        func=lambda x: -objective_function({
-            'num_segments': x[0],
-            'pixel_normalization_rate': x[1],
-            'training_set_limit': x[2],
-            'flood_config': x[3],
-        }),  # Minus bo gp_minimize minimalizuje
-        dimensions=space,
+        func=lambda x: -objective_function(dict(zip(param_names, x))),  # DRY: automatyczne mapowanie!
+        dimensions=search_space,
         n_calls=n_iterations,
         n_initial_points=n_random_starts,
         random_state=42,
         verbose=True
     )
     
-    # Wyniki
-    best_params = {
-        'num_segments': result.x[0],
-        'pixel_normalization_rate': result.x[1],
-        'training_set_limit': result.x[2],
-        'flood_config': result.x[3],
-    }
+    # Wyniki - dynamicznie z param_names (DRY!)
+    best_params = dict(zip(param_names, result.x))
+    best_params.update(fixed_params)  # Dodaj fixed params do wyniku
     best_score = -result.fun  # Minus bo minimalizowaliśmy
     
     print("\n" + "=" * 80)
@@ -230,7 +225,7 @@ def optimize_universal_params(datasets: List[DatasetConfig],
         'datasets': [ds.display_name for ds in datasets],
         'n_iterations': n_iterations,
         'best_mean_accuracy': float(best_score),
-        'best_params': best_params,
+        'best_params': convert_numpy_types_to_native(best_params),
     }
     
     with open(results_file, 'w') as f:
@@ -247,13 +242,13 @@ def main():
         MNIST_DATASET,
         EMNIST_DIGITS_DATASET,
         USPS_DATASET,
-    ] + ALL_MNIST_C_DATASETS
+    ]
     
     # Uruchom optymalizację
     best_params, best_score = optimize_universal_params(
         datasets=datasets,
-        n_iterations=50,
-        n_random_starts=10
+        n_iterations=200,
+        n_random_starts=40
     )
     
     if best_params:

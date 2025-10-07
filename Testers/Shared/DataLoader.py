@@ -20,17 +20,38 @@ class DataType(Enum):
 class DataLoader:
     """Klasa do wczytywania różnych typów danych"""
 
-    def __init__(self):
-        """Inicjalizuje DataLoader"""
+    def __init__(self, project_root: Optional[str] = None):
+        """
+        Inicjalizuje DataLoader
+        
+        Args:
+            project_root: Główny katalog projektu. Jeśli None, wykrywa automatycznie.
+        """
         self._loaders = {
             DataType.MNIST_FORMAT: self._load_mnist,
             DataType.SEPARATED_FORMAT: self._load_separated,
             DataType.LIBSVM_FORMAT: self._load_libsvm,
             DataType.NPY_FORMAT: self._load_npy,
         }
+        
+        # Wykryj katalog główny projektu (tam gdzie jest folder Data/)
+        if project_root:
+            self.project_root = Path(project_root)
+        else:
+            # Szukaj katalogu głównego projektu (zawierającego folder Data/)
+            current = Path(__file__).resolve().parent
+            while current.parent != current:
+                if (current / "Data").exists():
+                    self.project_root = current
+                    break
+                current = current.parent
+            else:
+                # Fallback: użyj bieżącego katalogu
+                self.project_root = Path.cwd()
 
     def load_data(self, file_path: str, data_type: DataType, 
-                  labels_path: Optional[str] = None) -> List[RawNumberData]:
+                  labels_path: Optional[str] = None,
+                  is_training_data: bool = True) -> List[RawNumberData]:
         """
         Główna metoda do wczytywania danych
 
@@ -38,6 +59,7 @@ class DataLoader:
             file_path: Ścieżka do pliku z danymi (lub folderu dla NPY)
             data_type: Typ danych do wczytania
             labels_path: Opcjonalna ścieżka do pliku z etykietami (dla SEPARATED_FORMAT)
+            is_training_data: True dla danych treningowych, False dla testowych (używane dla NPY_FORMAT)
 
         Returns:
             Lista obiektów RawNumberData
@@ -46,27 +68,38 @@ class DataLoader:
             ValueError: Jeśli nieobsługiwany typ danych
             FileNotFoundError: Jeśli plik nie istnieje
         """
-        # Walidacja ścieżki (plik lub folder dla NPY)
+        # Konwertuj ścieżkę względną na bezwzględną (względem project_root)
         path_obj = Path(file_path)
+        if not path_obj.is_absolute():
+            path_obj = self.project_root / file_path
+        
+        # Walidacja ścieżki (plik lub folder dla NPY)
         if data_type == DataType.NPY_FORMAT:
             if not path_obj.is_dir():
-                raise FileNotFoundError(f"Directory not found: {file_path}")
+                raise FileNotFoundError(f"Directory not found: {path_obj}")
         else:
             if not path_obj.exists():
-                raise FileNotFoundError(f"File not found: {file_path}")
+                raise FileNotFoundError(f"File not found: {path_obj}")
 
         if data_type not in self._loaders:
             raise ValueError(f"Unsupported data type: {data_type}")
 
-        print(f"Loading {data_type.value} data from {file_path}...")
+        print(f"Loading {data_type.value} data from {path_obj}...")
         
         # Przekaż labels_path jeśli loader go wymaga
         if data_type == DataType.SEPARATED_FORMAT:
             if not labels_path:
                 raise ValueError(f"labels_path is required for {data_type}")
-            return self._loaders[data_type](file_path, labels_path)
+            # Konwertuj również labels_path
+            labels_path_obj = Path(labels_path)
+            if not labels_path_obj.is_absolute():
+                labels_path_obj = self.project_root / labels_path
+            return self._loaders[data_type](str(path_obj), str(labels_path_obj))
+        elif data_type == DataType.NPY_FORMAT:
+            # Dla NPY przekaż informację czy to dane treningowe czy testowe
+            return self._loaders[data_type](str(path_obj), is_training_data)
         else:
-            return self._loaders[data_type](file_path)
+            return self._loaders[data_type](str(path_obj))
 
     def _load_mnist(self, file_path: str) -> List[RawNumberData]:
         """
@@ -223,7 +256,7 @@ class DataLoader:
         finally:
             file_handle.close()
 
-    def _load_npy(self, folder_path: str) -> List[RawNumberData]:
+    def _load_npy(self, folder_path: str, is_training_data: bool = True) -> List[RawNumberData]:
         """
         Wczytuje dane z plików NumPy (.npy) - format MNIST-C
         
@@ -236,20 +269,19 @@ class DataLoader:
         
         Args:
             folder_path: Ścieżka do folderu z plikami .npy
-                        Nazwa powinna zawierać 'train' lub 'test'
+            is_training_data: True dla danych treningowych, False dla testowych
         """
         folder = Path(folder_path)
         
-        # Określ czy to train czy test na podstawie nazwy folderu/ścieżki
-        is_train = 'train' in str(folder).lower()
-        
-        # Wybierz odpowiednie pliki
-        if is_train:
+        # Wybierz odpowiednie pliki na podstawie parametru
+        if is_training_data:
             images_file = folder / 'train_images.npy'
             labels_file = folder / 'train_labels.npy'
+            data_type_str = "training"
         else:
             images_file = folder / 'test_images.npy'
             labels_file = folder / 'test_labels.npy'
+            data_type_str = "test"
         
         if not images_file.exists():
             raise FileNotFoundError(f"Images file not found: {images_file}")
@@ -287,5 +319,5 @@ class DataLoader:
             )
             result.append(raw_number)
         
-        print(f"Loaded {len(result)} raw number samples from NPY format (image size: {height}x{width})")
+        print(f"Loaded {len(result)} {data_type_str} samples from NPY format (image size: {height}x{width})")
         return result

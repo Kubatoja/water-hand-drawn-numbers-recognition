@@ -105,9 +105,10 @@ class OptimizationOrchestrator:
         )
     
     def _create_fixed_params(self, dataset: DatasetConfig) -> Dict:
-        """Tworzy słownik stałych parametrów (bez dataset_name)."""
+        """Tworzy słownik stałych parametrów."""
         fixed_config = FixedParamsConfig(
             class_count=dataset.class_count,
-            image_size=dataset.image_size
+            image_size=dataset.image_size,
+            dataset_name=dataset.display_name  # Użyj display_name dla czytelności
         )
         return fixed_config.to_dict()
