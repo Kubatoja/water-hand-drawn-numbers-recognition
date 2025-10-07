@@ -170,16 +170,6 @@ def main():
     print("=" * 80)
     
     
-    # ========================================================================
-    # 7. POTWIERDZENIE
-    # ========================================================================
-    
-    if total_tests > 10:
-        response = input("\n⚠️  Duża liczba testów. Kontynuować? (y/n): ")
-        if response.lower() != 'y':
-            print("❌ Testy anulowane")
-            return
-    
     
     # ========================================================================
     # 8. URUCHOMIENIE TESTÓW
@@ -238,7 +228,7 @@ def main():
                     num_segments=params['num_segments'],
                     pixel_normalization_rate=params['pixel_normalization_rate'],
                     training_set_limit=params['training_set_limit'],
-                    flood_config_str=params['flood_config'],
+                    flood_config=params['flood_config'],
                     
                     # Dataset info
                     class_count=dataset.class_count,
@@ -250,6 +240,10 @@ def main():
                     learning_rate=params['learning_rate'],
                     subsample=params['subsample'],
                     colsample_bytree=params['colsample_bytree'],
+                    min_child_weight=params['min_child_weight'],
+                    gamma=params['gamma'],
+                    reg_lambda=params['reg_lambda'],
+                    reg_alpha=params['reg_alpha'],
                 )
             else:  # ANN
                 flood_config = FloodConfig.from_string(params['flood_config'])

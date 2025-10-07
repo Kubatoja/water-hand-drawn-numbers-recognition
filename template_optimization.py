@@ -49,7 +49,7 @@ def main():
     datasets = [
         #MNIST_DATASET,
         #EMNIST_DIGITS_DATASET,
-        ARABIC_DATASET,
+        #MNIST_C_FOG,
         # USPS_DATASET,  # Odkomentuj aby dodać
     ]
     
@@ -65,7 +65,7 @@ def main():
     # ]
     
     # OPCJA D: Dodaj wszystkie MNIST-C
-    # datasets += ALL_MNIST_C_DATASETS  # Dodaje 16 wariantów
+    datasets += ALL_MNIST_C_DATASETS  # Dodaje 16 wariantów
     
     # OPCJA E: Użyj enum do wyboru
     # datasets = get_datasets_by_names([
@@ -91,10 +91,10 @@ def main():
     # search_space = QUICK_SEARCH_SPACE   # Zredukowana (do szybkich testów)
     
     # Liczba iteracji dla każdego datasetu
-    n_iterations = 20           # Zmień na 10-20 dla szybkich testów
+    n_iterations = 50           # Zmień na 10-20 dla szybkich testów
     
     # Liczba losowych startów (exploration)
-    n_random_starts = 5        # Zazwyczaj 10-20% z n_iterations
+    n_random_starts = 10        # Zazwyczaj 10-20% z n_iterations
     
     # Tryb verbose (szczegółowe logi)
     verbose = True
@@ -184,7 +184,7 @@ def main():
     
     for dataset_name, result in results.items():
         print(f"📊 {dataset_name}")
-        print(f"   Best accuracy: {result.best_score:.4f}")
+        print(f"   Best accuracy: {result.best_accuracy:.4f}")
         print(f"   Best params:")
         for param, value in result.best_params.items():
             print(f"      {param:30s} = {value}")

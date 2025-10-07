@@ -209,7 +209,8 @@ class DataLoader:
                     continue
                 
                 # Pierwsza część to etykieta
-                label = int(float(parts[0]))
+                # USPS używa etykiet 1-10, konwertujemy do 0-9
+                label = int(float(parts[0])) - 1
                 labels.append(label)
                 
                 # Pozostałe to pary feature:value
