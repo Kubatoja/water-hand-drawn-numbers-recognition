@@ -8,6 +8,7 @@ from enum import Enum
 class DatasetName(Enum):
     """Główne datasety dostępne w projekcie"""
     MNIST = "mnist"
+    FASHION_MNIST = "fashion_mnist"
     EMNIST_BALANCED = "emnist_balanced"
     EMNIST_DIGITS = "emnist_digits"
     ARABIC = "arabic"

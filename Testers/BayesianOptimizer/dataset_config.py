@@ -59,6 +59,17 @@ MNIST_DATASET = DatasetConfig(
     dataset_enum=DatasetName.MNIST
 )
 
+# ----- Fashion MNIST -----
+FASHION_MNIST_DATASET = DatasetConfig(
+    name='Fashion-MNIST',
+    train_path='Data/FashionMnist/fashion_mnist_train.csv',
+    test_path='Data/FashionMnist/fashion_mnist_test.csv',
+    data_type=DataType.MNIST_FORMAT,
+    class_count=10,
+    image_size=28,
+    dataset_enum=DatasetName.FASHION_MNIST
+)
+
 # ----- EMNIST Balanced -----
 EMNIST_BALANCED_DATASET = DatasetConfig(
     name='EMNIST-Balanced',
@@ -180,6 +191,7 @@ ALL_MNIST_C_DATASETS = [
 # Podstawowe datasety (bez MNIST-C)
 BASIC_DATASETS = [
     MNIST_DATASET,
+    FASHION_MNIST_DATASET,
     EMNIST_BALANCED_DATASET,
     EMNIST_DIGITS_DATASET,
     ARABIC_DATASET,
@@ -194,6 +206,11 @@ DIGITS_ONLY_DATASETS = [
     USPS_DATASET,
 ]
 
+# Tylko datasety z innymi obiektami (10 klas, nie cyfry)
+NON_DIGITS_DATASETS = [
+    FASHION_MNIST_DATASET,
+]
+
 # Wszystkie EMNIST
 ALL_EMNIST_DATASETS = [
     EMNIST_BALANCED_DATASET,
@@ -206,6 +223,7 @@ ALL_DATASETS = BASIC_DATASETS + ALL_MNIST_C_DATASETS
 # Mapowanie enum -> config dla łatwego dostępu
 DATASET_REGISTRY: Dict[DatasetName, List[DatasetConfig]] = {
     DatasetName.MNIST: [MNIST_DATASET],
+    DatasetName.FASHION_MNIST: [FASHION_MNIST_DATASET],
     DatasetName.EMNIST_BALANCED: [EMNIST_BALANCED_DATASET],
     DatasetName.EMNIST_DIGITS: [EMNIST_DIGITS_DATASET],
     DatasetName.ARABIC: [ARABIC_DATASET],

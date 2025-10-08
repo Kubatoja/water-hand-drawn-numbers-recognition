@@ -106,12 +106,26 @@ class DataLoader:
         Wczytuje surowe dane liczb (oryginalny format)
         Format: label, pixel1, pixel2, ..., pixelN
         Automatycznie wykrywa rozmiar obrazu na podstawie liczby pikseli.
+        Pomija pierwszy wiersz jeśli zawiera nagłówek (np. 'label', 'pixel1', ...).
         """
         data = []
         with open(file_path, 'r') as file:
             reader = csv.reader(file)
+            first_row = True
             for row in reader:
-                data.append(row)
+                # Sprawdź czy pierwszy wiersz to nagłówek
+                if first_row:
+                    first_row = False
+                    # Jeśli pierwsza wartość to 'label' lub podobny tekst, pomiń
+                    try:
+                        float(row[0])
+                        # To są dane, nie nagłówek - dodaj
+                        data.append(row)
+                    except ValueError:
+                        # To nagłówek - pomiń
+                        continue
+                else:
+                    data.append(row)
 
         data = np.array(data, dtype=float)
         labels = data[:, 0]  # Pierwsza kolumna to etykieta

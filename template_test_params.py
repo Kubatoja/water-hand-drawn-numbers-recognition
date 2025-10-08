@@ -24,6 +24,8 @@ from Testers.BayesianOptimizer import (
     MNIST_C_FOG,
     BASIC_DATASETS,
     DatasetConfig,
+    ALL_MNIST_C_DATASETS,
+    FASHION_MNIST_DATASET
 )
 
 
@@ -47,12 +49,9 @@ def main():
     
     # OPCJA A: Ręczny wybór
     datasets = [
-        MNIST_DATASET,
-        EMNIST_DIGITS_DATASET,
-        # ARABIC_DATASET,
-        # USPS_DATASET,
+         EMNIST_BALANCED_DATASET
     ]
-    
+
     # OPCJA B: Użyj kolekcji
     # datasets = BASIC_DATASETS
     
@@ -69,19 +68,20 @@ def main():
             {
                 "name": "Konfiguracja 1 - Optymalna z poprzedniej optymalizacji",
                 "params": {
-                    # Parametry wektoryzacji
-                    "num_segments": 7,
-                    "pixel_normalization_rate": 0.34,
-                    "training_set_limit": 60000,
-                    "flood_config": "1111",  # left, right, top, bottom
-                    
-                    # Parametry XGBoost
+                    "num_segments": 8,
+                    "pixel_normalization_rate": 0.2285805064971576,
+                    "learning_rate": 0.1233078484533695,
                     "n_estimators": 100,
                     "max_depth": 6,
-                    "learning_rate": 0.1,
-                    "subsample": 0.8,
-                    "colsample_bytree": 0.8,
-                }
+                    "min_child_weight": 1.0,
+                    "gamma": 0.0,
+                    "subsample": 0.6,
+                    "colsample_bytree": 0.6,
+                    "reg_lambda": 2.0,
+                    "reg_alpha": 0.0,
+                    "training_set_limit": 9999999999,
+                    "flood_config": "1111"
+                  }
             },
             # Możesz dodać więcej konfiguracji:
             # {

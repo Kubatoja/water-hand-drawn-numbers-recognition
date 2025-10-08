@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from Tester.otherModels import VectorNumberData
+from Testers.Shared.models import VectorNumberData
 
 
 class Ann:

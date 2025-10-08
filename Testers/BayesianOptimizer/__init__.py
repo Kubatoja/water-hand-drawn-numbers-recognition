@@ -15,6 +15,7 @@ from Testers.BayesianOptimizer.dataset_config import (
     DatasetConfig,
     # Podstawowe datasety
     MNIST_DATASET,
+    FASHION_MNIST_DATASET,
     EMNIST_BALANCED_DATASET,
     EMNIST_DIGITS_DATASET,
     ARABIC_DATASET,
@@ -40,6 +41,7 @@ from Testers.BayesianOptimizer.dataset_config import (
     ALL_DATASETS,
     BASIC_DATASETS,
     DIGITS_ONLY_DATASETS,
+    NON_DIGITS_DATASETS,
     ALL_EMNIST_DATASETS,
     ALL_MNIST_C_DATASETS,
     # Helper functions
@@ -74,6 +76,7 @@ __all__ = [
     
     # Podstawowe datasety
     'MNIST_DATASET',
+    'FASHION_MNIST_DATASET',
     'EMNIST_BALANCED_DATASET',
     'EMNIST_DIGITS_DATASET',
     'ARABIC_DATASET',
@@ -101,6 +104,7 @@ __all__ = [
     'ALL_DATASETS',
     'BASIC_DATASETS',
     'DIGITS_ONLY_DATASETS',
+    'NON_DIGITS_DATASETS',
     'ALL_EMNIST_DATASETS',
     'ALL_MNIST_C_DATASETS',
     
