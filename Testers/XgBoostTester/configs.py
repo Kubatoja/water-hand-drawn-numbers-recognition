@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from Testers.Shared.configs import FloodConfig
+from Testers.Shared.configs import BaseTestConfig, FloodConfig, DimensionalityReductionAlgorithm
 
 
 @dataclass
@@ -22,12 +22,16 @@ class XGBTestConfig:
 
     # Parametry wektorów
     num_segments: int
-    pixel_normalization_rate: float
     training_set_limit: int
     flood_config: FloodConfig
 
     # Informacje o datasecie
     class_count: int
+
+    # Pola z domyślnymi wartościami
+    pixel_normalization_rate: float = 0.5  # Domyślnie 0.5, None dla metod statystycznych
+    dimensionality_reduction_algorithm: DimensionalityReductionAlgorithm = DimensionalityReductionAlgorithm.NONE
+    dimensionality_reduction_n_components: int = 50  # Liczba komponentów do redukcji
     image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
     dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
 
@@ -53,10 +57,14 @@ class XGBTestConfig:
             raise ValueError(f"Reg alpha musi być >= 0, otrzymano: {self.reg_alpha}")
         if self.num_segments <= 0:
             raise ValueError(f"Num segments musi być > 0, otrzymano: {self.num_segments}")
-        if not (0.0 <= self.pixel_normalization_rate <= 1.0):
+        if self.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.FLOOD_FILL and not (0.0 <= self.pixel_normalization_rate <= 1.0):
             raise ValueError(
-                f"Pixel normalization rate musi być w [0, 1], otrzymano: {self.pixel_normalization_rate}"
+                f"Pixel normalization rate musi być w [0, 1] dla FLOOD_FILL, otrzymano: {self.pixel_normalization_rate}"
             )
+        if self.dimensionality_reduction_n_components <= 0:
+            raise ValueError(f"Dimensionality reduction n_components musi być > 0, otrzymano: {self.dimensionality_reduction_n_components}")
+        if self.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA and self.dimensionality_reduction_n_components >= self.class_count:
+            raise ValueError(f"Dla LDA n_components musi być < class_count ({self.class_count}), otrzymano: {self.dimensionality_reduction_n_components}")
 
 
 class XGBTestConfigField(Enum):
@@ -74,6 +82,8 @@ class XGBTestConfigField(Enum):
     PIXEL_NORMALIZATION_RATE = "pixel_normalization_rate"
     TRAINING_SET_LIMIT = "training_set_limit"
     FLOOD_CONFIG = "flood_config"
+    DIMENSIONALITY_REDUCTION_ALGORITHM = "dimensionality_reduction_algorithm"
+    DIMENSIONALITY_REDUCTION_N_COMPONENTS = "dimensionality_reduction_n_components"
 
 
 @dataclass

@@ -11,7 +11,7 @@ from Testers.BayesianOptimizer.configs import (
     MNIST_FIXED_PARAMS,
     EMNIST_FIXED_PARAMS
 )
-from Testers.BayesianOptimizer.dataset_config import (
+from Testers.Shared.dataset_config import (
     DatasetConfig,
     # Podstawowe datasety
     MNIST_DATASET,

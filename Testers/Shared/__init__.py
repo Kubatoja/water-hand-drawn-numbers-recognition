@@ -1,5 +1,73 @@
 """Shared components for testers"""
 
 from Testers.Shared.ResultSaver import convert_numpy_types_to_native
+from Testers.Shared.configs import (
+    TestRunnerConfig,
+    FloodConfig,
+    DimensionalityReductionAlgorithm,
+)
+from Testers.Shared.dataset_config import (
+    DatasetConfig,
+    # Podstawowe datasety
+    MNIST_DATASET,
+    FASHION_MNIST_DATASET,
+    EMNIST_BALANCED_DATASET,
+    EMNIST_DIGITS_DATASET,
+    ARABIC_DATASET,
+    USPS_DATASET,
+    # MNIST-C
+    MNIST_C_IDENTITY,
+    MNIST_C_BRIGHTNESS,
+    MNIST_C_CANNY_EDGES,
+    MNIST_C_DOTTED_LINE,
+    MNIST_C_FOG,
+    MNIST_C_GLASS_BLUR,
+    MNIST_C_IMPULSE_NOISE,
+    MNIST_C_MOTION_BLUR,
+    MNIST_C_ROTATE,
+    MNIST_C_SCALE,
+    MNIST_C_SHEAR,
+    MNIST_C_SHOT_NOISE,
+    MNIST_C_SPATTER,
+    MNIST_C_STRIPE,
+    MNIST_C_TRANSLATE,
+    MNIST_C_ZIGZAG,
+    # Grupy
+    ALL_MNIST_C_DATASETS,
+    BASIC_DATASETS,
+    ALL_DATASETS,
+)
 
-__all__ = ['convert_numpy_types_to_native']
+__all__ = [
+    'convert_numpy_types_to_native',
+    'TestRunnerConfig',
+    'FloodConfig',
+    'DimensionalityReductionAlgorithm',
+    'DatasetConfig',
+    'DatasetConfig',
+    'MNIST_DATASET',
+    'FASHION_MNIST_DATASET', 
+    'EMNIST_BALANCED_DATASET',
+    'EMNIST_DIGITS_DATASET',
+    'ARABIC_DATASET',
+    'USPS_DATASET',
+    'MNIST_C_IDENTITY',
+    'MNIST_C_BRIGHTNESS',
+    'MNIST_C_CANNY_EDGES',
+    'MNIST_C_DOTTED_LINE',
+    'MNIST_C_FOG',
+    'MNIST_C_GLASS_BLUR',
+    'MNIST_C_IMPULSE_NOISE',
+    'MNIST_C_MOTION_BLUR',
+    'MNIST_C_ROTATE',
+    'MNIST_C_SCALE',
+    'MNIST_C_SHEAR',
+    'MNIST_C_SHOT_NOISE',
+    'MNIST_C_SPATTER',
+    'MNIST_C_STRIPE',
+    'MNIST_C_TRANSLATE',
+    'MNIST_C_ZIGZAG',
+    'ALL_MNIST_C_DATASETS',
+    'BASIC_DATASETS',
+    'ALL_DATASETS',
+]

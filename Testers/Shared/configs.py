@@ -17,6 +17,51 @@ class FloodSide(Enum):
     BOTTOM = 3
 
 
+class DimensionalityReductionAlgorithm(Enum):
+    """Enum dla algorytmów redukcji wymiarów"""
+    NONE = "none"
+    FLOOD_FILL = "flood_fill"
+    PCA = "pca"
+    LDA = "lda"
+    ISOMAP = "isomap"
+    TSNE = "tsne"
+
+
+@dataclass
+class BaseTestConfig:
+    """Bazowa konfiguracja testu wspólna dla wszystkich algorytmów"""
+    
+    # Informacje o datasecie (wymagane)
+    class_count: int
+    
+    # Parametry wektorów
+    pixel_normalization_rate: float = 0.5  # Domyślnie 0.5, None dla metod statystycznych
+    training_set_limit: int = 1000  # Domyślny limit zbioru treningowego
+    
+    # Redukcja wymiarów
+    dimensionality_reduction_algorithm: DimensionalityReductionAlgorithm = DimensionalityReductionAlgorithm.NONE
+    dimensionality_reduction_n_components: int = 50  # Liczba komponentów do redukcji
+
+    # Informacje o datasecie
+    image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
+    dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
+    """Enum dla kierunków flood fill"""
+    LEFT = 0
+    RIGHT = 1
+    TOP = 2
+    BOTTOM = 3
+
+
+class DimensionalityReductionAlgorithm(Enum):
+    """Enum dla algorytmów redukcji wymiarów"""
+    NONE = "none"
+    FLOOD_FILL = "flood_fill"
+    PCA = "pca"
+    LDA = "lda"
+    ISOMAP = "isomap"
+    TSNE = "tsne"
+
+
 @dataclass
 class FloodConfig:
     """Konfiguracja dla flood fill - używana w generowaniu wektorów"""

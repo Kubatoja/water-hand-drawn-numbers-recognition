@@ -3,8 +3,16 @@ from pathlib import Path
 from typing import Any, List, Optional
 import numpy as np
 
-from BFS.bfs import calculate_flooded_vector
+# Import BFS tylko gdy jest dostępny (warunkowy import)
+try:
+    from BFS.bfs import calculate_flooded_vector
+    BFS_AVAILABLE = True
+except ImportError:
+    BFS_AVAILABLE = False
+    print("Warning: BFS/numba not available, FLOOD_FILL will not work")
+
 from Testers.Shared.models import RawNumberData, VectorNumberData
+from Testers.Shared.configs import DimensionalityReductionAlgorithm
 
 
 class VectorManager:
@@ -87,41 +95,31 @@ class VectorManager:
         print(f"Generating {limit} training vectors...")
         
         start_time = time.perf_counter()
-        vectors = self._generate_vectors_sequential(raw_number_data_list, config, limit)
+        vectors = self._prepare_vectors_batch(raw_number_data_list[:limit], config)
         
         generation_time = time.perf_counter() - start_time
         per_image_ms = generation_time/limit*1000
         throughput = limit/generation_time
         
-        
         return vectors
     
-    def _generate_vectors_sequential(
+    def _prepare_vectors_batch(
         self, 
-        raw_number_data_list: List[RawNumberData], 
-        config: Any, 
-        limit: int
+        raw_data_list: List[RawNumberData], 
+        config: Any
     ) -> List[VectorNumberData]:
+        """
+        Przygotowuje wektory dla batcha danych (treningowych lub testowych) używając wspólnej logiki.
+        """
         import time
-        
-        total_start = time.perf_counter()
         
         # Get image size from config (default to 28 if not present)
         image_size = getattr(config, 'image_size', 28)
         
-        # OPTIMIZATION 1: Batch data preparation
-        print("📦 Phase 1: Batch data extraction...")
-        prep_start = time.perf_counter()
-        
-        all_pixels = np.array([raw_number_data_list[i].pixels for i in range(limit)])
-        all_labels = [raw_number_data_list[i].label for i in range(limit)]
-        
-        prep_time = time.perf_counter() - prep_start
-        print(f"   ✅ Data extraction: {prep_time:.3f}s")
-        
-        # OPTIMIZATION 2: Vectorized binarization
-        print("🔥 Phase 2: Vectorized binarization...")
-        bin_start = time.perf_counter()
+        # Batch data preparation
+        print(f"Batch processing {len(raw_data_list)} samples...")
+        all_pixels = np.array([data.pixels for data in raw_data_list])
+        all_labels = [data.label for data in raw_data_list]
         
         # Walidacja rozmiaru danych
         expected_pixels = image_size * image_size
@@ -143,69 +141,110 @@ class VectorManager:
             )
             raise ValueError(error_msg)
         
-        binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0)
-        binarized_batch = binarized_batch.reshape(-1, image_size, image_size)
+        binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0).reshape(-1, image_size, image_size)
+        original_batch = all_pixels.reshape(-1, image_size, image_size)
         
-        bin_time = time.perf_counter() - bin_start
-        print(f"   ✅ Batch binarization: {bin_time:.3f}s ({bin_time/limit*1000:.3f}ms per image)")
-        print(f"   📏 Image dimensions: {image_size}x{image_size}")
+        # Utwórz podstawowe wektory - zawsze binarne, bo apply_dimensionality_reduction obsłuży resztę
+        vectors = [VectorNumberData(label=label, vector=binarized_batch[i].flatten().astype(float).tolist()) for i, label in enumerate(all_labels)]
         
-        # Obsłuż zarówno FloodConfig obiekt jak i string
-        if isinstance(config.flood_config, str):
-            flood_str = config.flood_config
-        else:
-            flood_str = config.flood_config.to_string()
-        
-        # OPTIMIZATION 3: Minimal JIT Pre-compilation
-        print("⚡ Phase 3: Minimal JIT warmup...")
-        warmup_start = time.perf_counter()
-        
-        calculate_flooded_vector(
-            binarized_batch[0],
-            num_segments=config.num_segments,
-            floodSides=flood_str
-        )
-        
-        warmup_time = time.perf_counter() - warmup_start
-        print(f"   ✅ JIT compilation: {warmup_time:.3f}s")
-        
-        # OPTIMIZATION 4: Streamlined vector calculation
-        print("🎯 Phase 4: Ultra-fast vector generation...")
-        calc_start = time.perf_counter()
-        
-        vectors = []
-        for i in range(limit):
-            if limit > 1000 and i % 5000 == 0 and i > 0:
-                elapsed = time.perf_counter() - calc_start
-                rate = i / elapsed
-                eta = (limit - i) / rate
-                print(f"   📈 Progress: {i}/{limit} ({rate:.0f} img/s, ETA: {eta:.1f}s)")
-            
-            flooded_vector = calculate_flooded_vector(
-                binarized_batch[i],
-                num_segments=config.num_segments,
-                floodSides=flood_str
-            )
-            
-            vectors.append(VectorNumberData(label=all_labels[i], vector=flooded_vector))
-        
-        calc_time = time.perf_counter() - calc_start
-        total_time = time.perf_counter() - total_start
-        
-        # print("\n📊 ULTRA-OPTIMIZATION PERFORMANCE BREAKDOWN:")
-        # print(f"   📦 Data extraction:  {prep_time:.3f}s ({(prep_time/total_time)*100:.1f}%)")
-        # print(f"   🔥 Binarization:     {bin_time:.3f}s ({(bin_time/total_time)*100:.1f}%)")
-        # print(f"   ⚡ JIT warmup:       {warmup_time:.3f}s ({(warmup_time/total_time)*100:.1f}%)")
-        # print(f"   🎯 Vector calc:      {calc_time:.3f}s ({(calc_time/total_time)*100:.1f}%)")
-        # print(f"   🚀 TOTAL:            {total_time:.3f}s")
-        # print(f"   💎 Per image:        {calc_time/limit*1000:.3f}ms (calc only)")
-        # print(f"   🏆 Overall per img:  {total_time/limit*1000:.3f}ms (total)")
-        # print(f"   ⚡ Throughput:       {limit/total_time:.0f} images/sec")
-        
-        pure_calc_efficiency = calc_time / total_time * 100
-        # print(f"   📈 Calculation efficiency: {pure_calc_efficiency:.1f}%")
+        # Zastosuj redukcję wymiarów
+        if config.dimensionality_reduction_algorithm != DimensionalityReductionAlgorithm.NONE:
+            print(f"Applying {config.dimensionality_reduction_algorithm.value} dimensionality reduction...")
+            vectors = self.apply_dimensionality_reduction(vectors, binarized_batch, original_batch, config)
         
         return vectors
+    
+    def apply_dimensionality_reduction(
+        self, 
+        vectors: List[VectorNumberData], 
+        binarized_batch: np.ndarray,
+        original_batch: np.ndarray,
+        config: Any
+    ) -> List[VectorNumberData]:
+        """
+        Applies dimensionality reduction to the vectors if configured.
+        
+        Args:
+            vectors: List of VectorNumberData
+            config: Test configuration containing reduction parameters
+            
+        Returns:
+            List of VectorNumberData with reduced dimensions
+        """
+        if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
+            return vectors
+            
+        print(f"Applying {config.dimensionality_reduction_algorithm.value} dimensionality reduction...")
+        
+        # Extract features and labels
+        X = np.array([v.vector for v in vectors])
+        y = np.array([v.label for v in vectors])
+        
+        # Apply reduction
+        if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.FLOOD_FILL:
+            if not BFS_AVAILABLE:
+                raise ImportError("BFS/numba not available. Cannot use FLOOD_FILL dimensionality reduction.")
+
+            # Obsłuż zarówno FloodConfig obiekt jak i string
+            if isinstance(config.flood_config, str):
+                flood_str = config.flood_config
+            else:
+                flood_str = config.flood_config.to_string()
+
+            reduced_vectors = []
+            for i, vector_data in enumerate(vectors):
+                flooded_vector = calculate_flooded_vector(
+                    binarized_batch[i],
+                    num_segments=config.num_segments,
+                    floodSides=flood_str
+                )
+                reduced_vectors.append(VectorNumberData(label=vector_data.label, vector=flooded_vector))
+            return reduced_vectors
+
+        else:
+            # For statistical methods (PCA, LDA, Isomap, t-SNE) and NONE: use original images
+            X = original_batch.reshape(original_batch.shape[0], -1)  # Flatten to 2D
+            y = np.array([v.label for v in vectors])
+
+            if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
+                # Return flattened original images
+                reduced_vectors = [
+                    VectorNumberData(label=label, vector=X[i].tolist())
+                    for i, label in enumerate(y)
+                ]
+                return reduced_vectors
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PCA:
+                from sklearn.decomposition import PCA
+                reducer = PCA(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA:
+                from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+                reducer = LinearDiscriminantAnalysis(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X, y)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.ISOMAP:
+                from sklearn.manifold import Isomap
+                reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TSNE:
+                from sklearn.manifold import TSNE
+                reducer = TSNE(n_components=config.dimensionality_reduction_n_components, random_state=42)
+                X_reduced = reducer.fit_transform(X)
+
+            else:
+                raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
+
+            # Create new vectors
+            reduced_vectors = [
+                VectorNumberData(label=label, vector=X_reduced[i].tolist())
+                for i, label in enumerate(y)
+            ]
+
+            print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
+            return reduced_vectors
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
         """
@@ -329,6 +368,14 @@ class VectorManager:
                 
         if hasattr(old_config, 'num_segments') and hasattr(new_config, 'num_segments'):
             if old_config.num_segments != new_config.num_segments:
+                return True
+                
+        if hasattr(old_config, 'dimensionality_reduction_algorithm') and hasattr(new_config, 'dimensionality_reduction_algorithm'):
+            if old_config.dimensionality_reduction_algorithm != new_config.dimensionality_reduction_algorithm:
+                return True
+                
+        if hasattr(old_config, 'dimensionality_reduction_n_components') and hasattr(new_config, 'dimensionality_reduction_n_components'):
+            if old_config.dimensionality_reduction_n_components != new_config.dimensionality_reduction_n_components:
                 return True
                 
         return False

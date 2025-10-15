@@ -8,7 +8,7 @@ from Testers.XgBoostTester.XGBTestRunner import XGBTestRunner
 from Testers.Shared.configs import TestRunnerConfig
 from Testers.BayesianOptimizer.BayesianOptimizer import BayesianOptimizer, OptimizationResult
 from Testers.BayesianOptimizer.configs import SearchSpaceConfig, FixedParamsConfig
-from Testers.BayesianOptimizer.dataset_config import DatasetConfig
+from Testers.Shared.dataset_config import DatasetConfig
 from Testers.BayesianOptimizer.reporter import ResultReporter
 
 

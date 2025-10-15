@@ -1,11 +1,12 @@
 import time
+import numpy as np
 from typing import List, Optional
 
 from Testers.Shared.DataLoader import DataLoader, DataType
-from Testers.Shared.models import TestResult
+from Testers.Shared.models import TestResult, VectorNumberData
 from Testers.Shared.TestResultCollector import TestResultCollector
 from Testers.Shared.VectorManager import VectorManager
-from Testers.Shared.configs import TestRunnerConfig
+from Testers.Shared.configs import TestRunnerConfig, DimensionalityReductionAlgorithm
 from Testers.XgBoostTester.configs import XGBTestConfig
 from Testers.XgBoostTester.XGBTester import XGBTester
 
@@ -106,11 +107,7 @@ class XGBTestRunner:
 
         # Przygotuj wektory testowe
         print("Preparing test vectors...")
-        test_vectors = []
-        for test_number in self.test_data:
-            test_number.binarize_data(test_config.pixel_normalization_rate, test_config.image_size)
-            vector = VectorManager.create_vector_for_single_sample(test_number, test_config)
-            test_vectors.append(vector)
+        test_vectors = self.vector_manager._prepare_vectors_batch(self.test_data, test_config)
 
         vector_generation_time = time.perf_counter() - vector_generation_start
         
