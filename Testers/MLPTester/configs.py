@@ -33,6 +33,8 @@ class MLPTestConfig:
     dimensionality_reduction_n_components: int = 50  # Liczba komponentów do redukcji
     image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
     dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
+    classifier_name: str = "Unknown"  # Nazwa klasyfikatora dla raportów
+    reduction_name: str = "Unknown"  # Nazwa metody redukcji dla raportów
 
     def __post_init__(self):
         """Walidacja konfiguracji po inicjalizacji"""

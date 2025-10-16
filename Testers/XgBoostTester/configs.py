@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -21,9 +21,7 @@ class XGBTestConfig:
     reg_alpha: float   # alpha -> reg_alpha dla spójności
 
     # Parametry wektorów
-    num_segments: int
     training_set_limit: int
-    flood_config: FloodConfig
 
     # Informacje o datasecie
     class_count: int
@@ -34,6 +32,10 @@ class XGBTestConfig:
     dimensionality_reduction_n_components: int = 50  # Liczba komponentów do redukcji
     image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
     dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
+    classifier_name: str = "Unknown"  # Nazwa klasyfikatora dla raportów
+    reduction_name: str = "Unknown"  # Nazwa metody redukcji dla raportów
+    num_segments: int = 7  # Domyślna wartość dla Flood Fill
+    flood_config: FloodConfig = field(default_factory=lambda: FloodConfig.from_string("1111"))  # Domyślna wartość dla Flood Fill
 
     def __post_init__(self):
         """Walidacja konfiguracji po inicjalizacji"""

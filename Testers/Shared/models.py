@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Protocol
+from typing import Any, Dict, List, Protocol, Optional
 
 import numpy as np
 
@@ -29,6 +29,7 @@ class TestResult:
     precision: float = 0.0
     recall: float = 0.0
     f1_score: float = 0.0
+    actual_n_components: Optional[int] = None
     
     # Metryki per-class (opcjonalne)
     per_class_precision: np.ndarray = field(default_factory=lambda: np.array([]))

@@ -40,6 +40,16 @@ class VectorManager:
                 force_regenerate or
                 self._should_regenerate(config)):
 
+            # Sprawdź czy możemy wczytać z pliku zamiast generować
+            if not force_regenerate and self._can_load_from_file(config):
+                try:
+                    print("Loading vectors from file...")
+                    self._cached_vectors = self.load_vectors_from_csv()
+                    self._last_config = config
+                    return self._cached_vectors
+                except (FileNotFoundError, ValueError) as e:
+                    print(f"Could not load vectors from file ({e}), generating new ones...")
+
             print("Generating new vectors...")
             self._cached_vectors = self.generate_vectors(raw_data, config)
             self._last_config = config
@@ -379,3 +389,17 @@ class VectorManager:
                 return True
                 
         return False
+
+    def _can_load_from_file(self, new_config: Any) -> bool:
+        """Sprawdza czy można wczytać wektory z pliku zamiast generować"""
+        from pathlib import Path
+        
+        # Sprawdź czy plik istnieje
+        if not Path(self.default_vectors_file).exists():
+            return False
+            
+        # Sprawdź czy config się nie zmienił od ostatniego zapisu
+        if self._last_config is None:
+            return False
+            
+        return not self._should_regenerate(new_config)

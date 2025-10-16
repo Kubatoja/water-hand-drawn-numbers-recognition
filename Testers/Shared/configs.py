@@ -45,21 +45,23 @@ class BaseTestConfig:
     # Informacje o datasecie
     image_size: int = 28  # Rozmiar obrazu (domyślnie 28x28)
     dataset_name: str = "Unknown"  # Nazwa datasetu dla raportów
-    """Enum dla kierunków flood fill"""
-    LEFT = 0
-    RIGHT = 1
-    TOP = 2
-    BOTTOM = 3
 
 
-class DimensionalityReductionAlgorithm(Enum):
-    """Enum dla algorytmów redukcji wymiarów"""
-    NONE = "none"
-    FLOOD_FILL = "flood_fill"
-    PCA = "pca"
-    LDA = "lda"
-    ISOMAP = "isomap"
-    TSNE = "tsne"
+@dataclass
+class ReductionConfig:
+    """Konfiguracja redukcji wymiarów"""
+    name: str
+    algorithm: DimensionalityReductionAlgorithm
+    n_components: int
+    training_set_limit: int
+    requires_bfs: bool = False
+    num_segments: int = 7
+    pixel_normalization_rate: float = 0.5
+    flood_config: 'FloodConfig' = None
+
+    def __post_init__(self):
+        if self.flood_config is None:
+            self.flood_config = FloodConfig()
 
 
 @dataclass

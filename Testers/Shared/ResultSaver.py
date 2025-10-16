@@ -143,6 +143,9 @@ class ResultsSaver:
         """Zwraca bazowe nazwy kolumn dla pliku CSV"""
         return [
             'test_id',
+            'dataset_name',
+            'classifier_name',
+            'reduction_name',
             'training_time',
             'train_set_size',
             'test_set_size',
@@ -155,7 +158,8 @@ class ResultsSaver:
             'f1_score',
             'pixel_normalization_rate',
             'num_segments',
-            'training_set_limit'
+            'training_set_limit',
+            'n_components'
         ]
 
     def _extract_config_params(self, config: Any) -> Dict[str, Any]:
@@ -182,16 +186,14 @@ class ResultsSaver:
         if hasattr(config, 'dataset_name'):
             params['dataset_name'] = config.dataset_name
             
-        # Parametry specyficzne dla algorytmu - dynamiczne dodawanie
-        for attr in dir(config):
-            if not attr.startswith('_') and attr not in [
-                'pixel_normalization_rate', 'num_segments', 
-                'training_set_limit', 'class_count', 'flood_config', 'dataset_name'
-            ]:
-                value = getattr(config, attr, None)
-                if value is not None and not callable(value):
-                    params[attr] = value
-                    
+        # Classifier name
+        if hasattr(config, 'classifier_name'):
+            params['classifier_name'] = config.classifier_name
+            
+        # Reduction name
+        if hasattr(config, 'reduction_name'):
+            params['reduction_name'] = config.reduction_name
+            
         return params
 
     def _generate_or_update_summary_csv(self, test_results: List['TestResult']) -> None:
@@ -231,25 +233,7 @@ class ResultsSaver:
 
     def _append_single_result_to_summary(self, test_result: 'TestResult', test_index: int) -> None:
         """Dodaje pojedynczy wynik do pliku summary"""
-        # Read existing to get all possible fieldnames
-        all_fieldnames = set(self._get_base_fieldnames())
-        config_params = self._extract_config_params(test_result.config)
-        all_fieldnames.update(config_params.keys())
-        
-        fieldnames = sorted(list(all_fieldnames))
-        if 'test_id' in fieldnames:
-            fieldnames.remove('test_id')
-        fieldnames = ['test_id'] + fieldnames
-
-        # Update file structure if needed
-        if self._summary_file.exists():
-            existing_df = pd.read_csv(self._summary_file)
-            new_columns = set(fieldnames) - set(existing_df.columns)
-            if new_columns:
-                for col in new_columns:
-                    existing_df[col] = None
-                existing_df = existing_df[fieldnames]
-                existing_df.to_csv(self._summary_file, index=False)
+        fieldnames = self._get_base_fieldnames()
 
         with open(self._summary_file, 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -276,6 +260,10 @@ class ResultsSaver:
         # Dodaj parametry konfiguracji
         config_params = self._extract_config_params(result.config)
         row.update(config_params)
+        
+        # Użyj rzeczywistej liczby komponentów jeśli dostępna
+        if hasattr(result, 'actual_n_components') and result.actual_n_components is not None:
+            row['n_components'] = result.actual_n_components
         
         # Wypełnij brakujące kolumny None
         for field in fieldnames:
