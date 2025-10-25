@@ -30,6 +30,7 @@ from Testers.Shared.models import TestResult
 from Testers.Shared import (
     BASIC_DATASETS,
 )
+from Testers.Shared.dataset_config import ARABIC_DATASET, EMNIST_BALANCED_DATASET, MNIST_DATASET
 from BFS.bfs import calculate_flooded_vector
 
 class ClassifierType(Enum):
@@ -81,7 +82,7 @@ DEFAULT_CLASSIFIERS = [
         classifier_type=ClassifierType.MLP,
         name="Multi-Layer Perceptron",
         default_params={
-            "hidden_layer_sizes": (100,),
+            "hidden_layer_sizes": (256,128,),
             "activation": "relu",
             "solver": "adam",
             "alpha": 0.0001,
@@ -148,7 +149,7 @@ class FullComparisonRunner:
         first_runner = self.create_test_runner(first_classifier, dataset, self.result_collector)
         first_start_time = time.time()
         first_test_results = first_runner.run_tests([first_test_config])
-        first_test_result = first_test_results[0]
+        first_test_result = first_test_results[-1]
         first_end_time = time.time()
 
         # Zapisz wynik pierwszego testu
@@ -259,8 +260,8 @@ class FullComparisonRunner:
             ReductionConfig(
                 name="Flood Fill",
                 algorithm=DimensionalityReductionAlgorithm.FLOOD_FILL,
-                n_components=42,
-                num_segments=7,
+                n_components=43,
+                num_segments=30,
                 pixel_normalization_rate=0.2285805064971576,  # Optymalna wartość
                 flood_config=FloodConfig.from_string("1111"),
                 training_set_limit=base_training_limit,
@@ -284,11 +285,15 @@ class FullComparisonRunner:
         if classifier.classifier_type == ClassifierType.KNN:
             return KNNTestConfig(
                 **classifier.default_params,
+                num_segments=reduction_config.num_segments,
+                flood_config=reduction_config.flood_config,
                 **base_params,
             )
         elif classifier.classifier_type == ClassifierType.XGBOOST:
             return XGBTestConfig(
                 **classifier.default_params,
+                num_segments=reduction_config.num_segments,
+                flood_config=reduction_config.flood_config,
                 **base_params,
             )
         elif classifier.classifier_type == ClassifierType.MLP:
@@ -301,6 +306,8 @@ class FullComparisonRunner:
         elif classifier.classifier_type == ClassifierType.SVM:
             return SVMTestConfig(
                 **classifier.default_params,
+                num_segments=reduction_config.num_segments,
+                flood_config=reduction_config.flood_config,
                 **base_params,
             )
         else:
@@ -428,8 +435,12 @@ def main():
     # 1. WYBÓR DATASETÓW
     # ========================================================================
 
-    datasets = BASIC_DATASETS
+
+    # Use only the Arabic dataset for testing
+    datasets = [BASIC_DATASETS]  # Arabic dataset only
+
     classifiers_to_test = DEFAULT_CLASSIFIERS
+    
 
     # ========================================================================
     # 2. URUCHOMIENIE TESTÓW DLA WSZYSTKICH DATASETÓW

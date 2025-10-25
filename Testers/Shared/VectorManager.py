@@ -26,6 +26,11 @@ class VectorManager:
         self.default_vectors_file = default_vectors_file
         self._cached_vectors: Optional[List[VectorNumberData]] = None
         self._last_config: Optional[Any] = None
+        # Przechowuje dopasowany reduktor (np. PCA, LDA) oraz jego konfigurację
+        # dzięki temu można użyć tego samego reduktora dla testowych wektorów
+        # zamiast dopasowywać osobny reduktor na zbiorze testowym.
+        self._last_reducer = None
+        self._last_reducer_config = None
 
     def get_training_vectors(
         self, 
@@ -216,6 +221,9 @@ class VectorManager:
             X = original_batch.reshape(original_batch.shape[0], -1)  # Flatten to 2D
             y = np.array([v.label for v in vectors])
 
+            # Key opisujący konfigurację redukcji (używany do ponownego użycia reduktora)
+            config_key = (config.dimensionality_reduction_algorithm, config.dimensionality_reduction_n_components)
+
             if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
                 # Return flattened original images
                 reduced_vectors = [
@@ -224,28 +232,60 @@ class VectorManager:
                 ]
                 return reduced_vectors
 
-            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PCA:
-                from sklearn.decomposition import PCA
-                reducer = PCA(n_components=config.dimensionality_reduction_n_components)
-                X_reduced = reducer.fit_transform(X)
-
-            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA:
-                from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-                reducer = LinearDiscriminantAnalysis(n_components=config.dimensionality_reduction_n_components)
-                X_reduced = reducer.fit_transform(X, y)
-
-            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.ISOMAP:
-                from sklearn.manifold import Isomap
-                reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
-                X_reduced = reducer.fit_transform(X)
-
-            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TSNE:
-                from sklearn.manifold import TSNE
-                reducer = TSNE(n_components=config.dimensionality_reduction_n_components, random_state=42)
-                X_reduced = reducer.fit_transform(X)
-
+            # Jeśli mamy już dopasowany reduktor o tej samej konfiguracji, użyj transform
+            if self._last_reducer is not None and self._last_reducer_config == config_key:
+                try:
+                    print("Reusing previously fitted reducer for transform...")
+                    X_reduced = self._last_reducer.transform(X)
+                except Exception:
+                    # W razie gdy reducer nie wspiera transform() lub transform się nie powiódł,
+                    # przejdź do dopasowania nowego reduktora
+                    X_reduced = None
             else:
-                raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
+                X_reduced = None
+
+            # Jeśli nie mamy X_reduced, dopasuj nowy reduktor i zapisz go
+            if X_reduced is None:
+                if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PCA:
+                    from sklearn.decomposition import PCA
+                    reducer = PCA(n_components=config.dimensionality_reduction_n_components)
+                    X_reduced = reducer.fit_transform(X)
+
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA:
+                    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+                    reducer = LinearDiscriminantAnalysis(n_components=config.dimensionality_reduction_n_components)
+                    X_reduced = reducer.fit_transform(X, y)
+
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.ISOMAP:
+                    from sklearn.manifold import Isomap
+                    reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
+                    X_reduced = reducer.fit_transform(X)
+
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TSNE:
+                    from sklearn.manifold import TSNE
+                    # t-SNE nie posiada transform() dla nowych próbek — nie nadaje się do enkodowania testowych próbek
+                    reducer = TSNE(n_components=config.dimensionality_reduction_n_components, random_state=42)
+                    X_reduced = reducer.fit_transform(X)
+
+                else:
+                    raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
+
+                # Zapisz dopasowany reduktor tylko jeśli wspiera transform (TSNE nie wspiera)
+                try:
+                    # Sprawdź czy reducer ma metodę transform
+                    if hasattr(reducer, 'transform'):
+                        self._last_reducer = reducer
+                        self._last_reducer_config = config_key
+                        print("Stored fitted reducer for reuse on test set.")
+                    else:
+                        # Nie nadpisuj istniejącego reduktora dla algorytmów bez transform()
+                        print("Reducer does not support transform(); it will not be reused for test set.")
+                        self._last_reducer = None
+                        self._last_reducer_config = None
+                except NameError:
+                    # Jeśli reducer nie został utworzony (np. transform próby użycia wcześniej), po prostu nie zapisuj
+                    self._last_reducer = None
+                    self._last_reducer_config = None
 
             # Create new vectors
             reduced_vectors = [
@@ -253,7 +293,10 @@ class VectorManager:
                 for i, label in enumerate(y)
             ]
 
-            print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
+            try:
+                print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
+            except Exception:
+                pass
             return reduced_vectors
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
