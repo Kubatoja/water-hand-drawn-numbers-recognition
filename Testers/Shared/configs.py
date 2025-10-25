@@ -24,7 +24,7 @@ class DimensionalityReductionAlgorithm(Enum):
     PCA = "pca"
     LDA = "lda"
     ISOMAP = "isomap"
-    TSNE = "tsne"
+    UMAP = "umap"
 
 
 @dataclass

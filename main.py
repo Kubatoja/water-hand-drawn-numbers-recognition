@@ -251,10 +251,10 @@ class FullComparisonRunner:
                 requires_bfs=False,
             ),
             ReductionConfig(
-                name="t-SNE",
-                algorithm=DimensionalityReductionAlgorithm.TSNE,
-                n_components=3,  # t-SNE zwykle na 2-3 komponenty
-                training_set_limit=base_training_limit,  # t-SNE jest bardzo wolny
+                name="UMAP",
+                algorithm=DimensionalityReductionAlgorithm.UMAP,
+                n_components=43,  # UMAP zwykle na 2-3 komponenty
+                training_set_limit=base_training_limit,
                 requires_bfs=False,
             ),
             ReductionConfig(
@@ -437,7 +437,7 @@ def main():
 
 
     # Use only the Arabic dataset for testing
-    datasets = [BASIC_DATASETS]  # Arabic dataset only
+    datasets = BASIC_DATASETS  # Arabic dataset only
 
     classifiers_to_test = DEFAULT_CLASSIFIERS
     

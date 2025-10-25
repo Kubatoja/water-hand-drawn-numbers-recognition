@@ -217,7 +217,7 @@ class VectorManager:
             return reduced_vectors
 
         else:
-            # For statistical methods (PCA, LDA, Isomap, t-SNE) and NONE: use original images
+            # For statistical methods (PCA, LDA, Isomap, UMAP) and NONE: use original images
             X = original_batch.reshape(original_batch.shape[0], -1)  # Flatten to 2D
             y = np.array([v.label for v in vectors])
 
@@ -261,16 +261,20 @@ class VectorManager:
                     reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
                     X_reduced = reducer.fit_transform(X)
 
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TSNE:
-                    from sklearn.manifold import TSNE
-                    # t-SNE nie posiada transform() dla nowych próbek — nie nadaje się do enkodowania testowych próbek
-                    reducer = TSNE(n_components=config.dimensionality_reduction_n_components, random_state=42)
-                    X_reduced = reducer.fit_transform(X)
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.UMAP:
+                    # UMAP oferuje transform() i jest lepiej dopasowany do pipeline train->test.
+                    try:
+                        import umap
+                        reducer = umap.UMAP(n_components=config.dimensionality_reduction_n_components, random_state=42)
+                        X_reduced = reducer.fit_transform(X)
+                    except Exception:
+                        # Jeśli umap nie jest zainstalowany, podnieśmy błąd — UMAP powinien być dostępny.
+                        raise
 
                 else:
                     raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
 
-                # Zapisz dopasowany reduktor tylko jeśli wspiera transform (TSNE nie wspiera)
+                # Zapisz dopasowany reduktor tylko jeśli wspiera transform (UMAP wspiera transform())
                 try:
                     # Sprawdź czy reducer ma metodę transform
                     if hasattr(reducer, 'transform'):
