@@ -29,6 +29,7 @@ from Testers.Shared.test_runner_factory import TestRunnerFactory
 from Testers.Shared.models import TestResult
 from Testers.Shared import (
     BASIC_DATASETS,
+    ALL_MNIST_C_DATASETS
 )
 from Testers.Shared.dataset_config import ARABIC_DATASET, EMNIST_BALANCED_DATASET, MNIST_DATASET
 from BFS.bfs import calculate_flooded_vector
@@ -121,7 +122,7 @@ class FullComparisonRunner:
 
         for dataset in datasets:
             print(f"\n{'='*100}")
-            print(f"TESTOWANIE DATASETU: {dataset.name} ({dataset.class_count} klas, {dataset.image_size}x{dataset.image_size})")
+            print(f"TESTOWANIE DATASETU: {dataset.display_name} ({dataset.class_count} klas, {dataset.image_size}x{dataset.image_size})")
             print(f"{'='*100}")
 
             reduction_configs = self.get_reduction_configs_for_dataset(dataset)
@@ -142,7 +143,8 @@ class FullComparisonRunner:
         print(f"  Generowanie wektorów dla {reduction_config.name}...")
         first_classifier = classifiers[0]  # KNN jako pierwszy
         first_test_config = self.create_test_config(first_classifier, reduction_config, dataset)
-        first_test_config.dataset_name = dataset.name
+        # Use display_name so MNIST-C entries include the corruption variant
+        first_test_config.dataset_name = dataset.display_name
         first_test_config.classifier_name = first_classifier.name
         first_test_config.reduction_name = reduction_config.name
 
@@ -166,7 +168,8 @@ class FullComparisonRunner:
         print(f"Starting test for {classifier.name}")
         try:
             test_config = self.create_test_config(classifier, reduction_config, dataset)
-            test_config.dataset_name = dataset.name
+            # Use display_name so MNIST-C entries include the corruption variant
+            test_config.dataset_name = dataset.display_name
             test_config.classifier_name = classifier.name
             test_config.reduction_name = reduction_config.name
 
@@ -190,7 +193,8 @@ class FullComparisonRunner:
         self.global_test_index += 1
 
         result_dict = {
-            "dataset": dataset.name,
+            # Use display_name to reflect corruption variant for MNIST-C
+            "dataset": dataset.display_name,
             "classifier": classifier.name,
             "reduction": reduction_config.name,
             "algorithm": reduction_config.algorithm.value if hasattr(reduction_config.algorithm, 'value') else str(reduction_config.algorithm),
@@ -207,7 +211,8 @@ class FullComparisonRunner:
     def _save_failed_test(self, dataset, classifier: ClassifierConfig, reduction_config: ReductionConfig, error: str) -> None:
         """Zapisuje nieudany test"""
         result_dict = {
-            "dataset": dataset.name,
+            # Use display_name to reflect corruption variant for MNIST-C
+            "dataset": dataset.display_name,
             "classifier": classifier.name,
             "reduction": reduction_config.name,
             "algorithm": reduction_config.algorithm.value if hasattr(reduction_config.algorithm, 'value') else str(reduction_config.algorithm),
@@ -239,7 +244,7 @@ class FullComparisonRunner:
             ReductionConfig(
                 name="PCA",
                 algorithm=DimensionalityReductionAlgorithm.PCA,
-                n_components=43,  # Dostosuj do rozmiaru
+                n_components=43,  
                 training_set_limit=base_training_limit,
                 requires_bfs=False,
             ),
@@ -253,7 +258,7 @@ class FullComparisonRunner:
             ReductionConfig(
                 name="UMAP",
                 algorithm=DimensionalityReductionAlgorithm.UMAP,
-                n_components=43,  # UMAP zwykle na 2-3 komponenty
+                n_components=43, 
                 training_set_limit=base_training_limit,
                 requires_bfs=False,
             ),
@@ -261,7 +266,7 @@ class FullComparisonRunner:
                 name="Flood Fill",
                 algorithm=DimensionalityReductionAlgorithm.FLOOD_FILL,
                 n_components=43,
-                num_segments=30,
+                num_segments=7,
                 pixel_normalization_rate=0.2285805064971576,  # Optymalna wartość
                 flood_config=FloodConfig.from_string("1111"),
                 training_set_limit=base_training_limit,
@@ -368,7 +373,7 @@ class FullComparisonRunner:
         print(f"\n{'='*120}")
         print("PODSUMOWANIE WYNIKÓW PORÓWNANIA")
         print(f"{'='*120}")
-        print(f"Testowane datasety: {[d.name for d in datasets]}")
+        print(f"Testowane datasety: {[d.display_name for d in datasets]}")
         print(f"Testowane klasyfikatory: {[c.name for c in classifiers]}")
         reduction_names = [c.name for c in self.get_reduction_configs_for_dataset(datasets[0])]
         print(f"Testowane metody redukcji: {reduction_names}")
@@ -398,11 +403,12 @@ class FullComparisonRunner:
             # Podsumowanie per dataset
             print(f"\nPODSUMOWANIE PER DATASET:")
             for dataset in datasets:
-                dataset_results = [r for r in successful_results if r["dataset"] == dataset.name]
+                # Compare using display_name because saved results use display_name for MNIST-C
+                dataset_results = [r for r in successful_results if r["dataset"] == dataset.display_name]
                 if dataset_results:
                     avg_accuracy = sum(r["accuracy"] for r in dataset_results) / len(dataset_results)
                     best_for_dataset = max(dataset_results, key=lambda x: x["accuracy"])
-                    print(f"  {dataset.name:<12}: Średnia accuracy = {avg_accuracy:.4f}, Najlepsza = {best_for_dataset['classifier']} + {best_for_dataset['reduction']} ({best_for_dataset['accuracy']:.4f})")
+                    print(f"  {dataset.display_name:<12}: Średnia accuracy = {avg_accuracy:.4f}, Najlepsza = {best_for_dataset['classifier']} + {best_for_dataset['reduction']} ({best_for_dataset['accuracy']:.4f})")
 
             # Podsumowanie per klasyfikator
             print(f"\nPODSUMOWANIE PER KLASYFIKATOR:")
@@ -437,7 +443,7 @@ def main():
 
 
     # Use only the Arabic dataset for testing
-    datasets = BASIC_DATASETS  # Arabic dataset only
+    datasets = ALL_MNIST_C_DATASETS  # Arabic dataset only
 
     classifiers_to_test = DEFAULT_CLASSIFIERS
     
