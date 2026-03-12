@@ -123,13 +123,13 @@ def flood_from_all_sides_numba(array):
     """Ultra-fast Numba implementation of flood_from_all_sides"""
     
     # Process all sides with correct direction mapping
-    left_flooded = bfs_flood_numba_stack(array, 1, False)  # flood from right edge going left
-    right_flooded = bfs_flood_numba_stack(array, 0, False)  # flood from left edge going right
+    left_flooded = bfs_flood_numba_stack(array, 0, False)  # flood from left edge going right
+    right_flooded = bfs_flood_numba_stack(array, 1, False)  # flood from right edge going left
     
     # For top/bottom, work with transposed array
     array_t = array.T
-    top_flooded_t = bfs_flood_numba_stack(array_t, 1, False)  # flood from right in transposed = top in original
-    bottom_flooded_t = bfs_flood_numba_stack(array_t, 0, False)  # flood from left in transposed = bottom in original
+    top_flooded_t = bfs_flood_numba_stack(array_t, 0, False)  # flood from top in transposed
+    bottom_flooded_t = bfs_flood_numba_stack(array_t, 1, False)  # flood from bottom in transposed
     
     top_flooded = top_flooded_t.T
     bottom_flooded = bottom_flooded_t.T
@@ -234,15 +234,19 @@ def calculate_flooded_vector(original_array, num_segments=2, floodSides="1111"):
         zero_mask = (flood_array == 0).astype(np.float64)
         segments = calculate_segments_numba(zero_mask, num_segments)
         
-        # Apply correction efficiently
-        total_pixels = flood_array.shape[0] * flood_array.shape[1]
-        segment_size = total_pixels // num_segments
+        # Calculate actual segment sizes (handles last segment correctly)
+        rows, cols = flood_array.shape
+        segment_height = rows // num_segments
         
         for i in range(num_segments):
-            zero_count = segments[i] * segment_size
-            correction_count = correction_segments[i] * segment_size
+            start_row = i * segment_height
+            end_row = start_row + segment_height if i < num_segments - 1 else rows
+            actual_segment_size = (end_row - start_row) * cols
+            
+            zero_count = segments[i] * actual_segment_size
+            correction_count = correction_segments[i] * actual_segment_size
             corrected_zero_count = max(0, zero_count - correction_count)
-            result_vector.append(corrected_zero_count / segment_size)
+            result_vector.append(corrected_zero_count / actual_segment_size)
     
     # Add correction array features
     result_vector.extend(correction_segments.tolist())

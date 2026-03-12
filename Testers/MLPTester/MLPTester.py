@@ -1,8 +1,9 @@
 import time
-from typing import List
+from typing import List, Dict, Optional
 
 import numpy as np
 from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
 from Testers.Shared.models import TestResult, RawNumberData, VectorNumberData
 from Testers.Shared.MetricsCalculator import MetricsCalculator
@@ -89,11 +90,83 @@ class MLPTester:
         self._print_results(results)
         return results
 
+    def _perform_cross_validation(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        config: MLPTestConfig,
+        n_folds: int = 5
+    ) -> Dict[str, float]:
+        """
+        Wykonuje stratified k-fold cross-validation na training set.
+        
+        Args:
+            X_train: Macierz cech treningowych
+            y_train: Wektor etykiet treningowych
+            config: Konfiguracja MLP
+            n_folds: Liczba foldów dla CV
+            
+        Returns:
+            Dict ze średnimi i odchyleniami standardowymi metryk CV
+        """
+        print(f"  Performing {n_folds}-fold stratified cross-validation...")
+        
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=42)
+        
+        # Stwórz model do CV
+        model = MLPClassifier(
+            hidden_layer_sizes=config.hidden_layer_sizes,
+            activation=config.activation,
+            solver=config.solver,
+            alpha=config.alpha,
+            learning_rate=config.learning_rate,
+            learning_rate_init=config.learning_rate_init,
+            max_iter=config.max_iter,
+            random_state=config.random_state,
+            verbose=False
+        )
+        
+        # Scoring metrics
+        scoring = {
+            'accuracy': 'accuracy',
+            'precision_macro': 'precision_macro',
+            'recall_macro': 'recall_macro',
+            'f1_macro': 'f1_macro'
+        }
+        
+        # Wykonaj CV
+        cv_results = cross_validate(
+            model, X_train, y_train,
+            cv=skf,
+            scoring=scoring,
+            n_jobs=-1,
+            return_train_score=False
+        )
+        
+        # Oblicz średnie i std
+        cv_scores = {
+            'cv_accuracy_mean': float(cv_results['test_accuracy'].mean()),
+            'cv_accuracy_std': float(cv_results['test_accuracy'].std()),
+            'cv_precision_mean': float(cv_results['test_precision_macro'].mean()),
+            'cv_precision_std': float(cv_results['test_precision_macro'].std()),
+            'cv_recall_mean': float(cv_results['test_recall_macro'].mean()),
+            'cv_recall_std': float(cv_results['test_recall_macro'].std()),
+            'cv_f1_mean': float(cv_results['test_f1_macro'].mean()),
+            'cv_f1_std': float(cv_results['test_f1_macro'].std()),
+        }
+        
+        print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
+        print(f"              F1-Score = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
+        
+        return cv_scores
+
     def train_and_test(
         self,
         training_vectors: List[VectorNumberData],
         test_vectors: List[VectorNumberData],
-        config: MLPTestConfig
+        config: MLPTestConfig,
+        use_cross_validation: bool = True,
+        cv_n_folds: int = 5
     ) -> tuple[MLPClassifier, TestResult]:
         """
         Trenuje i testuje model MLP
@@ -102,6 +175,8 @@ class MLPTester:
             training_vectors: Lista wektorów treningowych
             test_vectors: Lista wektorów testowych
             config: Konfiguracja testu
+            use_cross_validation: Czy wykonać cross-validation
+            cv_n_folds: Liczba foldów dla CV
 
         Returns:
             Tuple(model, wyniki): Wytrenowany model i wyniki testowania
@@ -110,8 +185,15 @@ class MLPTester:
         X_train = np.array([vec.vector for vec in training_vectors])
         y_train = np.array([vec.label for vec in training_vectors])
 
-        # Trenowanie
-        print("Training MLP model...")
+        # Cross-validation (jeśli włączone)
+        cv_scores = None
+        if use_cross_validation:
+            cv_scores = self._perform_cross_validation(
+                X_train, y_train, config, n_folds=cv_n_folds
+            )
+
+        # Trenowanie na pełnym training set
+        print("Training MLP model on full training set...")
         train_start = time.perf_counter()
 
         model = MLPClassifier(
@@ -133,10 +215,21 @@ class MLPTester:
 
         print(f"📊 Training completed in {training_time:.3f}s")
 
-        # Testowanie
+        # Testowanie na test set
         print("Running test evaluation...")
         result = self.test_model(model, test_vectors, config)
         result.training_time = training_time
+        
+        # Dodaj CV scores do wyniku
+        if cv_scores:
+            result.cv_accuracy_mean = cv_scores['cv_accuracy_mean']
+            result.cv_accuracy_std = cv_scores['cv_accuracy_std']
+            result.cv_precision_mean = cv_scores['cv_precision_mean']
+            result.cv_precision_std = cv_scores['cv_precision_std']
+            result.cv_recall_mean = cv_scores['cv_recall_mean']
+            result.cv_recall_std = cv_scores['cv_recall_std']
+            result.cv_f1_mean = cv_scores['cv_f1_mean']
+            result.cv_f1_std = cv_scores['cv_f1_std']
 
         return model, result
 

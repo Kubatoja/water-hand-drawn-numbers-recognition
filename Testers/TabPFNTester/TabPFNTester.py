@@ -1,7 +1,9 @@
 import time
-from typing import List
+from typing import List, Dict, Optional
 
 import numpy as np
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from Testers.Shared.models import TestResult, VectorNumberData
 from Testers.Shared.MetricsCalculator import MetricsCalculator
@@ -92,11 +94,90 @@ class TabPFNTester:
         self._print_results(results)
         return results
 
+    def _perform_cross_validation_manual(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        config: TabPFNTestConfig,
+        n_folds: int = 5
+    ) -> Dict[str, float]:
+        """
+        Ręczna implementacja stratified k-fold cross-validation dla TabPFN.
+        
+        Args:
+            X_train: Macierz cech treningowych
+            y_train: Wektor etykiet treningowych
+            config: Konfiguracja TabPFN
+            n_folds: Liczba foldów dla CV
+            
+        Returns:
+            Dict ze średnimi i odchyleniami standardowymi metryk CV
+        """
+        from tabpfn import TabPFNClassifier
+        from tabpfn.constants import ModelVersion
+        
+        print(f"  Performing {n_folds}-fold stratified cross-validation (manual loop)...")
+        
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=42)
+        
+        fold_accuracies = []
+        fold_precisions = []
+        fold_recalls = []
+        fold_f1s = []
+        
+        device = _resolve_device(config.device)
+        
+        for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train), 1):
+            X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
+            y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
+            
+            # Stwórz i trenuj model
+            if config.use_v2:
+                model = TabPFNClassifier.create_default_for_version(
+                    ModelVersion.V2,
+                    n_estimators=config.n_estimators,
+                    device=device,
+                )
+            else:
+                model = TabPFNClassifier(
+                    n_estimators=config.n_estimators,
+                    device=device,
+                )
+            
+            model.fit(X_fold_train, y_fold_train)
+            y_pred = model.predict(X_fold_val)
+            
+            # Oblicz metryki
+            fold_accuracies.append(accuracy_score(y_fold_val, y_pred))
+            fold_precisions.append(precision_score(y_fold_val, y_pred, average='macro', zero_division=0))
+            fold_recalls.append(recall_score(y_fold_val, y_pred, average='macro', zero_division=0))
+            fold_f1s.append(f1_score(y_fold_val, y_pred, average='macro', zero_division=0))
+            
+            print(f"    Fold {fold}/{n_folds}: Accuracy={fold_accuracies[-1]:.4f}")
+        
+        cv_scores = {
+            'cv_accuracy_mean': float(np.mean(fold_accuracies)),
+            'cv_accuracy_std': float(np.std(fold_accuracies)),
+            'cv_precision_mean': float(np.mean(fold_precisions)),
+            'cv_precision_std': float(np.std(fold_precisions)),
+            'cv_recall_mean': float(np.mean(fold_recalls)),
+            'cv_recall_std': float(np.std(fold_recalls)),
+            'cv_f1_mean': float(np.mean(fold_f1s)),
+            'cv_f1_std': float(np.std(fold_f1s)),
+        }
+        
+        print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
+        print(f"              F1-Score = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
+        
+        return cv_scores
+
     def train_and_test(
         self,
         training_vectors: List[VectorNumberData],
         test_vectors: List[VectorNumberData],
-        config: TabPFNTestConfig
+        config: TabPFNTestConfig,
+        use_cross_validation: bool = True,
+        cv_n_folds: int = 5
     ) -> tuple:
         """
         Trenuje i testuje model TabPFN-v2.
@@ -105,6 +186,8 @@ class TabPFNTester:
             training_vectors: Lista wektorów treningowych
             test_vectors: Lista wektorów testowych
             config: Konfiguracja testu
+            use_cross_validation: Czy wykonać cross-validation
+            cv_n_folds: Liczba foldów dla CV
 
         Returns:
             Tuple(model, wyniki): Wytrenowany model i wyniki testowania
@@ -115,8 +198,15 @@ class TabPFNTester:
         X_train = np.array([vec.vector for vec in training_vectors])
         y_train = np.array([vec.label for vec in training_vectors])
 
+        # Cross-validation (jeśli włączone)
+        cv_scores = None
+        if use_cross_validation:
+            cv_scores = self._perform_cross_validation_manual(
+                X_train, y_train, config, n_folds=cv_n_folds
+            )
+
         device = _resolve_device(config.device)
-        print(f"Training TabPFN-v2 model on device='{device}'...")
+        print(f"Training TabPFN-v2 model on full training set (device='{device}')...")
 
         train_start = time.perf_counter()
 
@@ -141,6 +231,17 @@ class TabPFNTester:
         print("Running test evaluation...")
         result = self.test_model(model, test_vectors, config)
         result.training_time = training_time
+        
+        # Dodaj CV scores do wyniku
+        if cv_scores:
+            result.cv_accuracy_mean = cv_scores['cv_accuracy_mean']
+            result.cv_accuracy_std = cv_scores['cv_accuracy_std']
+            result.cv_precision_mean = cv_scores['cv_precision_mean']
+            result.cv_precision_std = cv_scores['cv_precision_std']
+            result.cv_recall_mean = cv_scores['cv_recall_mean']
+            result.cv_recall_std = cv_scores['cv_recall_std']
+            result.cv_f1_mean = cv_scores['cv_f1_mean']
+            result.cv_f1_std = cv_scores['cv_f1_std']
 
         return model, result
 

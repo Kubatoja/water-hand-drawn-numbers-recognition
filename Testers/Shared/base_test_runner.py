@@ -138,7 +138,9 @@ class BaseTestRunner(ABC):
         model, result = tester.train_and_test(
             training_vectors,
             test_vectors,
-            test_config
+            test_config,
+            use_cross_validation=self.config.use_cross_validation,
+            cv_n_folds=self.config.cv_n_folds
         )
 
         # Ustaw rzeczywistą liczbę komponentów

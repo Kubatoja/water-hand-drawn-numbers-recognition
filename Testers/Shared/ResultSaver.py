@@ -156,6 +156,16 @@ class ResultsSaver:
             'precision',
             'recall',
             'f1_score',
+            # Cross-validation metrics
+            'cv_accuracy_mean',
+            'cv_accuracy_std',
+            'cv_precision_mean',
+            'cv_precision_std',
+            'cv_recall_mean',
+            'cv_recall_std',
+            'cv_f1_mean',
+            'cv_f1_std',
+            # Additional config params
             'pixel_normalization_rate',
             'num_segments',
             'training_set_limit',
@@ -256,6 +266,17 @@ class ResultsSaver:
             'recall': result.recall,
             'f1_score': result.f1_score,
         }
+        
+        # Dodaj CV metryki (jeśli dostępne)
+        if hasattr(result, 'cv_accuracy_mean') and result.cv_accuracy_mean is not None:
+            row['cv_accuracy_mean'] = result.cv_accuracy_mean
+            row['cv_accuracy_std'] = result.cv_accuracy_std
+            row['cv_precision_mean'] = result.cv_precision_mean
+            row['cv_precision_std'] = result.cv_precision_std
+            row['cv_recall_mean'] = result.cv_recall_mean
+            row['cv_recall_std'] = result.cv_recall_std
+            row['cv_f1_mean'] = result.cv_f1_mean
+            row['cv_f1_std'] = result.cv_f1_std
         
         # Dodaj parametry konfiguracji
         config_params = self._extract_config_params(result.config)
@@ -361,6 +382,31 @@ class ResultsSaver:
                 f.write(f"Średni recall: {df['recall'].mean():.4f}\n")
             if 'f1_score' in df.columns:
                 f.write(f"Średni F1-score: {df['f1_score'].mean():.4f}\n\n")
+            
+            # Cross-validation wyniki jeśli dostępne
+            if 'cv_accuracy_mean' in df.columns and pd.notna(df['cv_accuracy_mean'].iloc[0]):
+                f.write("CROSS-VALIDATION STATISTICS:\n")
+                f.write("-" * 30 + "\n")
+                cv_acc_mean = df['cv_accuracy_mean'].mean()
+                cv_acc_std = df['cv_accuracy_std'].mean()
+                f.write(f"CV Accuracy (mean): {cv_acc_mean:.4f} ± {cv_acc_std:.4f}\n")
+                
+                if 'cv_f1_mean' in df.columns:
+                    cv_f1_mean = df['cv_f1_mean'].mean()
+                    cv_f1_std = df['cv_f1_std'].mean()
+                    f.write(f"CV F1-Score (mean): {cv_f1_mean:.4f} ± {cv_f1_std:.4f}\n")
+                
+                if 'cv_precision_mean' in df.columns:
+                    cv_prec_mean = df['cv_precision_mean'].mean()
+                    cv_prec_std = df['cv_precision_std'].mean()
+                    f.write(f"CV Precision (mean): {cv_prec_mean:.4f} ± {cv_prec_std:.4f}\n")
+                
+                if 'cv_recall_mean' in df.columns:
+                    cv_rec_mean = df['cv_recall_mean'].mean()
+                    cv_rec_std = df['cv_recall_std'].mean()
+                    f.write(f"CV Recall (mean): {cv_rec_mean:.4f} ± {cv_rec_std:.4f}\n")
+                
+                f.write("\nNote: CV performed on training set, test scores are final evaluation.\n\n")
 
             best_test = df.loc[df['accuracy'].idxmax()]
             f.write("NAJLEPSZY WYNIK:\n")
@@ -368,11 +414,19 @@ class ResultsSaver:
             f.write(f"Test ID: {best_test['test_id']}\n")
             f.write(f"Dokładność: {best_test['accuracy']:.4f}\n")
             
+            # Pokazaj CV dla najlepszego wyniku jeśli dostępne
+            if 'cv_accuracy_mean' in df.columns and pd.notna(best_test.get('cv_accuracy_mean')):
+                cv_mean = best_test['cv_accuracy_mean']
+                cv_std = best_test['cv_accuracy_std']
+                f.write(f"CV Accuracy: {cv_mean:.4f} ± {cv_std:.4f}\n")
+            
             # Wypisz wszystkie parametry konfiguracji
             config_columns = [col for col in df.columns if col not in [
                 'test_id', 'training_time', 'train_set_size', 'test_set_size',
                 'execution_time', 'correct_predictions', 'incorrect_predictions',
-                'accuracy', 'precision', 'recall', 'f1_score'
+                'accuracy', 'precision', 'recall', 'f1_score',
+                'cv_accuracy_mean', 'cv_accuracy_std', 'cv_precision_mean', 'cv_precision_std',
+                'cv_recall_mean', 'cv_recall_std', 'cv_f1_mean', 'cv_f1_std'
             ]]
             
             f.write("\nParametry konfiguracji:\n")

@@ -31,6 +31,16 @@ class TestResult:
     f1_score: float = 0.0
     actual_n_components: Optional[int] = None
     
+    # Cross-validation metryki (opcjonalne - None jeśli CV nie było uruchomione)
+    cv_accuracy_mean: Optional[float] = None
+    cv_accuracy_std: Optional[float] = None
+    cv_precision_mean: Optional[float] = None
+    cv_precision_std: Optional[float] = None
+    cv_recall_mean: Optional[float] = None
+    cv_recall_std: Optional[float] = None
+    cv_f1_mean: Optional[float] = None
+    cv_f1_std: Optional[float] = None
+    
     # Metryki per-class (opcjonalne)
     per_class_precision: np.ndarray = field(default_factory=lambda: np.array([]))
     per_class_recall: np.ndarray = field(default_factory=lambda: np.array([]))
