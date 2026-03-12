@@ -6,6 +6,9 @@ from Testers.KNNTester.KNNTestRunner import KNNTestRunner
 from Testers.XgBoostTester.XGBTestRunner import XGBTestRunner
 from Testers.MLPTester.MLPTestRunner import MLPTestRunner
 from Testers.SVMTester.SVMTestRunner import SVMTestRunner
+from Testers.TabPFNTester.TabPFNTestRunner import TabPFNTestRunner
+from Testers.TabICLTester.TabICLTestRunner import TabICLTestRunner
+from Testers.HyperFastTester.HyperFastTestRunner import HyperFastTestRunner
 
 if TYPE_CHECKING:
     from Testers.Shared.base_test_runner import BaseTestRunner
@@ -17,6 +20,9 @@ class ClassifierType:
     XGBOOST = "xgboost"
     MLP = "mlp"
     SVM = "svm"
+    TABPFN = "tabpfn"
+    TABICL = "tabicl"
+    HYPERFAST = "hyperfast"
 
 
 class TestRunnerFactory:
@@ -82,6 +88,39 @@ class TestRunnerFactory:
             )
         elif classifier_type == ClassifierType.SVM:
             return SVMTestRunner(
+                train_dataset_path=train_dataset_path,
+                test_dataset_path=test_dataset_path,
+                train_data_type=train_data_type,
+                test_data_type=test_data_type,
+                train_labels_path=train_labels_path,
+                test_labels_path=test_labels_path,
+                config=config,
+                vectors_file=vectors_file
+            )
+        elif classifier_type == ClassifierType.TABPFN:
+            return TabPFNTestRunner(
+                train_dataset_path=train_dataset_path,
+                test_dataset_path=test_dataset_path,
+                train_data_type=train_data_type,
+                test_data_type=test_data_type,
+                train_labels_path=train_labels_path,
+                test_labels_path=test_labels_path,
+                config=config,
+                vectors_file=vectors_file
+            )
+        elif classifier_type == ClassifierType.TABICL:
+            return TabICLTestRunner(
+                train_dataset_path=train_dataset_path,
+                test_dataset_path=test_dataset_path,
+                train_data_type=train_data_type,
+                test_data_type=test_data_type,
+                train_labels_path=train_labels_path,
+                test_labels_path=test_labels_path,
+                config=config,
+                vectors_file=vectors_file
+            )
+        elif classifier_type == ClassifierType.HYPERFAST:
+            return HyperFastTestRunner(
                 train_dataset_path=train_dataset_path,
                 test_dataset_path=test_dataset_path,
                 train_data_type=train_data_type,
