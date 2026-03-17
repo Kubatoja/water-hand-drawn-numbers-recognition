@@ -43,6 +43,7 @@ class ANNTestRunner:
 
     def run_tests(self, test_configs: List[ANNTestConfig]) -> List[TestResult]:
         """Run all tests using the merged VectorManager"""
+        interrupted = False
 
         for index, test_config in enumerate(test_configs):
             print(f"Starting test case #{index + 1}/{len(test_configs)}")
@@ -50,13 +51,15 @@ class ANNTestRunner:
             try:
                 result = self._run_single_test(test_config, index)
 
-                # Save results incrementally or just add to collection
-                if self.config.save_results_after_each_test:
-                    self.result_collector.add_success_and_save(result, index)
-                    print(f"Test case #{index + 1} completed and saved")
-                else:
-                    self.result_collector.add_success(result)
-                    print(f"Test case #{index + 1} completed successfully")
+                # Save incrementally after each test to preserve progress.
+                self.result_collector.add_success_and_save(result, index)
+                print(f"Test case #{index + 1} completed and saved")
+
+            except KeyboardInterrupt:
+                interrupted = True
+                print("Execution interrupted by user. Progress has been saved up to the last completed test.")
+                print("-" * 40)
+                break
 
             except Exception as e:
                 error_msg = str(e)
@@ -66,11 +69,11 @@ class ANNTestRunner:
             print("-" * 40)
 
         # Print summary and save final results
-        self.result_collector.print_summary(len(test_configs))
+        if interrupted:
+            completed = len(self.result_collector.results) + len(self.result_collector.failed_tests)
+            print(f"Interrupted after {completed}/{len(test_configs)} tests.")
 
-        if not self.config.save_results_after_each_test:
-            # Save all results at once if not saving incrementally
-            self.result_collector.save_results()
+        self.result_collector.print_summary(len(test_configs))
 
         # Create final summary report
         try:
@@ -90,8 +93,7 @@ class ANNTestRunner:
         vector_generation_start = time.perf_counter()
         
         # Get training vectors using merged VectorManager
-        is_first_test = (test_index == 0)
-        force_regenerate = not (self.config.skip_first_vector_generation and is_first_test)
+        force_regenerate = self.config.force_regenerate_vectors
 
         training_vectors = self.vector_manager.get_training_vectors(
             self.train_data,

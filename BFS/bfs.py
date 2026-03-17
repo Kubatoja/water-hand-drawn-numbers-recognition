@@ -88,8 +88,10 @@ def bfs_flood_numba_stack(array, side_num, allow_backtrack=False):
                     # Use main direction
                     dr, dc = directions[main_dir_idx]
                 else:
-                    # Use up/down directions
-                    dr, dc = directions[i]
+                    if side_num < 2:  # horizontal flood (left/right): lateral = up, down
+                        dr, dc = directions[i]
+                    else:             # vertical flood (top/bottom): lateral = left, right
+                        dr, dc = directions[i + 2]
                     
                 new_row, new_col = row + dr, col + dc
                 

@@ -63,6 +63,7 @@ class BaseTestRunner(ABC):
 
     def run_tests(self, test_configs: List['BaseTestConfig']) -> List[TestResult]:
         """Uruchamia wszystkie testy używając wspólnego VectorManager"""
+        interrupted = False
 
         for index, test_config in enumerate(test_configs):
             print(f"Starting test case #{index + 1}/{len(test_configs)}")
@@ -70,12 +71,15 @@ class BaseTestRunner(ABC):
             try:
                 result = self._run_single_test(test_config, index)
 
-                if self.config.save_results_after_each_test:
-                    self.result_collector.add_success_and_save(result, index)
-                    print(f"Test case #{index + 1} completed and saved")
-                else:
-                    self.result_collector.add_success(result)
-                    print(f"Test case #{index + 1} completed successfully")
+                # Zapisujemy inkrementalnie po każdym teście, aby nie utracić postępu przy przerwaniu.
+                self.result_collector.add_success_and_save(result, index)
+                print(f"Test case #{index + 1} completed and saved")
+
+            except KeyboardInterrupt:
+                interrupted = True
+                print("Execution interrupted by user. Progress has been saved up to the last completed test.")
+                print("-" * 40)
+                break
 
             except Exception as e:
                 error_msg = str(e)
@@ -86,10 +90,11 @@ class BaseTestRunner(ABC):
 
         # Podsumowanie i zapis wyników tylko jeśli nie używa external_collector
         if self.external_collector is None:
-            self.result_collector.print_summary(len(test_configs))
+            if interrupted:
+                completed = len(self.result_collector.results) + len(self.result_collector.failed_tests)
+                print(f"Interrupted after {completed}/{len(test_configs)} tests.")
 
-            if not self.config.save_results_after_each_test:
-                self.result_collector.save_results()
+            self.result_collector.print_summary(len(test_configs))
 
             # Raport końcowy
             try:
@@ -109,8 +114,7 @@ class BaseTestRunner(ABC):
         # Generowanie wektorów
         vector_generation_start = time.perf_counter()
 
-        is_first_test = (test_index == 0)
-        force_regenerate = not (self.config.skip_first_vector_generation and is_first_test)
+        force_regenerate = self.config.force_regenerate_vectors
 
         training_vectors = self.vector_manager.get_training_vectors(
             self.train_data,
@@ -124,8 +128,7 @@ class BaseTestRunner(ABC):
             raise ValueError("Vector validation failed")
 
         # Przygotuj wektory testowe
-        print("Preparing test vectors...")
-        test_vectors = self.vector_manager._prepare_vectors_batch(self.test_data, test_config)
+        test_vectors = self.vector_manager.get_test_vectors(self.test_data, test_config)
 
         vector_generation_time = time.perf_counter() - vector_generation_start
 

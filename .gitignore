@@ -6,3 +6,5 @@ Data/*
 !Data/**/*.md
 /results
 !/results/important
+.venv/
+.venv311/

@@ -3,26 +3,15 @@ from typing import List, Dict, Optional
 
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
+from pytabkit import TabR_S_D_Classifier
 from Testers.Shared.models import TestResult, VectorNumberData
 from Testers.Shared.MetricsCalculator import MetricsCalculator
-from Testers.TabPFNTester.configs import TabPFNTestConfig
+from .configs import TabRTestConfig
 
 
-def _resolve_device(device: str) -> str:
-    """Wykrywa dostępne urządzenie."""
-    if device == "auto":
-        try:
-            import torch
-            return "cuda" if torch.cuda.is_available() else "cpu"
-        except ImportError:
-            return "cpu"
-    return device
-
-
-class TabPFNTester:
-    """Klasa odpowiedzialna za testowanie modeli TabPFN-v2"""
+class TabRTester:
+    """Klasa odpowiedzialna za testowanie modeli TabR"""
 
     def __init__(self, num_classes: int = 10):
         self.num_classes = num_classes
@@ -30,15 +19,15 @@ class TabPFNTester:
 
     def test_model(
         self,
-        model,
+        model: TabR_S_D_Classifier,
         test_vectors: List[VectorNumberData],
-        config: TabPFNTestConfig
+        config: TabRTestConfig
     ) -> TestResult:
         """
-        Testuje model TabPFN na podanych danych testowych.
+        Testuje model TabR na podanych danych testowych.
 
         Args:
-            model: Wytrenowany model TabPFN
+            model: Wytrenowany model TabR
             test_vectors: Lista wektorów testowych
             config: Konfiguracja testu
 
@@ -53,13 +42,15 @@ class TabPFNTester:
         X_test = np.array([vec.vector for vec in test_vectors])
         y_test = np.array([vec.label for vec in test_vectors])
 
+        # TabR_S_D_Classifier.predict() zwraca bezpośrednio etykiety klas
+        # (zachowanie identyczne z SVC.predict), bez potrzeby argmax
         y_pred = model.predict(X_test)
 
         end_time = time.perf_counter()
         execution_time = end_time - start_time
 
         actual_labels = y_test.astype(int)
-        predicted_labels = np.array(y_pred).astype(int)
+        predicted_labels = y_pred.astype(int)
 
         correct_predictions = np.sum(actual_labels == predicted_labels)
         total_predictions = len(test_vectors)
@@ -69,6 +60,7 @@ class TabPFNTester:
         metrics = self.metrics_calculator.calculate_all_metrics(
             actual_labels, predicted_labels, self.num_classes
         )
+
         confusion_matrix = self.metrics_calculator.calculate_confusion_matrix(
             actual_labels, predicted_labels, self.num_classes
         )
@@ -94,67 +86,86 @@ class TabPFNTester:
         self._print_results(results)
         return results
 
-    def _perform_cross_validation_manual(
+    def _build_model(self, config: TabRTestConfig) -> TabR_S_D_Classifier:
+        """
+        Tworzy instancję modelu TabR_S_D_Classifier na podstawie konfiguracji.
+        Przekazywane są wyłącznie podstawowe parametry (n_epochs, batch_size,
+        learning_rate); pozostałe hiperparametry zachowują wartości domyślne
+        zdefiniowane przez bibliotekę pytabkit.
+
+        Args:
+            config: Konfiguracja TabR
+
+        Returns:
+            Nowa instancja TabR_S_D_Classifier
+        """
+        # Resolve device automatically if needed
+        # Force device to 'cpu' for TabR
+        return TabR_S_D_Classifier(
+            n_epochs=config.n_epochs,
+            batch_size=config.batch_size,
+            optimizer={"type": "Adam", "lr": config.learning_rate},
+            random_state=config.random_state,
+            device="cpu",
+            n_cv=1,
+            n_refit=0,
+            verbosity=config.verbose,
+        )
+
+    def _perform_cross_validation(
         self,
         X_train: np.ndarray,
         y_train: np.ndarray,
-        config: TabPFNTestConfig,
+        config: TabRTestConfig,
         n_folds: int = 5
     ) -> Dict[str, float]:
         """
-        Ręczna implementacja stratified k-fold cross-validation dla TabPFN.
-        
+        Wykonuje stratified k-fold cross-validation na training set.
+
+        TabR_S_D_Classifier posiada wbudowany mechanizm n_cv (bagging CV),
+        jednak tutaj realizujemy zewnętrzne CV ręcznie – analogicznie
+        do GRANDETester – aby zachować spójność z pozostałymi testerami
+        i unikać podwójnego CV.
+
         Args:
             X_train: Macierz cech treningowych
             y_train: Wektor etykiet treningowych
-            config: Konfiguracja TabPFN
+            config: Konfiguracja TabR
             n_folds: Liczba foldów dla CV
-            
+
         Returns:
             Dict ze średnimi i odchyleniami standardowymi metryk CV
         """
-        from tabpfn import TabPFNClassifier
-        from tabpfn.constants import ModelVersion
-        
-        print(f"  Performing {n_folds}-fold stratified cross-validation (manual loop)...")
-        
+        print(f"  Performing {n_folds}-fold stratified cross-validation...")
+
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=42)
-        
+
         fold_accuracies = []
         fold_precisions = []
         fold_recalls = []
         fold_f1s = []
-        
-        device = _resolve_device(config.device)
-        
-        for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train), 1):
+
+        for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
             X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
             y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
-            
-            # Stwórz i trenuj model
-            if config.use_v2:
-                model = TabPFNClassifier.create_default_for_version(
-                    ModelVersion.V2,
-                    n_estimators=config.n_estimators,
-                    device=device,
-                )
-            else:
-                model = TabPFNClassifier(
-                    n_estimators=config.n_estimators,
-                    device=device,
-                )
-            
-            model.fit(X_fold_train, y_fold_train)
-            y_pred = model.predict(X_fold_val)
-            
-            # Oblicz metryki
-            fold_accuracies.append(accuracy_score(y_fold_val, y_pred))
-            fold_precisions.append(precision_score(y_fold_val, y_pred, average='macro', zero_division=0))
-            fold_recalls.append(recall_score(y_fold_val, y_pred, average='macro', zero_division=0))
-            fold_f1s.append(f1_score(y_fold_val, y_pred, average='macro', zero_division=0))
-            
-            print(f"    Fold {fold}/{n_folds}: Accuracy={fold_accuracies[-1]:.4f}")
-        
+
+            fold_model = self._build_model(config)
+            fold_model.fit(X_fold_train, y_fold_train)
+
+            y_fold_pred = fold_model.predict(X_fold_val).astype(int)
+
+            fold_metrics = self.metrics_calculator.calculate_all_metrics(
+                y_fold_val.astype(int), y_fold_pred, self.num_classes
+            )
+
+            acc = np.sum(y_fold_val.astype(int) == y_fold_pred) / len(y_fold_val)
+            fold_accuracies.append(acc)
+            fold_precisions.append(fold_metrics['precision'])
+            fold_recalls.append(fold_metrics['recall'])
+            fold_f1s.append(fold_metrics['f1_score'])
+
+            print(f"  Fold {fold_idx + 1}/{n_folds}: Accuracy={acc:.4f}, F1={fold_metrics['f1_score']:.4f}")
+
         cv_scores = {
             'cv_accuracy_mean': float(np.mean(fold_accuracies)),
             'cv_accuracy_std': float(np.std(fold_accuracies)),
@@ -165,22 +176,22 @@ class TabPFNTester:
             'cv_f1_mean': float(np.mean(fold_f1s)),
             'cv_f1_std': float(np.std(fold_f1s)),
         }
-        
+
         print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
-        print(f"              F1-Score = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
-        
+        print(f"              F1-Score  = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
+
         return cv_scores
 
     def train_and_test(
         self,
         training_vectors: List[VectorNumberData],
         test_vectors: List[VectorNumberData],
-        config: TabPFNTestConfig,
+        config: TabRTestConfig,
         use_cross_validation: bool = True,
         cv_n_folds: int = 5
-    ) -> tuple:
+    ) -> tuple[TabR_S_D_Classifier, TestResult]:
         """
-        Trenuje i testuje model TabPFN-v2.
+        Trenuje i testuje model TabR.
 
         Args:
             training_vectors: Lista wektorów treningowych
@@ -192,46 +203,36 @@ class TabPFNTester:
         Returns:
             Tuple(model, wyniki): Wytrenowany model i wyniki testowania
         """
-        from tabpfn import TabPFNClassifier
-        from tabpfn.constants import ModelVersion
-
         X_train = np.array([vec.vector for vec in training_vectors])
         y_train = np.array([vec.label for vec in training_vectors])
 
         # Cross-validation (jeśli włączone)
         cv_scores = None
         if use_cross_validation:
-            cv_scores = self._perform_cross_validation_manual(
+            cv_scores = self._perform_cross_validation(
                 X_train, y_train, config, n_folds=cv_n_folds
             )
 
-        device = _resolve_device(config.device)
-        print(f"Training TabPFN-v2 model on full training set (device='{device}')...")
-
+        # Trenowanie na pełnym training set
+        print("Training TabR model on full training set...")
         train_start = time.perf_counter()
 
-        if config.use_v2:
-            model = TabPFNClassifier.create_default_for_version(
-                ModelVersion.V2,
-                n_estimators=config.n_estimators,
-                device=device,
-            )
-        else:
-            model = TabPFNClassifier(
-                n_estimators=config.n_estimators,
-                device=device,
-            )
+        model = self._build_model(config)
 
+        # TabR_S_D_Classifier jest w pełni sklearn-kompatybilny:
+        # wewnętrzny val split do early stopping jest obsługiwany automatycznie
         model.fit(X_train, y_train)
 
         train_end = time.perf_counter()
         training_time = train_end - train_start
+
         print(f"📊 Training completed in {training_time:.3f}s")
 
+        # Testowanie na test set
         print("Running test evaluation...")
         result = self.test_model(model, test_vectors, config)
         result.training_time = training_time
-        
+
         # Dodaj CV scores do wyniku
         if cv_scores:
             result.cv_accuracy_mean = cv_scores['cv_accuracy_mean']
@@ -248,10 +249,10 @@ class TabPFNTester:
     def _print_results(self, results: TestResult) -> None:
         """Wyświetla wyniki testowania"""
         print(f"Test zakończony:")
-        print(f"  Poprawne predykcje: {results.correct_predictions}")
+        print(f"  Poprawne predykcje:    {results.correct_predictions}")
         print(f"  Niepoprawne predykcje: {results.incorrect_predictions}")
-        print(f"  Dokładność: {results.accuracy:.2%}")
-        print(f"  Precision: {results.precision:.4f}")
-        print(f"  Recall: {results.recall:.4f}")
-        print(f"  F1-Score: {results.f1_score:.4f}")
-        print(f"  Czas wykonania: {results.execution_time:.3f}s")
+        print(f"  Dokładność:            {results.accuracy:.2%}")
+        print(f"  Precision:             {results.precision:.4f}")
+        print(f"  Recall:                {results.recall:.4f}")
+        print(f"  F1-Score:              {results.f1_score:.4f}")
+        print(f"  Czas wykonania:        {results.execution_time:.3f}s")

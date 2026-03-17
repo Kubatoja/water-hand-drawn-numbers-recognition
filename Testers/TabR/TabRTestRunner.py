@@ -1,14 +1,17 @@
 from typing import Optional
 
-from Testers.Shared.DataLoader import DataType
+from Testers.Shared.DataLoader import DataLoader, DataType
+from Testers.Shared.models import TestResult, VectorNumberData
 from Testers.Shared.TestResultCollector import TestResultCollector
-from Testers.Shared.configs import TestRunnerConfig
+from Testers.Shared.VectorManager import VectorManager
+from Testers.Shared.configs import TestRunnerConfig, DimensionalityReductionAlgorithm
 from Testers.Shared.base_test_runner import BaseTestRunner
-from Testers.TabPFNTester.TabPFNTester import TabPFNTester
+from .configs import TabRTestConfig
+from .TabrTester import TabRTester
 
 
-class TabPFNTestRunner(BaseTestRunner):
-    """Test runner dla TabPFN-v2 używający wspólnych komponentów"""
+class TabRTestRunner(BaseTestRunner):
+    """Test runner dla TabR używający wspólnych komponentów."""
 
     def __init__(
         self,
@@ -35,7 +38,7 @@ class TabPFNTestRunner(BaseTestRunner):
         )
 
     def get_algorithm_name(self) -> str:
-        return "TabPFN-v2"
+        return "TabR"
 
-    def get_tester_instance(self, num_classes: int):
-        return TabPFNTester(num_classes=num_classes)
+    def get_tester_instance(self, num_classes: int) -> TabRTester:
+        return TabRTester(num_classes=num_classes)

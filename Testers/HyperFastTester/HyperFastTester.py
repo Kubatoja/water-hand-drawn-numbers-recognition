@@ -9,14 +9,8 @@ from Testers.HyperFastTester.configs import HyperFastTestConfig
 
 
 def _resolve_device(device: str) -> str:
-    """Wykrywa dostępne urządzenie."""
-    if device == "auto":
-        try:
-            import torch
-            return "cuda" if torch.cuda.is_available() else "cpu"
-        except ImportError:
-            return "cpu"
-    return device
+    """Wymusza użycie CPU niezależnie od ustawień."""
+    return "cpu"
 
 
 class HyperFastTester:
@@ -96,7 +90,9 @@ class HyperFastTester:
         self,
         training_vectors: List[VectorNumberData],
         test_vectors: List[VectorNumberData],
-        config: HyperFastTestConfig
+        config: HyperFastTestConfig,
+        use_cross_validation: bool = True,
+        cv_n_folds: int = 5
     ) -> tuple:
         """
         Trenuje i testuje model HyperFast.
@@ -105,6 +101,8 @@ class HyperFastTester:
             training_vectors: Lista wektorów treningowych
             test_vectors: Lista wektorów testowych
             config: Konfiguracja testu
+            use_cross_validation: Nieużywane dla HyperFast (zachowane dla kompatybilności API)
+            cv_n_folds: Nieużywane dla HyperFast (zachowane dla kompatybilności API)
 
         Returns:
             Tuple(model, wyniki): Wytrenowany model i wyniki testowania

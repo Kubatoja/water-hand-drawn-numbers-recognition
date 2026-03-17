@@ -1,5 +1,4 @@
 numpy
-scikit-learn
 xgboost
 pandas
 matplotlib
@@ -7,3 +6,9 @@ numba
 umap-learn
 tabpfn
 tabicl
+hyperfast
+pytabkit
+GRANDE
+skorch
+faiss-cpu
+scikit-learn==1.5.2

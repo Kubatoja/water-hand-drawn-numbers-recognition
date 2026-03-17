@@ -42,7 +42,7 @@ class OptimizationOrchestrator:
         self.verbose = verbose
         
         self.test_runner_config = test_runner_config or TestRunnerConfig(
-            skip_first_vector_generation=False,
+            force_regenerate_vectors=False,
             save_results_after_each_test=True
         )
         

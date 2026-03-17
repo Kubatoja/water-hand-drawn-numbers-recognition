@@ -39,7 +39,10 @@ class TestResultCollector:
             test_index: Indeks testu
         """
         self.results.append(result)
-        self.saver.save_single_result(result, test_index)
+        # Używamy globalnego indeksu wyniku w kolektorze, żeby uniknąć
+        # kolizji nazw plików przy wielu batchach uruchamianych na tym samym saverze.
+        global_index = len(self.results) - 1
+        self.saver.save_single_result(result, global_index)
 
     def add_failure(self, test_index: int, error: str):
         """Dodaje nieudany test"""

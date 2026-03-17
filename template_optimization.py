@@ -155,7 +155,7 @@ def main():
     # Konfiguracja test runnera
     from Testers.Shared.configs import TestRunnerConfig
     test_runner_config = TestRunnerConfig(
-        skip_first_vector_generation=skip_first_vectors,
+        force_regenerate_vectors=not skip_first_vectors,
         save_results_after_each_test=save_after_each
     )
     

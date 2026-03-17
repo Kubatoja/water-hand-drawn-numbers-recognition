@@ -12,7 +12,7 @@ from Testers.AnnTester.configs import ANNTestConfig, ANNTestConfigField, FieldCo
 if __name__ == "__main__":
     # Inicjalizacja test runnera
     test_runner_config = TestRunnerConfig(
-        skip_first_vector_generation=False, 
+        force_regenerate_vectors=False,
         save_results_after_each_test=True
     )
 

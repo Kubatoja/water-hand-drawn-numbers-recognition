@@ -5,7 +5,7 @@ from enum import Enum
 @dataclass
 class TestRunnerConfig:
     """Konfiguracja dla TestRunner - uniwersalna dla wszystkich algorytmów"""
-    skip_first_vector_generation: bool = False
+    force_regenerate_vectors: bool = False
     save_results_after_each_test: bool = False
     # Cross-validation settings
     use_cross_validation: bool = True  # Czy używać cross-validation (domyślnie włączone)

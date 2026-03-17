@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import precision_recall_fscore_support, precision_score, recall_score, f1_score
+from sklearn.metrics import precision_recall_fscore_support, confusion_matrix as sklearn_confusion_matrix
 
 
 class MetricsCalculator:
@@ -22,27 +22,17 @@ class MetricsCalculator:
         Returns:
             Słownik z metrykami
         """
-        # Macro-averaged metryki (średnia dla wszystkich klas)
-        precision_macro = precision_score(
-            actual_labels, predicted_labels, 
-            average='macro', zero_division=0
-        )
-        recall_macro = recall_score(
-            actual_labels, predicted_labels, 
-            average='macro', zero_division=0
-        )
-        f1_macro = f1_score(
-            actual_labels, predicted_labels, 
-            average='macro', zero_division=0
-        )
-        
-        # Per-class metryki
+        # Jeden przebieg po danych: metryki per-class, a macro wyliczamy jako średnią.
         precision_per_class, recall_per_class, f1_per_class, _ = precision_recall_fscore_support(
             actual_labels, predicted_labels,
             labels=list(range(num_classes)),
             average=None,
             zero_division=0
         )
+
+        precision_macro = float(np.mean(precision_per_class))
+        recall_macro = float(np.mean(recall_per_class))
+        f1_macro = float(np.mean(f1_per_class))
         
         return {
             'precision': precision_macro,
@@ -70,12 +60,11 @@ class MetricsCalculator:
         Returns:
             Confusion matrix jako numpy array
         """
-        confusion_matrix = np.zeros((num_classes, num_classes), dtype=int)
-        
-        for actual, predicted in zip(actual_labels, predicted_labels):
-            confusion_matrix[int(actual)][int(predicted)] += 1
-            
-        return confusion_matrix
+        return sklearn_confusion_matrix(
+            actual_labels,
+            predicted_labels,
+            labels=list(range(num_classes))
+        )
     
     @staticmethod
     def print_metrics(metrics: dict, detailed: bool = True):

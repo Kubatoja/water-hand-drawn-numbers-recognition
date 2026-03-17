@@ -1,4 +1,5 @@
-import csv
+import json
+import time
 from pathlib import Path
 from typing import Any, List, Optional
 import numpy as np
@@ -26,6 +27,8 @@ class VectorManager:
         self.default_vectors_file = default_vectors_file
         self._cached_vectors: Optional[List[VectorNumberData]] = None
         self._last_config: Optional[Any] = None
+        self._cached_test_vectors: Optional[List[VectorNumberData]] = None
+        self._last_test_config_key: Optional[dict] = None
         # Przechowuje dopasowany reduktor (np. PCA, LDA) oraz jego konfigurację
         # dzięki temu można użyć tego samego reduktora dla testowych wektorów
         # zamiast dopasowywać osobny reduktor na zbiorze testowym.
@@ -51,6 +54,7 @@ class VectorManager:
                     print("Loading vectors from file...")
                     self._cached_vectors = self.load_vectors_from_csv()
                     self._last_config = config
+                    self._cached_test_vectors = None
                     return self._cached_vectors
                 except (FileNotFoundError, ValueError) as e:
                     print(f"Could not load vectors from file ({e}), generating new ones...")
@@ -58,9 +62,11 @@ class VectorManager:
             print("Generating new vectors...")
             self._cached_vectors = self.generate_vectors(raw_data, config)
             self._last_config = config
+            self._cached_test_vectors = None
 
             if auto_save:
                 self.save_vectors_to_csv(self._cached_vectors)
+                self._save_config_metadata(config)
 
         return self._cached_vectors
 
@@ -104,37 +110,36 @@ class VectorManager:
             raw_number_data_list: List of raw image data
             config: Test configuration containing parameters
         """
-        import time
-        
         limit = min(len(raw_number_data_list), config.training_set_limit)
         print(f"Generating {limit} training vectors...")
         
         start_time = time.perf_counter()
-        vectors = self._prepare_vectors_batch(raw_number_data_list[:limit], config)
+        vectors = self._prepare_vectors_batch(raw_number_data_list[:limit], config, is_training_data=True)
         
         generation_time = time.perf_counter() - start_time
-        per_image_ms = generation_time/limit*1000
-        throughput = limit/generation_time
+        if limit > 0:
+            per_image_ms = generation_time / limit * 1000
+            throughput = limit / generation_time if generation_time > 0 else 0.0
+            print(f"Vector generation throughput: {throughput:.2f} samples/s ({per_image_ms:.3f} ms/sample)")
         
         return vectors
     
     def _prepare_vectors_batch(
         self, 
         raw_data_list: List[RawNumberData], 
-        config: Any
+        config: Any,
+        is_training_data: bool = False
     ) -> List[VectorNumberData]:
         """
         Przygotowuje wektory dla batcha danych (treningowych lub testowych) używając wspólnej logiki.
         """
-        import time
-        
         # Get image size from config (default to 28 if not present)
         image_size = getattr(config, 'image_size', 28)
         
         # Batch data preparation
         print(f"Batch processing {len(raw_data_list)} samples...")
-        all_pixels = np.array([data.pixels for data in raw_data_list])
-        all_labels = [data.label for data in raw_data_list]
+        all_pixels = np.asarray([data.pixels for data in raw_data_list], dtype=np.float64)
+        all_labels = np.asarray([data.label for data in raw_data_list], dtype=np.int64)
         
         # Walidacja rozmiaru danych
         expected_pixels = image_size * image_size
@@ -158,42 +163,47 @@ class VectorManager:
         
         binarized_batch = np.where(all_pixels > config.pixel_normalization_rate, 1, 0).reshape(-1, image_size, image_size)
         original_batch = all_pixels.reshape(-1, image_size, image_size)
-        
-        # Utwórz podstawowe wektory - zawsze binarne, bo apply_dimensionality_reduction obsłuży resztę
-        vectors = [VectorNumberData(label=label, vector=binarized_batch[i].flatten().astype(float).tolist()) for i, label in enumerate(all_labels)]
-        
-        # Zastosuj redukcję wymiarów
-        if config.dimensionality_reduction_algorithm != DimensionalityReductionAlgorithm.NONE:
-            print(f"Applying {config.dimensionality_reduction_algorithm.value} dimensionality reduction...")
-            vectors = self.apply_dimensionality_reduction(vectors, binarized_batch, original_batch, config)
-        
-        return vectors
+
+        if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
+            feature_matrix = binarized_batch.reshape(binarized_batch.shape[0], -1).astype(np.float64, copy=False)
+        else:
+            feature_matrix = self.apply_dimensionality_reduction(
+                binarized_batch,
+                original_batch,
+                all_labels,
+                config,
+                is_training_data=is_training_data
+            )
+
+        return [
+            VectorNumberData(label=int(all_labels[i]), vector=feature_matrix[i].tolist())
+            for i in range(feature_matrix.shape[0])
+        ]
     
     def apply_dimensionality_reduction(
         self, 
-        vectors: List[VectorNumberData], 
         binarized_batch: np.ndarray,
         original_batch: np.ndarray,
-        config: Any
-    ) -> List[VectorNumberData]:
+        labels: np.ndarray,
+        config: Any,
+        is_training_data: bool = False
+    ) -> np.ndarray:
         """
         Applies dimensionality reduction to the vectors if configured.
         
         Args:
             vectors: List of VectorNumberData
             config: Test configuration containing reduction parameters
+            is_training_data: True if processing training data, False for test data
             
         Returns:
             List of VectorNumberData with reduced dimensions
         """
         if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
-            return vectors
+            return binarized_batch.reshape(binarized_batch.shape[0], -1).astype(np.float64, copy=False)
             
         print(f"Applying {config.dimensionality_reduction_algorithm.value} dimensionality reduction...")
-        
-        # Extract features and labels
-        X = np.array([v.vector for v in vectors])
-        y = np.array([v.label for v in vectors])
+        y = labels
         
         # Apply reduction
         if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.FLOOD_FILL:
@@ -206,40 +216,40 @@ class VectorManager:
             else:
                 flood_str = config.flood_config.to_string()
 
-            reduced_vectors = []
-            for i, vector_data in enumerate(vectors):
-                flooded_vector = calculate_flooded_vector(
+            return np.asarray([
+                calculate_flooded_vector(
                     binarized_batch[i],
                     num_segments=config.num_segments,
                     floodSides=flood_str
                 )
-                reduced_vectors.append(VectorNumberData(label=vector_data.label, vector=flooded_vector))
-            return reduced_vectors
+                for i in range(binarized_batch.shape[0])
+            ], dtype=np.float64)
 
         else:
             # For statistical methods (PCA, LDA, Isomap, UMAP) and NONE: use original images
             X = original_batch.reshape(original_batch.shape[0], -1)  # Flatten to 2D
-            y = np.array([v.label for v in vectors])
 
             # Key opisujący konfigurację redukcji (używany do ponownego użycia reduktora)
-            config_key = (config.dimensionality_reduction_algorithm, config.dimensionality_reduction_n_components)
-
-            if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
-                # Return flattened original images
-                reduced_vectors = [
-                    VectorNumberData(label=label, vector=X[i].tolist())
-                    for i, label in enumerate(y)
-                ]
-                return reduced_vectors
+            config_key = (config.dimensionality_reduction_algorithm, config.dimensionality_reduction_n_components, config.training_set_limit)
 
             # Jeśli mamy już dopasowany reduktor o tej samej konfiguracji, użyj transform
             if self._last_reducer is not None and self._last_reducer_config == config_key:
                 try:
                     print("Reusing previously fitted reducer for transform...")
                     X_reduced = self._last_reducer.transform(X)
-                except Exception:
-                    # W razie gdy reducer nie wspiera transform() lub transform się nie powiódł,
-                    # przejdź do dopasowania nowego reduktora
+                except Exception as e:
+                    if not is_training_data:
+                        # KRYTYCZNE: Dla danych testowych transform() MUSI działać
+                        # Nie pozwalamy na ponowne dopasowanie reduktora na danych testowych
+                        raise ValueError(
+                            f"\n❌ KRYTYCZNY BŁĄD: Nie można transformować danych testowych!\n"
+                            f"   Transform() zawiódł z błędem: {e}\n"
+                            f"   Reduktor musi być prawidłowo dopasowany na danych treningowych.\n"
+                            f"   Algorytm: {config.dimensionality_reduction_algorithm.value}\n"
+                            f"   Sprawdź czy konfiguracja się nie zmieniła między treningiem a testem."
+                        ) from e
+                    # Dla danych treningowych można pozwolić na nowe dopasowanie
+                    print(f"Warning: Transform failed on training data, will refit. Error: {e}")
                     X_reduced = None
             else:
                 X_reduced = None
@@ -291,17 +301,11 @@ class VectorManager:
                     self._last_reducer = None
                     self._last_reducer_config = None
 
-            # Create new vectors
-            reduced_vectors = [
-                VectorNumberData(label=label, vector=X_reduced[i].tolist())
-                for i, label in enumerate(y)
-            ]
-
             try:
                 print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
             except Exception:
                 pass
-            return reduced_vectors
+            return X_reduced
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
         """
@@ -318,27 +322,20 @@ class VectorManager:
         if not Path(file_path).exists():
             raise FileNotFoundError(f"Vectors file not found: {file_path}")
 
-        vectors = []
-        with open(file_path, 'r') as file:
-            reader = csv.reader(file)
+        with open(file_path, 'r', encoding='utf-8') as file:
+            first_line = file.readline().strip()
+        has_header = bool(first_line) and not (first_line[0].isdigit() or first_line[0] in '+-')
 
-            first_row = next(reader, None)
-            if first_row and not first_row[0].isdigit():
-                pass
-            else:
-                file.seek(0)
-                reader = csv.reader(file)
+        data = np.loadtxt(file_path, delimiter=',', skiprows=1 if has_header else 0)
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
 
-            for row in reader:
-                if not row:
-                    continue
-
-                try:
-                    label = int(row[0])
-                    vector = [float(x) for x in row[1:]]
-                    vectors.append(VectorNumberData(label=label, vector=vector))
-                except (ValueError, IndexError) as e:
-                    print(f"Warning: Skipping invalid row: {row}. Error: {e}")
+        labels = data[:, 0].astype(np.int64)
+        features = data[:, 1:].astype(np.float64, copy=False)
+        vectors = [
+            VectorNumberData(label=int(labels[i]), vector=features[i].tolist())
+            for i in range(features.shape[0])
+        ]
 
         print(f"Loaded {len(vectors)} vectors from {file_path}")
         return vectors
@@ -364,17 +361,16 @@ class VectorManager:
         file_path = Path(output_file or self.default_vectors_file)
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file)
+        labels = np.asarray([v.label for v in vectors], dtype=np.int64).reshape(-1, 1)
+        features = np.asarray([v.vector for v in vectors], dtype=np.float64)
+        data = np.hstack((labels, features))
 
-            if include_header:
-                vector_size = len(vectors[0].vector)
-                header = ['label'] + [f'feature_{i}' for i in range(vector_size)]
-                writer.writerow(header)
+        header = ''
+        if include_header:
+            vector_size = features.shape[1]
+            header = ','.join(['label'] + [f'feature_{i}' for i in range(vector_size)])
 
-            for vector_data in vectors:
-                row = [vector_data.label] + list(vector_data.vector)
-                writer.writerow(row)
+        np.savetxt(file_path, data, delimiter=',', header=header, comments='')
 
         print(f"Saved {len(vectors)} vectors to {file_path}")
 
@@ -437,16 +433,70 @@ class VectorManager:
                 
         return False
 
+    def _meta_path(self) -> Path:
+        """Returns path to the metadata file stored alongside the vectors CSV."""
+        return Path(self.default_vectors_file).with_suffix('.meta.json')
+
+    def _extract_config_key(self, config: Any) -> dict:
+        """Extracts the fields from config that affect vector content."""
+        flood_cfg = getattr(config, 'flood_config', None)
+        if flood_cfg is not None:
+            flood_str = flood_cfg if isinstance(flood_cfg, str) else flood_cfg.to_string()
+        else:
+            flood_str = None
+        return {
+            'pixel_normalization_rate': getattr(config, 'pixel_normalization_rate', None),
+            'num_segments': getattr(config, 'num_segments', None),
+            'flood_config': flood_str,
+            'training_set_limit': getattr(config, 'training_set_limit', None),
+            'dimensionality_reduction_algorithm': str(getattr(config, 'dimensionality_reduction_algorithm', None)),
+            'dimensionality_reduction_n_components': getattr(config, 'dimensionality_reduction_n_components', None),
+            'image_size': getattr(config, 'image_size', None),
+        }
+
+    def _save_config_metadata(self, config: Any) -> None:
+        """Saves the config key as JSON metadata alongside the vectors CSV."""
+        try:
+            meta = self._extract_config_key(config)
+            meta_path = self._meta_path()
+            meta_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(meta_path, 'w') as f:
+                json.dump(meta, f)
+        except Exception as e:
+            print(f"Warning: Could not save vector metadata: {e}")
+
+    def _load_config_metadata(self) -> Optional[dict]:
+        """Loads the cached config key from JSON metadata file, or None if missing/corrupt."""
+        meta_path = self._meta_path()
+        if not meta_path.exists():
+            return None
+        try:
+            with open(meta_path, 'r') as f:
+                return json.load(f)
+        except Exception:
+            return None
+
+    def get_test_vectors(
+        self,
+        raw_data: List[RawNumberData],
+        config: Any
+    ) -> List[VectorNumberData]:
+        """Returns test vectors, using in-memory cache when config is unchanged."""
+        current_key = self._extract_config_key(config)
+        if self._cached_test_vectors is not None and self._last_test_config_key == current_key:
+            print("Using cached test vectors.")
+            return self._cached_test_vectors
+        print("Preparing test vectors...")
+        self._cached_test_vectors = self._prepare_vectors_batch(raw_data, config, is_training_data=False)
+        self._last_test_config_key = current_key
+        return self._cached_test_vectors
+
     def _can_load_from_file(self, new_config: Any) -> bool:
         """Sprawdza czy można wczytać wektory z pliku zamiast generować"""
-        from pathlib import Path
-        
-        # Sprawdź czy plik istnieje
         if not Path(self.default_vectors_file).exists():
             return False
-            
-        # Sprawdź czy config się nie zmienił od ostatniego zapisu
-        if self._last_config is None:
+        saved_key = self._load_config_metadata()
+        if saved_key is None:
             return False
-            
-        return not self._should_regenerate(new_config)
+        current_key = self._extract_config_key(new_config)
+        return saved_key == current_key
