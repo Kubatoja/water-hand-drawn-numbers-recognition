@@ -124,7 +124,7 @@ class GRANDETester:
         y_train: np.ndarray,
         config: GRANDETestConfig,
         n_folds: int = 5
-    ) -> Dict[str, float]:
+    ) -> tuple[Dict[str, float], list[TestResult]]:
         print(f"  Performing {n_folds}-fold stratified cross-validation...")
 
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=42)
@@ -133,6 +133,7 @@ class GRANDETester:
         fold_precisions = []
         fold_recalls = []
         fold_f1s = []
+        fold_results = []
 
         for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
             try:
@@ -161,6 +162,28 @@ class GRANDETester:
                 fold_recalls.append(fold_metrics['recall'])
                 fold_f1s.append(fold_metrics['f1_score'])
 
+                confusion_matrix = self.metrics_calculator.calculate_confusion_matrix(
+                    y_fold_val.astype(int), y_fold_pred.astype(int), self.num_classes
+                )
+                fold_results.append(TestResult(
+                    execution_time=None,
+                    correct_predictions=int(np.sum(y_fold_val.astype(int) == y_fold_pred.astype(int))),
+                    incorrect_predictions=int(len(y_fold_val) - np.sum(y_fold_val.astype(int) == y_fold_pred.astype(int))),
+                    accuracy=acc,
+                    confusion_matrix=confusion_matrix,
+                    precision=fold_metrics['precision'],
+                    recall=fold_metrics['recall'],
+                    f1_score=fold_metrics['f1_score'],
+                    per_class_precision=fold_metrics.get('per_class_precision', np.array([])),
+                    per_class_recall=fold_metrics.get('per_class_recall', np.array([])),
+                    per_class_f1=fold_metrics.get('per_class_f1', np.array([])),
+                    config=config,
+                    training_time=None,
+                    train_set_size=len(X_fold_train),
+                    test_set_size=len(X_fold_val),
+                    fold_id=fold_idx + 1
+                ))
+
                 print(f"  Fold {fold_idx + 1}/{n_folds}: Accuracy={acc:.4f}, F1={fold_metrics['f1_score']:.4f}")
 
             except Exception:
@@ -182,7 +205,7 @@ class GRANDETester:
         print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
         print(f"              F1-Score  = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
 
-        return cv_scores
+        return cv_scores, fold_results
 
     def train_and_test(
         self,
@@ -198,8 +221,9 @@ class GRANDETester:
         y_test  = np.array([vec.label for vec in test_vectors])
 
         cv_scores = None
+        fold_results = None
         if use_cross_validation:
-            cv_scores = self._perform_cross_validation(
+            cv_scores, fold_results = self._perform_cross_validation(
                 X_train, y_train, config, n_folds=cv_n_folds
             )
 
@@ -237,7 +261,7 @@ class GRANDETester:
             result.cv_f1_mean = cv_scores['cv_f1_mean']
             result.cv_f1_std = cv_scores['cv_f1_std']
 
-        return model, result
+        return model, result, fold_results
 
     def _print_results(self, results: TestResult) -> None:
         print(f"Test zakończony:")

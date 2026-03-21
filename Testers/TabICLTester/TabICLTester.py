@@ -100,7 +100,7 @@ class TabICLTester:
         y_train: np.ndarray,
         config: TabICLTestConfig,
         n_folds: int = 5
-    ) -> Dict[str, float]:
+    ) -> tuple[Dict[str, float], list[TestResult]]:
         """
         Ręczna implementacja stratified k-fold cross-validation dla TabICL.
         
@@ -111,7 +111,7 @@ class TabICLTester:
             n_folds: Liczba foldów dla CV
             
         Returns:
-            Dict ze średnimi i odchyleniami standardowymi metryk CV
+            Tuple(cv_scores, fold_results)
         """
         from tabicl import TabICLClassifier
         
@@ -123,6 +123,7 @@ class TabICLTester:
         fold_precisions = []
         fold_recalls = []
         fold_f1s = []
+        fold_results = []
         
         device = _resolve_device(config.device)
         
@@ -144,12 +145,37 @@ class TabICLTester:
             y_pred = model.predict(X_fold_val)
             
             # Oblicz metryki
-            fold_accuracies.append(accuracy_score(y_fold_val, y_pred))
-            fold_precisions.append(precision_score(y_fold_val, y_pred, average='macro', zero_division=0))
-            fold_recalls.append(recall_score(y_fold_val, y_pred, average='macro', zero_division=0))
-            fold_f1s.append(f1_score(y_fold_val, y_pred, average='macro', zero_division=0))
+            acc = accuracy_score(y_fold_val, y_pred)
+            precision = precision_score(y_fold_val, y_pred, average='macro', zero_division=0)
+            recall = recall_score(y_fold_val, y_pred, average='macro', zero_division=0)
+            f1 = f1_score(y_fold_val, y_pred, average='macro', zero_division=0)
+
+            fold_accuracies.append(acc)
+            fold_precisions.append(precision)
+            fold_recalls.append(recall)
+            fold_f1s.append(f1)
+
+            confusion_matrix = self.metrics_calculator.calculate_confusion_matrix(y_fold_val.astype(int), np.array(y_pred).astype(int), self.num_classes)
+            fold_results.append(TestResult(
+                execution_time=None,
+                correct_predictions=int(np.sum(y_fold_val.astype(int) == np.array(y_pred).astype(int))),
+                incorrect_predictions=int(len(y_fold_val) - np.sum(y_fold_val.astype(int) == np.array(y_pred).astype(int))),
+                accuracy=acc,
+                confusion_matrix=confusion_matrix,
+                precision=precision,
+                recall=recall,
+                f1_score=f1,
+                per_class_precision=np.array([]),
+                per_class_recall=np.array([]),
+                per_class_f1=np.array([]),
+                config=config,
+                training_time=None,
+                train_set_size=len(X_fold_train),
+                test_set_size=len(X_fold_val),
+                fold_id=fold
+            ))
             
-            print(f"    Fold {fold}/{n_folds}: Accuracy={fold_accuracies[-1]:.4f}")
+            print(f"    Fold {fold}/{n_folds}: Accuracy={acc:.4f}")
         
         cv_scores = {
             'cv_accuracy_mean': float(np.mean(fold_accuracies)),
@@ -165,7 +191,7 @@ class TabICLTester:
         print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
         print(f"              F1-Score = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
         
-        return cv_scores
+        return cv_scores, fold_results
 
     def train_and_test(
         self,
@@ -195,8 +221,9 @@ class TabICLTester:
 
         # Cross-validation (jeśli włączone)
         cv_scores = None
+        fold_results = None
         if use_cross_validation:
-            cv_scores = self._perform_cross_validation_manual(
+            cv_scores, fold_results = self._perform_cross_validation_manual(
                 X_train, y_train, config, n_folds=cv_n_folds
             )
 
@@ -236,7 +263,7 @@ class TabICLTester:
             result.cv_f1_mean = cv_scores['cv_f1_mean']
             result.cv_f1_std = cv_scores['cv_f1_std']
 
-        return model, result
+        return model, result, fold_results
 
     def _print_results(self, results: TestResult) -> None:
         """Wyświetla wyniki testowania"""

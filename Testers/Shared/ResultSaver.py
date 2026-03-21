@@ -143,6 +143,7 @@ class ResultsSaver:
         """Zwraca bazowe nazwy kolumn dla pliku CSV"""
         return [
             'test_id',
+            'fold_id',
             'dataset_name',
             'classifier_name',
             'reduction_name',
@@ -255,6 +256,7 @@ class ResultsSaver:
         """Tworzy dane wiersza dla wyniku testu"""
         row = {
             'test_id': test_id,
+            'fold_id': getattr(result, 'fold_id', None),
             'training_time': result.training_time,
             'train_set_size': result.train_set_size,
             'test_set_size': result.test_set_size,

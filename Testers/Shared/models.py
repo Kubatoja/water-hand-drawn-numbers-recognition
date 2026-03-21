@@ -46,6 +46,9 @@ class TestResult:
     per_class_recall: np.ndarray = field(default_factory=lambda: np.array([]))
     per_class_f1: np.ndarray = field(default_factory=lambda: np.array([]))
 
+    # Identyfikator folda (dla cross-validation)
+    fold_id: Optional[int] = None
+
     @property
     def total_predictions(self) -> int:
         """Łączna liczba predykcji."""

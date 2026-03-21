@@ -37,6 +37,14 @@ from Testers.TabR.TabRTestRunner import TabRTestRunner
 from Testers.TabR.configs import TabRTestConfig
 from Testers.GrandeTester.Grandetestrunner import GRANDETestRunner
 from Testers.GrandeTester.configs import GRANDETestConfig
+from Testers.KNNTester.KNNTestRunner import KNNTestRunner
+from Testers.KNNTester.configs import KNNTestConfig
+from Testers.SVMTester.SVMTestRunner import SVMTestRunner
+from Testers.SVMTester.configs import SVMTestConfig
+from Testers.MLPTester.MLPTestRunner import MLPTestRunner
+from Testers.MLPTester.configs import MLPTestConfig
+from Testers.XgBoostTester.XGBTestRunner import XGBTestRunner
+from Testers.XgBoostTester.configs import XGBTestConfig
 
 
 @dataclass(frozen=True)
@@ -72,58 +80,75 @@ class ExperimentSpec:
 # ============================================================================
 
 CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
-    "HYPERFAST": ClassifierSpec(
-        key="HYPERFAST",
-        name="HyperFast",
-        runner_cls=HyperFastTestRunner,
-        config_cls=HyperFastTestConfig,
+    "KNN": ClassifierSpec(
+        key="KNN",
+        name="KNN",
+        runner_cls=KNNTestRunner,
+        config_cls=KNNTestConfig,
         default_params={
-            "n_ensemble": 16,
-            "batch_size": 2048,
-            "nn_bias": 0.0,
-            "optimization": "optimize",
-            "optimize_steps": 64,
-            "device": "auto",
+            "n_neighbors": 3,
+            "weights": "uniform",
+            "algorithm": "auto",
+            "leaf_size": 30,
+            "p": 2,
+            "metric": "minkowski",
         },
     ),
-    "TABR": ClassifierSpec(
-        key="TABR",
-        name="TabR",
-        runner_cls=TabRTestRunner,
-        config_cls=TabRTestConfig,
+    "SVM": ClassifierSpec(
+        key="SVM",
+        name="SVM",
+        runner_cls=SVMTestRunner,
+        config_cls=SVMTestConfig,
         default_params={
-            "n_epochs": 10,
-            "batch_size": 128,
-            "learning_rate": 0.01,
+            "C": 1.0,
+            "kernel": "rbf",
+            "degree": 3,
+            "gamma": "scale",
+            "coef0": 0.0,
+            "shrinking": True,
+            "probability": False,
         },
     ),
-    "TABICL": ClassifierSpec(
-        key="TABICL",
-        name="TabICL",
-        runner_cls=TabICLTestRunner,
-        config_cls=TabICLTestConfig,
+    "MLP": ClassifierSpec(
+        key="MLP",
+        name="MLP",
+        runner_cls=MLPTestRunner,
+        config_cls=MLPTestConfig,
         default_params={
-            "n_estimators": 16,
-            "softmax_temperature": 0.9,
-            "outlier_threshold": 4.0,
-            "device": "auto",
+            "hidden_layer_sizes": (100,),
+            "activation": "relu",
+            "solver": "adam",
+            "alpha": 0.0001,
+            "learning_rate": "adaptive",
+            "learning_rate_init": 0.001,
+            "max_iter": 200,
+            "num_segments": 7,
+            "training_set_limit": 10000,
+            "flood_config": FloodConfig.from_string("1111"),
         },
     ),
-    "GRANDE": ClassifierSpec(
-        key="GRANDE",
-        name="Grande",
-        runner_cls=GRANDETestRunner,
-        config_cls=GRANDETestConfig,
+    "XGBOOST": ClassifierSpec(
+        key="XGBOOST",
+        name="XGBoost",
+        runner_cls=XGBTestRunner,
+        config_cls=XGBTestConfig,
         default_params={
-            "n_estimators": 16,
-            "max_depth": 8,
-            "learning_rate": 0.01,
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "max_depth": 6,
+            "min_child_weight": 1.0,
+            "gamma": 0.0,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "reg_lambda": 1.0,
+            "reg_alpha": 0.0,
+            "training_set_limit": 10000,
         },
     ),
 }
 
 # Choose which classifiers are active.
-SELECTED_CLASSIFIERS: List[str] = ["GRANDE"]
+SELECTED_CLASSIFIERS: List[str] = ["KNN", "SVM", "MLP", "XGBOOST"]
 
 
 # ============================================================================
@@ -132,11 +157,22 @@ SELECTED_CLASSIFIERS: List[str] = ["GRANDE"]
 
 DATASET_REGISTRY: Dict[str, Any] = {
     "MNIST": MNIST_DATASET,
+    "FASHION_MNIST": FASHION_MNIST_DATASET,
+    "EMNIST_DIGITS": EMNIST_DIGITS_DATASET,
+    "EMNIST_BALANCED": EMNIST_BALANCED_DATASET,
+    "ARABIC": ARABIC_DATASET,
     "USPS": USPS_DATASET,
 }
 
 # Choose which datasets are active.
-SELECTED_DATASETS: List[str] = ["USPS"]
+SELECTED_DATASETS: List[str] = [
+    "MNIST",
+    "FASHION_MNIST",
+    "EMNIST_DIGITS",
+    "EMNIST_BALANCED",
+    "ARABIC",
+    "USPS",
+]
 
 
 # ============================================================================
@@ -144,19 +180,48 @@ SELECTED_DATASETS: List[str] = ["USPS"]
 # ============================================================================
 
 REDUCTION_REGISTRY: Dict[str, ReductionSpec] = {
+    "NONE": ReductionSpec(
+        key="NONE",
+        name="No Reduction",
+        algorithm=DimensionalityReductionAlgorithm.NONE,
+        n_components=1,
+    ),
     "DFFE": ReductionSpec(
         key="DFFE",
         name="DFFE (Flood Fill)",
         algorithm=DimensionalityReductionAlgorithm.FLOOD_FILL,
         n_components=43,
         num_segments=7,
-    SELECTED_CLASSIFIERS: List[str] = ["HYPERFAST", "TABR", "TABICL", "GRANDE"]
         flood_config=FloodConfig.from_string("1111"),
+    ),
+    "PCA": ReductionSpec(
+        key="PCA",
+        name="PCA",
+        algorithm=DimensionalityReductionAlgorithm.PCA,
+        n_components=30,
+    ),
+    "LDA": ReductionSpec(
+        key="LDA",
+        name="LDA",
+        algorithm=DimensionalityReductionAlgorithm.LDA,
+        n_components=9,
+    ),
+    "ISOMAP": ReductionSpec(
+        key="ISOMAP",
+        name="Isomap",
+        algorithm=DimensionalityReductionAlgorithm.ISOMAP,
+        n_components=30,
+    ),
+    "UMAP": ReductionSpec(
+        key="UMAP",
+        name="UMAP",
+        algorithm=DimensionalityReductionAlgorithm.UMAP,
+        n_components=30,
     ),
 }
 
 # Choose which reductions are active.
-SELECTED_REDUCTIONS: List[str] = ["DFFE"]
+SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP"]
 
 
 # ============================================================================
@@ -165,15 +230,12 @@ SELECTED_REDUCTIONS: List[str] = ["DFFE"]
 
 # "cartesian" -> every selected dataset x reduction x classifier
 # "manual"    -> run only explicit MANUAL_EXPERIMENTS list
-RUN_MODE = "manual"
+RUN_MODE = "cartesian"
 
 # Manual list / array of experiments.
-# USPS + DFFE + (all classifiers)
+# Not used in cartesian mode, but useful for one-off debugging.
 MANUAL_EXPERIMENTS: List[ExperimentSpec] = [
-    ExperimentSpec("USPS", "DFFE", "HYPERFAST"),
-    ExperimentSpec("USPS", "DFFE", "TABR"),
-    ExperimentSpec("USPS", "DFFE", "TABICL"),
-    ExperimentSpec("USPS", "DFFE", "GRANDE"),
+    ExperimentSpec("USPS", "DFFE", "KNN"),
 ]
 
 

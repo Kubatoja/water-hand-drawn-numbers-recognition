@@ -96,7 +96,7 @@ class SVMTester:
         y_train: np.ndarray,
         config: SVMTestConfig,
         n_folds: int = 5
-    ) -> Dict[str, float]:
+    ) -> tuple[Dict[str, float], list[TestResult]]:
         """
         Wykonuje stratified k-fold cross-validation na training set.
         
@@ -134,7 +134,51 @@ class SVMTester:
             'f1_macro': 'f1_macro'
         }
         
-        # Wykonaj CV
+        fold_results = []
+        for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
+            X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
+            y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
+            fold_model = SVC(
+                C=config.C,
+                kernel=config.kernel,
+                degree=config.degree,
+                gamma=config.gamma,
+                coef0=config.coef0,
+                shrinking=config.shrinking,
+                probability=config.probability,
+                random_state=config.random_state,
+                verbose=False
+            )
+            fold_model.fit(X_fold_train, y_fold_train)
+            y_pred = fold_model.predict(X_fold_val)
+            actual_labels = y_fold_val.astype(int)
+            predicted_labels = y_pred.astype(int)
+            correct_predictions = np.sum(actual_labels == predicted_labels)
+            total_predictions = len(y_fold_val)
+            incorrect_predictions = total_predictions - correct_predictions
+            accuracy = correct_predictions / total_predictions if total_predictions > 0 else 0.0
+            metrics = self.metrics_calculator.calculate_all_metrics(actual_labels, predicted_labels, self.num_classes)
+            confusion_matrix = self.metrics_calculator.calculate_confusion_matrix(actual_labels, predicted_labels, self.num_classes)
+            fold_result = TestResult(
+                execution_time=None,
+                correct_predictions=int(correct_predictions),
+                incorrect_predictions=int(incorrect_predictions),
+                accuracy=accuracy,
+                confusion_matrix=confusion_matrix,
+                precision=metrics['precision'],
+                recall=metrics['recall'],
+                f1_score=metrics['f1_score'],
+                per_class_precision=metrics['per_class_precision'],
+                per_class_recall=metrics['per_class_recall'],
+                per_class_f1=metrics['per_class_f1'],
+                config=config,
+                training_time=None,
+                train_set_size=len(X_fold_train),
+                test_set_size=len(X_fold_val),
+                fold_id=fold_idx + 1
+            )
+            fold_results.append(fold_result)
+        # Wersja z cross_validate do statystyk
         cv_results = cross_validate(
             model, X_train, y_train,
             cv=skf,
@@ -142,8 +186,6 @@ class SVMTester:
             n_jobs=-1,
             return_train_score=False
         )
-        
-        # Oblicz średnie i std
         cv_scores = {
             'cv_accuracy_mean': float(cv_results['test_accuracy'].mean()),
             'cv_accuracy_std': float(cv_results['test_accuracy'].std()),
@@ -154,11 +196,9 @@ class SVMTester:
             'cv_f1_mean': float(cv_results['test_f1_macro'].mean()),
             'cv_f1_std': float(cv_results['test_f1_macro'].std()),
         }
-        
         print(f"  CV Results: Accuracy = {cv_scores['cv_accuracy_mean']:.4f} ± {cv_scores['cv_accuracy_std']:.4f}")
         print(f"              F1-Score = {cv_scores['cv_f1_mean']:.4f} ± {cv_scores['cv_f1_std']:.4f}")
-        
-        return cv_scores
+        return cv_scores, fold_results
 
     def train_and_test(
         self,
@@ -187,8 +227,9 @@ class SVMTester:
 
         # Cross-validation (jeśli włączone)
         cv_scores = None
+        fold_results = None
         if use_cross_validation:
-            cv_scores = self._perform_cross_validation(
+            cv_scores, fold_results = self._perform_cross_validation(
                 X_train, y_train, config, n_folds=cv_n_folds
             )
 
@@ -231,7 +272,7 @@ class SVMTester:
             result.cv_f1_mean = cv_scores['cv_f1_mean']
             result.cv_f1_std = cv_scores['cv_f1_std']
 
-        return model, result
+        return model, result, fold_results
 
     def _print_results(self, results: TestResult) -> None:
         """Wyświetla wyniki testowania"""

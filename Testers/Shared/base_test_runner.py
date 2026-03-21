@@ -69,9 +69,14 @@ class BaseTestRunner(ABC):
             print(f"Starting test case #{index + 1}/{len(test_configs)}")
 
             try:
-                result = self._run_single_test(test_config, index)
+                result, fold_results = self._run_single_test(test_config, index)
 
-                # Zapisujemy inkrementalnie po każdym teście, aby nie utracić postępu przy przerwaniu.
+                # Zapisywanie wyników z każdego folda CV, jeśli są dostępne
+                if fold_results:
+                    for fold_index, fold_result in enumerate(fold_results):
+                        self.result_collector.add_success_and_save(fold_result, index * len(fold_results) + fold_index)
+
+                # Zapisujemy inkrementalnie wynik główny
                 self.result_collector.add_success_and_save(result, index)
                 print(f"Test case #{index + 1} completed and saved")
 
@@ -105,7 +110,7 @@ class BaseTestRunner(ABC):
 
         return self.result_collector.results
 
-    def _run_single_test(self, test_config: 'BaseTestConfig', test_index: int) -> TestResult:
+    def _run_single_test(self, test_config: 'BaseTestConfig', test_index: int):
         """Uruchamia pojedynczy test"""
         import time
 
@@ -138,7 +143,7 @@ class BaseTestRunner(ABC):
         print("Training and testing model...")
         tester = self.get_tester_instance(test_config.class_count)
 
-        model, result = tester.train_and_test(
+        model, result, fold_results = tester.train_and_test(
             training_vectors,
             test_vectors,
             test_config,
@@ -160,4 +165,4 @@ class BaseTestRunner(ABC):
         result.execution_time = total_execution_time  # Całkowity czas
         result.config = test_config
 
-        return result
+        return result, fold_results
