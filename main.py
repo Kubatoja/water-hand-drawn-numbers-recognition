@@ -23,6 +23,7 @@ from Testers.Shared.configs import (
 from Testers.Shared.TestResultCollector import TestResultCollector
 from Testers.Shared.dataset_config import (
     ARABIC_DATASET,
+    EMNIST_BALANCED_DATASET,
     EMNIST_DIGITS_DATASET,
     FASHION_MNIST_DATASET,
     MNIST_DATASET,
@@ -101,8 +102,8 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
         config_cls=SVMTestConfig,
         default_params={
             "C": 1.0,
-            "kernel": "rbf",
-            "degree": 3,
+            "kernel": "poly",  # Zmieniono z rbf na poly zgodnie z wynikami dla MNIST
+            "degree": 9,       # Virtual SVM z wielomianem 9. stopnia osiągnął błąd 0.56%
             "gamma": "scale",
             "coef0": 0.0,
             "shrinking": True,
@@ -115,16 +116,13 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
         runner_cls=MLPTestRunner,
         config_cls=MLPTestConfig,
         default_params={
-            "hidden_layer_sizes": (100,),
+            "hidden_layer_sizes": (800,),  # 784-800-10 architecture
             "activation": "relu",
             "solver": "adam",
             "alpha": 0.0001,
             "learning_rate": "adaptive",
             "learning_rate_init": 0.001,
             "max_iter": 200,
-            "num_segments": 7,
-            "training_set_limit": 10000,
-            "flood_config": FloodConfig.from_string("1111"),
         },
     ),
     "XGBOOST": ClassifierSpec(
@@ -133,22 +131,76 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
         runner_cls=XGBTestRunner,
         config_cls=XGBTestConfig,
         default_params={
-            "learning_rate": 0.1,
-            "n_estimators": 100,
-            "max_depth": 6,
+            "learning_rate": 0.1237, 
+            "n_estimators": 600,     # Zmieniono z 100 na 600
+            "max_depth": 4,          # Zmieniono z 6 na 4
             "min_child_weight": 1.0,
-            "gamma": 0.0,
-            "subsample": 0.8,
-            "colsample_bytree": 0.8,
+            "gamma": 0.0597,         # Zmieniono z 0.0 na 0.0597
+            "subsample": 0.6455,     # Zmieniono z 0.8 na 0.6455
+            "colsample_bytree": 0.5871, # Zmieniono z 0.8 na 0.5871
             "reg_lambda": 1.0,
             "reg_alpha": 0.0,
-            "training_set_limit": 10000,
+        },
+    ),
+    "TABICL": ClassifierSpec(
+        key="TABICL",
+        name="TabICL",
+        runner_cls=TabICLTestRunner,
+        config_cls=TabICLTestConfig,
+        default_params={
+            "n_estimators": 16,
+            "softmax_temperature": 0.9,
+            "outlier_threshold": 4.0,
+            "device": "cuda",
+            "random_state": 42,
+        },
+    ),
+    "TABR": ClassifierSpec(
+        key="TABR",
+        name="TabR",
+        runner_cls=TabRTestRunner,
+        config_cls=TabRTestConfig,
+        default_params={
+            "n_epochs": 10,
+            "batch_size": 256,
+            "learning_rate": 0.001,
+            "device": "cuda",
+            "random_state": 42,
+        },
+    ),
+    "GRANDE": ClassifierSpec(
+        key="GRANDE",
+        name="GRANDE",
+        runner_cls=GRANDETestRunner,
+        config_cls=GRANDETestConfig,
+        default_params={
+            "n_estimators": 100,
+            "max_depth": 6,
+            "learning_rate": 0.1,
+            "random_state": 42,
+            "verbose": 0,
+            "device": "cuda",
+        },
+    ),
+    "HYPERFAST": ClassifierSpec(
+        key="HYPERFAST",
+        name="HyperFast",
+        runner_cls=HyperFastTestRunner,
+        config_cls=HyperFastTestConfig,
+        default_params={
+            "n_ensemble": 16,
+            "batch_size": 2048,
+            "nn_bias": 0.0,
+            "optimization": "optimize",
+            "optimize_steps": 64,
+            "device": "cuda",
+            "random_state": 42,
         },
     ),
 }
 
 # Choose which classifiers are active.
-SELECTED_CLASSIFIERS: List[str] = ["KNN", "SVM", "MLP", "XGBOOST"]
+SELECTED_CLASSIFIERS: List[str] = ["KNN", "SVM", "MLP", "XGBOOST", "TABICL", "TABR", "GRANDE", "HYPERFAST"]
 
 
 # ============================================================================
@@ -198,7 +250,7 @@ REDUCTION_REGISTRY: Dict[str, ReductionSpec] = {
         key="PCA",
         name="PCA",
         algorithm=DimensionalityReductionAlgorithm.PCA,
-        n_components=30,
+        n_components=43,
     ),
     "LDA": ReductionSpec(
         key="LDA",
@@ -210,13 +262,13 @@ REDUCTION_REGISTRY: Dict[str, ReductionSpec] = {
         key="ISOMAP",
         name="Isomap",
         algorithm=DimensionalityReductionAlgorithm.ISOMAP,
-        n_components=30,
+        n_components=43,
     ),
     "UMAP": ReductionSpec(
         key="UMAP",
         name="UMAP",
         algorithm=DimensionalityReductionAlgorithm.UMAP,
-        n_components=30,
+        n_components=43,
     ),
 }
 
@@ -230,12 +282,19 @@ SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP"
 
 # "cartesian" -> every selected dataset x reduction x classifier
 # "manual"    -> run only explicit MANUAL_EXPERIMENTS list
-RUN_MODE = "cartesian"
+RUN_MODE = "manual"
 
 # Manual list / array of experiments.
 # Not used in cartesian mode, but useful for one-off debugging.
 MANUAL_EXPERIMENTS: List[ExperimentSpec] = [
     ExperimentSpec("USPS", "DFFE", "KNN"),
+    ExperimentSpec("USPS", "DFFE", "SVM"),
+    ExperimentSpec("USPS", "DFFE", "MLP"),
+    ExperimentSpec("USPS", "DFFE", "XGBOOST"),
+    ExperimentSpec("USPS", "DFFE", "TABICL"),
+    ExperimentSpec("USPS", "DFFE", "TABR"),
+    ExperimentSpec("USPS", "DFFE", "GRANDE"),
+    ExperimentSpec("USPS", "DFFE", "HYPERFAST"),
 ]
 
 
@@ -321,19 +380,23 @@ class ExperimentRunner:
 
     @staticmethod
     def _build_test_config(classifier: ClassifierSpec, reduction: ReductionSpec, dataset: Any) -> Any:
-        cfg = classifier.config_cls(
-            **classifier.default_params,
-            class_count=dataset.class_count,
-            image_size=dataset.image_size,
-            dimensionality_reduction_algorithm=reduction.algorithm,
-            dimensionality_reduction_n_components=min(reduction.n_components, dataset.class_count - 1)
-            if reduction.algorithm == DimensionalityReductionAlgorithm.LDA
-            else reduction.n_components,
-            training_set_limit=reduction.training_set_limit,
-            pixel_normalization_rate=reduction.pixel_normalization_rate,
-            num_segments=reduction.num_segments,
-            flood_config=reduction.flood_config,
+        params = dict(classifier.default_params)
+        params.update(
+            {
+                "class_count": dataset.class_count,
+                "image_size": dataset.image_size,
+                "dimensionality_reduction_algorithm": reduction.algorithm,
+                "dimensionality_reduction_n_components":
+                    min(reduction.n_components, dataset.class_count - 1)
+                    if reduction.algorithm == DimensionalityReductionAlgorithm.LDA
+                    else reduction.n_components,
+                "training_set_limit": reduction.training_set_limit,
+                "pixel_normalization_rate": reduction.pixel_normalization_rate,
+                "num_segments": reduction.num_segments,
+                "flood_config": reduction.flood_config,
+            }
         )
+        cfg = classifier.config_cls(**params)
         cfg.dataset_name = dataset.display_name
         cfg.classifier_name = classifier.name
         cfg.reduction_name = reduction.name
