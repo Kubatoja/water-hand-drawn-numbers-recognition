@@ -179,7 +179,6 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
             "learning_rate": 0.1,
             "random_state": 42,
             "verbose": 0,
-            "device": "cuda",
         },
     ),
     "HYPERFAST": ClassifierSpec(
