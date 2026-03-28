@@ -174,7 +174,7 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
         runner_cls=GRANDETestRunner,
         config_cls=GRANDETestConfig,
         default_params={
-            "n_estimators": 100,
+            "n_estimators": 600,
             "max_depth": 6,
             "learning_rate": 0.1,
             "random_state": 42,
@@ -190,7 +190,7 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
             "n_ensemble": 16,
             "batch_size": 2048,
             "nn_bias": 0.0,
-            "optimization": "optimize",
+            "optimization": "ensemble_optimize",
             "optimize_steps": 64,
             "device": "cuda",
             "random_state": 42,
@@ -269,10 +269,22 @@ REDUCTION_REGISTRY: Dict[str, ReductionSpec] = {
         algorithm=DimensionalityReductionAlgorithm.UMAP,
         n_components=43,
     ),
+    "PACMAP": ReductionSpec(
+        key="PACMAP",
+        name="PaCMAP",
+        algorithm=DimensionalityReductionAlgorithm.PACMAP,
+        n_components=43,
+    ),
+    "TRIMAP": ReductionSpec(
+        key="TRIMAP",
+        name="TriMAP",
+        algorithm=DimensionalityReductionAlgorithm.TRIMAP,
+        n_components=43,
+    ),
 }
 
 # Choose which reductions are active.
-SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP"]
+SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP", "PACMAP", "TRIMAP"]
 
 
 # ============================================================================
@@ -281,7 +293,7 @@ SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP"
 
 # "cartesian" -> every selected dataset x reduction x classifier
 # "manual"    -> run only explicit MANUAL_EXPERIMENTS list
-RUN_MODE = "manual"
+RUN_MODE = "cartesian"
 
 # Manual list / array of experiments.
 # Not used in cartesian mode, but useful for one-off debugging.
@@ -301,7 +313,7 @@ class ExperimentRunner:
     def __init__(self) -> None:
         self.collector = TestResultCollector(algorithm_name="Main_Experiments")
         self.runner_config = TestRunnerConfig(
-            force_regenerate_vectors=False,
+            force_regenerate_vectors=True,
             save_results_after_each_test=True,
             use_cross_validation=True,
             cv_n_folds=5,

@@ -11,7 +11,7 @@ from sklearn.model_selection import StratifiedKFold
 
 def _resolve_device(device: str) -> str:
     """Wymusza użycie CPU niezależnie od ustawień."""
-    return "cpu"
+    return "cuda" if device == "cuda" else "cpu"
 
 
 class HyperFastTester:

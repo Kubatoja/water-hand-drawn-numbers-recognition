@@ -28,6 +28,8 @@ class DimensionalityReductionAlgorithm(Enum):
     LDA = "lda"
     ISOMAP = "isomap"
     UMAP = "umap"
+    PACMAP = "pacmap"
+    TRIMAP = "trimap"
 
 
 @dataclass

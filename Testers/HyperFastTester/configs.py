@@ -43,8 +43,15 @@ class HyperFastTestConfig:
             raise ValueError(f"batch_size musi być >= 0, otrzymano: {self.batch_size}")
         if self.optimize_steps < 0:
             raise ValueError(f"optimize_steps musi być >= 0, otrzymano: {self.optimize_steps}")
-        if self.optimization not in ("optimize", "fit_only"):
-            raise ValueError(f"optimization musi być 'optimize' lub 'fit_only', otrzymano: {self.optimization}")
+
+        # Hybrydowa walidacja `optimization` dla n_ensemble
+        if self.optimization not in ("optimize", "fit_only", "ensemble_optimize", None):
+            raise ValueError(f"optimization musi być 'optimize', 'fit_only' lub 'ensemble_optimize', otrzymano: {self.optimization}")
+
+        if self.n_ensemble > 1 and self.optimization == "optimize":
+            # HyperFast: optymalizacja pojedynczego modelu tylko dla n_ensemble=1
+            print("Warunek: n_ensemble>1 i optimization='optimize' -> zmieniam na 'ensemble_optimize'.")
+            self.optimization = "ensemble_optimize"
         if self.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.FLOOD_FILL and not (0.0 <= self.pixel_normalization_rate <= 1.0):
             raise ValueError(
                 f"Pixel normalization rate musi być w [0, 1] dla FLOOD_FILL, otrzymano: {self.pixel_normalization_rate}"

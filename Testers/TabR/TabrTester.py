@@ -100,13 +100,23 @@ class TabRTester:
             Nowa instancja TabR_S_D_Classifier
         """
         # Resolve device automatically if needed
-        # Force device to 'cpu' for TabR
+        device = getattr(config, 'device', 'auto')
+        if device not in ('auto', 'cpu', 'cuda'):
+            device = 'cpu'
+
+        if device == 'auto':
+            try:
+                import torch
+                device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            except ImportError:
+                device = 'cpu'
+
         return TabR_S_D_Classifier(
             n_epochs=config.n_epochs,
             batch_size=config.batch_size,
             optimizer={"type": "Adam", "lr": config.learning_rate},
             random_state=config.random_state,
-            device="cpu",
+            device=device,
             n_cv=1,
             n_refit=0,
             verbosity=config.verbose,

@@ -281,6 +281,24 @@ class VectorManager:
                         # Jeśli umap nie jest zainstalowany, podnieśmy błąd — UMAP powinien być dostępny.
                         raise
 
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PACMAP:
+                    try:
+                        import pacmap
+                    except ImportError as e:
+                        raise ImportError("PaCMAP is required for DimensionalityReductionAlgorithm.PACMAP. Install via pip install pacmap") from e
+
+                    reducer = pacmap.PaCMAP(n_components=config.dimensionality_reduction_n_components, random_state=42)
+                    X_reduced = reducer.fit_transform(X)
+
+                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TRIMAP:
+                    try:
+                        import trimap
+                    except ImportError as e:
+                        raise ImportError("TriMap is required for DimensionalityReductionAlgorithm.TRIMAP. Install via pip install trimap") from e
+
+                    reducer = trimap.TRIMAP(n_dims=config.dimensionality_reduction_n_components, random_state=42)
+                    X_reduced = reducer.fit_transform(X)
+
                 else:
                     raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
 
@@ -445,6 +463,10 @@ class VectorManager:
         else:
             flood_str = None
         return {
+            'dataset_name': getattr(config, 'dataset_name', None),
+            'training_path': getattr(config, 'train_path', None),
+            'test_path': getattr(config, 'test_path', None),
+            'class_count': getattr(config, 'class_count', None),
             'pixel_normalization_rate': getattr(config, 'pixel_normalization_rate', None),
             'num_segments': getattr(config, 'num_segments', None),
             'flood_config': flood_str,
