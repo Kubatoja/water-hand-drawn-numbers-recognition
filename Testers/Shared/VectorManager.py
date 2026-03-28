@@ -29,11 +29,10 @@ class VectorManager:
         self._last_config: Optional[Any] = None
         self._cached_test_vectors: Optional[List[VectorNumberData]] = None
         self._last_test_config_key: Optional[dict] = None
-        # Przechowuje dopasowany reduktor (np. PCA, LDA) oraz jego konfigurację
-        # dzięki temu można użyć tego samego reduktora dla testowych wektorów
-        # zamiast dopasowywać osobny reduktor na zbiorze testowym.
+        # Bez cache reducerów: zawsze dopasowujemy modeli lokalnie dla zestawu (train/test)
         self._last_reducer = None
         self._last_reducer_config = None
+
 
     def get_training_vectors(
         self, 
@@ -192,12 +191,14 @@ class VectorManager:
         Applies dimensionality reduction to the vectors if configured.
         
         Args:
-            vectors: List of VectorNumberData
+            binarized_batch: Binarized image data
+            original_batch: Original (non-binarized) image data
+            labels: Class labels for the data
             config: Test configuration containing reduction parameters
             is_training_data: True if processing training data, False for test data
             
         Returns:
-            List of VectorNumberData with reduced dimensions
+            Reduced feature matrix as numpy array
         """
         if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.NONE:
             return binarized_batch.reshape(binarized_batch.shape[0], -1).astype(np.float64, copy=False)
@@ -226,103 +227,81 @@ class VectorManager:
             ], dtype=np.float64)
 
         else:
-            # For statistical methods (PCA, LDA, Isomap, UMAP) and NONE: use original images
+            # For statistical methods (PCA, LDA, Isomap, UMAP, PaCMAP, TriMAP): use original images
             X = original_batch.reshape(original_batch.shape[0], -1)  # Flatten to 2D
 
             # Key opisujący konfigurację redukcji (używany do ponownego użycia reduktora)
-            config_key = (config.dimensionality_reduction_algorithm, config.dimensionality_reduction_n_components, config.training_set_limit)
+            config_key = (
+                config.dimensionality_reduction_algorithm, 
+                config.dimensionality_reduction_n_components, 
+                config.training_set_limit
+            )
 
-            # Jeśli mamy już dopasowany reduktor o tej samej konfiguracji, użyj transform
-            if self._last_reducer is not None and self._last_reducer_config == config_key:
+            # ===================================================================
+            # Brak cache. Dla dowolnego zestawu (train/test) wykonujemy fit_transform.
+            # ===================================================================
+
+            if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PCA:
+                from sklearn.decomposition import PCA
+                reducer = PCA(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TSVD:
+                from sklearn.decomposition import TruncatedSVD
+                reducer = TruncatedSVD(n_components=config.dimensionality_reduction_n_components, random_state=42)
+                X_reduced = reducer.fit_transform(X)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA:
+                from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+                reducer = LinearDiscriminantAnalysis(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X, y)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.ISOMAP:
+                from sklearn.manifold import Isomap
+                reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
+                X_reduced = reducer.fit_transform(X)
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.UMAP:
                 try:
-                    print("Reusing previously fitted reducer for transform...")
-                    X_reduced = self._last_reducer.transform(X)
-                except Exception as e:
-                    if not is_training_data:
-                        # KRYTYCZNE: Dla danych testowych transform() MUSI działać
-                        # Nie pozwalamy na ponowne dopasowanie reduktora na danych testowych
-                        raise ValueError(
-                            f"\n❌ KRYTYCZNY BŁĄD: Nie można transformować danych testowych!\n"
-                            f"   Transform() zawiódł z błędem: {e}\n"
-                            f"   Reduktor musi być prawidłowo dopasowany na danych treningowych.\n"
-                            f"   Algorytm: {config.dimensionality_reduction_algorithm.value}\n"
-                            f"   Sprawdź czy konfiguracja się nie zmieniła między treningiem a testem."
-                        ) from e
-                    # Dla danych treningowych można pozwolić na nowe dopasowanie
-                    print(f"Warning: Transform failed on training data, will refit. Error: {e}")
-                    X_reduced = None
+                    import umap
+                    reducer = umap.UMAP(
+                        n_components=config.dimensionality_reduction_n_components, 
+                        random_state=42
+                    )
+                    X_reduced = reducer.fit_transform(X)
+                except ImportError as e:
+                    raise ImportError(
+                        "UMAP is required for DimensionalityReductionAlgorithm.UMAP. "
+                        "Install via: pip install umap-learn"
+                    ) from e
+
+            elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PACMAP:
+                try:
+                    import pacmap
+                except ImportError as e:
+                    raise ImportError(
+                        "PaCMAP is required for DimensionalityReductionAlgorithm.PACMAP. "
+                        "Install via: pip install pacmap"
+                    ) from e
+
+                reducer = pacmap.PaCMAP(
+                    n_components=config.dimensionality_reduction_n_components,
+                    n_neighbors=10,
+                    MN_ratio=0.5,
+                    FP_ratio=2.0,
+                    random_state=42
+                )
+                
+                print("Fitting PaCMAP on training data with PCA initialization...")
+                X_reduced = reducer.fit_transform(X, init="pca")
+                
             else:
-                X_reduced = None
+                raise ValueError(
+                    f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}"
+                )
 
-            # Jeśli nie mamy X_reduced, dopasuj nowy reduktor i zapisz go
-            if X_reduced is None:
-                if config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PCA:
-                    from sklearn.decomposition import PCA
-                    reducer = PCA(n_components=config.dimensionality_reduction_n_components)
-                    X_reduced = reducer.fit_transform(X)
-
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.LDA:
-                    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-                    reducer = LinearDiscriminantAnalysis(n_components=config.dimensionality_reduction_n_components)
-                    X_reduced = reducer.fit_transform(X, y)
-
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.ISOMAP:
-                    from sklearn.manifold import Isomap
-                    reducer = Isomap(n_components=config.dimensionality_reduction_n_components)
-                    X_reduced = reducer.fit_transform(X)
-
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.UMAP:
-                    # UMAP oferuje transform() i jest lepiej dopasowany do pipeline train->test.
-                    try:
-                        import umap
-                        reducer = umap.UMAP(n_components=config.dimensionality_reduction_n_components, random_state=42)
-                        X_reduced = reducer.fit_transform(X)
-                    except Exception:
-                        # Jeśli umap nie jest zainstalowany, podnieśmy błąd — UMAP powinien być dostępny.
-                        raise
-
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.PACMAP:
-                    try:
-                        import pacmap
-                    except ImportError as e:
-                        raise ImportError("PaCMAP is required for DimensionalityReductionAlgorithm.PACMAP. Install via pip install pacmap") from e
-
-                    reducer = pacmap.PaCMAP(n_components=config.dimensionality_reduction_n_components, random_state=42)
-                    X_reduced = reducer.fit_transform(X)
-
-                elif config.dimensionality_reduction_algorithm == DimensionalityReductionAlgorithm.TRIMAP:
-                    try:
-                        import trimap
-                    except ImportError as e:
-                        raise ImportError("TriMap is required for DimensionalityReductionAlgorithm.TRIMAP. Install via pip install trimap") from e
-
-                    reducer = trimap.TRIMAP(n_dims=config.dimensionality_reduction_n_components, random_state=42)
-                    X_reduced = reducer.fit_transform(X)
-
-                else:
-                    raise ValueError(f"Unsupported dimensionality reduction algorithm: {config.dimensionality_reduction_algorithm}")
-
-                # Zapisz dopasowany reduktor tylko jeśli wspiera transform (UMAP wspiera transform())
-                try:
-                    # Sprawdź czy reducer ma metodę transform
-                    if hasattr(reducer, 'transform'):
-                        self._last_reducer = reducer
-                        self._last_reducer_config = config_key
-                        print("Stored fitted reducer for reuse on test set.")
-                    else:
-                        # Nie nadpisuj istniejącego reduktora dla algorytmów bez transform()
-                        print("Reducer does not support transform(); it will not be reused for test set.")
-                        self._last_reducer = None
-                        self._last_reducer_config = None
-                except NameError:
-                    # Jeśli reducer nie został utworzony (np. transform próby użycia wcześniej), po prostu nie zapisuj
-                    self._last_reducer = None
-                    self._last_reducer_config = None
-
-            try:
-                print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
-            except Exception:
-                pass
+            # Brak cache reduktora, każdy zestaw jest przetwarzany niezależnie
+            print(f"Reduced dimensions from {X.shape[1]} to {X_reduced.shape[1]}")
             return X_reduced
 
     def load_vectors_from_csv(self, input_file: str = None) -> List[VectorNumberData]:
@@ -483,7 +462,7 @@ class VectorManager:
             meta_path = self._meta_path()
             meta_path.parent.mkdir(parents=True, exist_ok=True)
             with open(meta_path, 'w') as f:
-                json.dump(meta, f)
+                json.dump(meta, f, indent=2)
         except Exception as e:
             print(f"Warning: Could not save vector metadata: {e}")
 

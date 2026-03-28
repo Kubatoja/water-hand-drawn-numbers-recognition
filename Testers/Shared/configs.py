@@ -29,7 +29,7 @@ class DimensionalityReductionAlgorithm(Enum):
     ISOMAP = "isomap"
     UMAP = "umap"
     PACMAP = "pacmap"
-    TRIMAP = "trimap"
+    TSVD = "tsvd"
 
 
 @dataclass

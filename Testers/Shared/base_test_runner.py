@@ -76,9 +76,13 @@ class BaseTestRunner(ABC):
                     for fold_index, fold_result in enumerate(fold_results):
                         self.result_collector.add_success_and_save(fold_result, index * len(fold_results) + fold_index)
 
-                # Zapisujemy inkrementalnie wynik główny
-                self.result_collector.add_success_and_save(result, index)
-                print(f"Test case #{index + 1} completed and saved")
+                    # Dla cross-validation nie zapisujemy osobnego rezultatu modelu finalnego,
+                    # ponieważ może się różnić od wyników вложonych foldów.
+                    print(f"Test case #{index + 1} completed and saved (fold-level CV results)")
+                else:
+                    # Zapisujemy inkrementalnie wynik główny, gdy CV nie było użyte
+                    self.result_collector.add_success_and_save(result, index)
+                    print(f"Test case #{index + 1} completed and saved")
 
             except KeyboardInterrupt:
                 interrupted = True

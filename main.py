@@ -36,8 +36,10 @@ from Testers.HyperFastTester.HyperFastTestRunner import HyperFastTestRunner
 from Testers.HyperFastTester.configs import HyperFastTestConfig
 from Testers.TabR.TabRTestRunner import TabRTestRunner
 from Testers.TabR.configs import TabRTestConfig
-from Testers.GrandeTester.Grandetestrunner import GRANDETestRunner
-from Testers.GrandeTester.configs import GRANDETestConfig
+from Testers.CatBoostTester.CatBoostTestRunner import CatBoostTestRunner
+from Testers.CatBoostTester.configs import CatBoostTestConfig
+from Testers.LightGBMTester.LightGBMTestRunner import LightGBMTestRunner
+from Testers.LightGBMTester.configs import LightGBMTestConfig
 from Testers.KNNTester.KNNTestRunner import KNNTestRunner
 from Testers.KNNTester.configs import KNNTestConfig
 from Testers.SVMTester.SVMTestRunner import SVMTestRunner
@@ -168,17 +170,36 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
             "random_state": 42,
         },
     ),
-    "GRANDE": ClassifierSpec(
-        key="GRANDE",
-        name="GRANDE",
-        runner_cls=GRANDETestRunner,
-        config_cls=GRANDETestConfig,
+    "CATBOOST": ClassifierSpec(
+        key="CATBOOST",
+        name="CatBoost",
+        runner_cls=CatBoostTestRunner,
+        config_cls=CatBoostTestConfig,
         default_params={
-            "n_estimators": 600,
-            "max_depth": 6,
             "learning_rate": 0.1,
+            "n_estimators": 500,
+            "max_depth": 6,
+            "subsample": 0.8,
+            "colsample_bylevel": 0.8,
             "random_state": 42,
             "verbose": 0,
+            "thread_count": -1,
+        },
+    ),
+    "LIGHTGBM": ClassifierSpec(
+        key="LIGHTGBM",
+        name="LightGBM",
+        runner_cls=LightGBMTestRunner,
+        config_cls=LightGBMTestConfig,
+        default_params={
+            "learning_rate": 0.1,
+            "n_estimators": 500,
+            "max_depth": 7,
+            "num_leaves": 31,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+            "n_jobs": -1,
         },
     ),
     "HYPERFAST": ClassifierSpec(
@@ -199,7 +220,7 @@ CLASSIFIER_REGISTRY: Dict[str, ClassifierSpec] = {
 }
 
 # Choose which classifiers are active.
-SELECTED_CLASSIFIERS: List[str] = ["KNN", "SVM", "MLP", "XGBOOST", "TABICL", "TABR", "GRANDE", "HYPERFAST"]
+SELECTED_CLASSIFIERS: List[str] = ["KNN", "SVM", "MLP", "XGBOOST", "TABICL", "TABR", "CATBOOST", "LIGHTGBM", "HYPERFAST"]
 
 
 # ============================================================================
@@ -269,22 +290,22 @@ REDUCTION_REGISTRY: Dict[str, ReductionSpec] = {
         algorithm=DimensionalityReductionAlgorithm.UMAP,
         n_components=43,
     ),
+    "TSVD": ReductionSpec(
+        key="TSVD",
+        name="TruncatedSVD",
+        algorithm=DimensionalityReductionAlgorithm.TSVD,
+        n_components=43,
+    ),
     "PACMAP": ReductionSpec(
         key="PACMAP",
         name="PaCMAP",
         algorithm=DimensionalityReductionAlgorithm.PACMAP,
         n_components=43,
     ),
-    "TRIMAP": ReductionSpec(
-        key="TRIMAP",
-        name="TriMAP",
-        algorithm=DimensionalityReductionAlgorithm.TRIMAP,
-        n_components=43,
-    ),
 }
 
 # Choose which reductions are active.
-SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "LDA", "ISOMAP", "UMAP", "PACMAP", "TRIMAP"]
+SELECTED_REDUCTIONS: List[str] = ["NONE", "DFFE", "PCA", "TSVD", "LDA", "ISOMAP", "UMAP", "PACMAP"]
 
 
 # ============================================================================
@@ -298,14 +319,7 @@ RUN_MODE = "cartesian"
 # Manual list / array of experiments.
 # Not used in cartesian mode, but useful for one-off debugging.
 MANUAL_EXPERIMENTS: List[ExperimentSpec] = [
-    ExperimentSpec("USPS", "DFFE", "KNN"),
-    ExperimentSpec("USPS", "DFFE", "SVM"),
-    ExperimentSpec("USPS", "DFFE", "MLP"),
-    ExperimentSpec("USPS", "DFFE", "XGBOOST"),
-    ExperimentSpec("USPS", "DFFE", "TABICL"),
-    ExperimentSpec("USPS", "DFFE", "TABR"),
-    ExperimentSpec("USPS", "DFFE", "GRANDE"),
-    ExperimentSpec("USPS", "DFFE", "HYPERFAST"),
+    ExperimentSpec("USPS", "ISOMAP", "XGBOOST"),
 ]
 
 

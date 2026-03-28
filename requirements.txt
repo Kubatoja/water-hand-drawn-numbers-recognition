@@ -1,5 +1,7 @@
 numpy
 xgboost
+catboost
+lightgbm
 pandas
 matplotlib
 numba
@@ -8,7 +10,7 @@ tabpfn
 tabicl
 hyperfast
 pytabkit
-GRANDE
 skorch
 faiss-cpu
 scikit-learn==1.5.2
+pacmap
