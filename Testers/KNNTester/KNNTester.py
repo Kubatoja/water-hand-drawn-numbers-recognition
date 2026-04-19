@@ -51,8 +51,7 @@ class KNNTester:
         execution_time = end_time - start_time
 
         # Oblicz podstawowe metryki
-        actual_labels = y_test.astype(int)
-        predicted_labels = y_pred.astype(int)
+        actual_labels, predicted_labels = self.metrics_calculator.prepare_labels(y_test, y_pred)
         
         correct_predictions = np.sum(actual_labels == predicted_labels)
         total_predictions = len(test_vectors)
@@ -131,8 +130,7 @@ class KNNTester:
             fold_model.fit(X_fold_train, y_fold_train)
             y_pred = fold_model.predict(X_fold_val)
 
-            actual_labels = y_fold_val.astype(int)
-            predicted_labels = y_pred.astype(int)
+            actual_labels, predicted_labels = self.metrics_calculator.prepare_labels(y_fold_val, y_pred)
             correct_predictions = np.sum(actual_labels == predicted_labels)
             total_predictions = len(y_fold_val)
             incorrect_predictions = total_predictions - correct_predictions

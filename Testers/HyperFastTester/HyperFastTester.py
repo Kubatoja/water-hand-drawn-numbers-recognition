@@ -51,8 +51,7 @@ class HyperFastTester:
         end_time = time.perf_counter()
         execution_time = end_time - start_time
 
-        actual_labels = y_test.astype(int)
-        predicted_labels = np.array(y_pred).astype(int)
+        actual_labels, predicted_labels = self.metrics_calculator.prepare_labels(y_test, y_pred)
 
         correct_predictions = np.sum(actual_labels == predicted_labels)
         total_predictions = len(test_vectors)
@@ -155,8 +154,7 @@ class HyperFastTester:
                 fold_model.fit(X_fold_train, y_fold_train)
                 y_fold_pred = fold_model.predict(X_fold_val)
 
-                actual_labels = y_fold_val.astype(int)
-                predicted_labels = np.array(y_fold_pred).astype(int)
+                actual_labels, predicted_labels = self.metrics_calculator.prepare_labels(y_fold_val, y_fold_pred)
 
                 correct_predictions = int(np.sum(actual_labels == predicted_labels))
                 total_predictions = len(y_fold_val)

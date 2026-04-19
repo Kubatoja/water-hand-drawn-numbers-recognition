@@ -65,7 +65,45 @@ class MetricsCalculator:
             predicted_labels,
             labels=list(range(num_classes))
         )
-    
+
+    @staticmethod
+    def normalize_labels(labels: np.ndarray) -> np.ndarray:
+        """
+        Normalizuje etykiety do formatu 1D wektora klas.
+
+        Obsługuje wyniki predykcji w postaci:
+        - 1D wektora klas
+        - kolumnowego wektora kształtu (n_samples, 1)
+        - macierzy prawdopodobieństw lub one-hot kształtu (n_samples, n_classes)
+        """
+        arr = np.asarray(labels)
+
+        if arr.ndim > 1:
+            if arr.shape[1] == 1:
+                arr = arr.ravel()
+            else:
+                arr = np.argmax(arr, axis=1)
+
+        return arr.astype(int)
+
+    @staticmethod
+    def prepare_labels(actual_labels: np.ndarray, predicted_labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Przygotowuje etykiety do obliczeń metryk.
+
+        Zwraca 1D wektory etykiet i weryfikuje ich kształt.
+        """
+        actual = MetricsCalculator.normalize_labels(actual_labels)
+        predicted = MetricsCalculator.normalize_labels(predicted_labels)
+
+        if actual.shape != predicted.shape:
+            raise ValueError(
+                f"Shape mismatch between actual labels {actual.shape} "
+                f"and predicted labels {predicted.shape}"
+            )
+
+        return actual, predicted
+
     @staticmethod
     def print_metrics(metrics: dict, detailed: bool = True):
         """
