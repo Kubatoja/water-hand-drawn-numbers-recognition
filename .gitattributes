@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Duże pliki danych/modeli - bez konwersji końców linii (inaczej OOM przy git status)
+*.csv -text
+*.ckpt binary
+*.cbm binary

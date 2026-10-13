@@ -4,7 +4,17 @@
 Data/*
 !Data/*.md
 !Data/**/*.md
-/results
-!/results/important
+/results/*
+!/results/final/
 .venv/
 .venv311/
+
+# Artefakty treningu (checkpointy, logi CatBoost)
+catboost_info/
+**/catboost_info/
+checkpoints/
+lightning_logs/
+*.ckpt
+*.cbm
+*.pt
+*.pth
