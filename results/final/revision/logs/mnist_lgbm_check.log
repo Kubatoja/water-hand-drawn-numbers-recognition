@@ -1,0 +1,58 @@
+[No Reduction] features (60000, 784) in 0.1s
+  LightGBM  fold 1: acc=0.9798 train=15.8s test=0.64s
+  LightGBM  fold 2: acc=0.9803 train=17.4s test=0.73s
+  LightGBM  fold 3: acc=0.9798 train=17.9s test=0.64s
+  LightGBM  fold 4: acc=0.9792 train=18.4s test=0.62s
+  LightGBM  fold 5: acc=0.9783 train=15.6s test=0.63s
+Applying flood_fill dimensionality reduction...
+[DFFE (Flood Fill)] features (60000, 43) in 11.7s
+  LightGBM  fold 1: acc=0.9800 train=7.9s test=0.61s
+  LightGBM  fold 2: acc=0.9781 train=7.5s test=0.63s
+  LightGBM  fold 3: acc=0.9793 train=7.3s test=0.62s
+  LightGBM  fold 4: acc=0.9781 train=7.3s test=0.63s
+  LightGBM  fold 5: acc=0.9781 train=7.3s test=0.63s
+Applying lda dimensionality reduction...
+Reduced dimensions from 784 to 9
+[LDA] features (60000, 9) in 6.6s
+  LightGBM  fold 1: acc=0.9216 train=6.8s test=0.96s
+  LightGBM  fold 2: acc=0.9209 train=6.8s test=0.98s
+  LightGBM  fold 3: acc=0.9207 train=7.0s test=0.95s
+  LightGBM  fold 4: acc=0.9189 train=6.8s test=0.94s
+  LightGBM  fold 5: acc=0.9205 train=6.8s test=0.94s
+Applying pca dimensionality reduction...
+Reduced dimensions from 784 to 43
+[PCA] features (60000, 43) in 0.6s
+  LightGBM  fold 1: acc=0.9698 train=8.9s test=0.64s
+  LightGBM  fold 2: acc=0.9718 train=8.8s test=0.64s
+  LightGBM  fold 3: acc=0.9707 train=8.9s test=0.64s
+  LightGBM  fold 4: acc=0.9694 train=8.8s test=0.65s
+  LightGBM  fold 5: acc=0.9708 train=9.0s test=0.64s
+Applying tsvd dimensionality reduction...
+Reduced dimensions from 784 to 43
+[TruncatedSVD] features (60000, 43) in 1.5s
+  LightGBM  fold 1: acc=0.9720 train=8.9s test=0.63s
+  LightGBM  fold 2: acc=0.9738 train=8.8s test=0.65s
+  LightGBM  fold 3: acc=0.9723 train=8.8s test=0.63s
+  LightGBM  fold 4: acc=0.9706 train=8.8s test=0.63s
+  LightGBM  fold 5: acc=0.9711 train=8.8s test=0.64s
+Applying pacmap dimensionality reduction...
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+Fitting PaCMAP on training data with PCA initialization...
+Reduced dimensions from 784 to 43
+[PaCMAP] features (60000, 43) in 215.5s
+  LightGBM  fold 1: acc=0.9784 train=7.5s test=0.74s
+  LightGBM  fold 2: acc=0.9768 train=7.6s test=0.73s
+  LightGBM  fold 3: acc=0.9774 train=7.7s test=0.75s
+  LightGBM  fold 4: acc=0.9791 train=7.8s test=0.75s
+  LightGBM  fold 5: acc=0.9754 train=7.7s test=0.74s
+Applying umap dimensionality reduction...
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+Reduced dimensions from 784 to 43
+[UMAP] features (60000, 43) in 131.4s
+  LightGBM  fold 1: acc=0.9732 train=8.0s test=0.80s
+  LightGBM  fold 2: acc=0.9727 train=8.2s test=0.79s
+  LightGBM  fold 3: acc=0.9711 train=8.0s test=0.82s
+  LightGBM  fold 4: acc=0.9732 train=8.0s test=0.80s
+  LightGBM  fold 5: acc=0.9706 train=8.2s test=0.80s

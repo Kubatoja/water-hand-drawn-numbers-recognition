@@ -1,0 +1,1013 @@
+%% 
+%% Copyright 2019-2024 Elsevier Ltd
+%% 
+%% This file is part of the 'CAS Bundle'.
+%% --------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.3c of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'CAS Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+%% Template article for cas-dc documentclass for 
+%% double column output.
+
+\documentclass[a4paper,fleqn]{cas-dc}
+
+% If the frontmatter runs over more than one page
+% use the longmktitle option.
+
+%\documentclass[a4paper,fleqn,longmktitle]{cas-dc}
+
+%\usepackage[numbers]{natbib}
+%\usepackage[authoryear]{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[authoryear,longnamesfirst]{natbib}
+\usepackage{xcolor}
+
+% Wystarczy tutaj tylko usunąć kolor red
+\newcommand{\best}[1]{{\color{red}\boldmath$#1$}}
+
+%%%Author macros
+\def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
+\tsc{WGM}
+\tsc{QE}
+%%%
+
+% Uncomment and use as if needed
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}[theorem]{Lemma}
+\newdefinition{rmk}{Remark}
+%\newproof{pf}{Proof}
+%\newproof{pot}{Proof of Theorem \ref{thm}}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+% Short title
+\shorttitle{Feature Extraction via Directional Water Flow Simulation}    
+
+% Short author
+\shortauthors{}  
+
+% Main title of the paper
+\title [mode = title]{Feature Extraction via Directional Water Flow Simulation: A Deterministic Approach to Dimensionality Reduction}  
+
+% Title footnote mark
+% eg: \tnotemark[1]
+%\tnotemark[1] 
+
+% Title footnote 1.
+% eg: \tnotetext[1]{Title footnote text}
+%\tnotetext[1]{} 
+
+% First author
+\author[1]{Jakub Błaszczyk}[orcid=0009-0004-0368-7263]
+
+% Footnote of the first author
+%\fnmark[]
+
+% Email id of the first author
+\ead{jb315939@student.polsl.pl}
+
+% URL of the first author
+%\ead[url]{}
+
+% Credit authorship
+%\credit{}
+
+% Address/affiliation
+\affiliation[1]{organization={Faculty of Applied Mathematics, Silesian University of Technology}, addressline={Kaszubska 23}, city={Gliwice},
+%          citysep={}, % Uncomment if no comma needed between city and postcode
+postcode={44-100},
+state={},
+country={Poland}}
+
+% Second author
+\author[2]{Rafał Brociek}[orcid=0000-0002-7255-6951]
+
+% Corresponding author indication
+\cormark[1]
+
+% Footnote of the second author
+%\fnmark[2]
+
+% Email id of the second author
+\ead{rafal.brociek@polsl.pl}
+
+% URL of the second author
+%\ead[url]{}
+
+% Credit authorship
+%\credit{}
+
+% Address/affiliation
+\affiliation[2]{organization={Department of Artificial Intelligence Modelling, Silesian University of Technology},
+addressline={Kaszubska 23},
+city={Gliwice},
+%          citysep={}, % Uncomment if no comma needed between city and postcode
+postcode={44-100},
+state={},
+country={Poland}}
+
+% Third author
+\author[1]{Maciej Czaicki}[orcid=0009-0001-2512-8380]
+
+% Footnote of the third author
+%\fnmark[3]
+
+% Email id of the third author
+\ead{mc315940@student.polsl.pl}
+
+% URL of the third author
+%\ead[url]{}
+
+% Credit authorship
+%\credit{}
+
+% Fourth author
+\author[3]{Mariusz Pleszczyński}[orcid=0000-0002-4971-5360]
+
+% Footnote of the fourth author
+%\fnmark[4]
+
+% Email id of the fourth author
+\ead{mariusz.pleszczynski@polsl.pl}
+
+% URL of the fourth author
+%\ead[url]{}
+
+% Credit authorship
+%\credit{}
+
+% Address/affiliation
+\affiliation[3]{organization={Department of Mathematical Methods in Technology and Computer Science, Silesian University of Technology}, addressline={Kaszubska 23}, city={Gliwice},
+%          citysep={}, % Uncomment if no comma needed between city and postcode
+postcode={44-100},
+state={},
+country={Poland}}
+
+% Fifth author
+\author[4, 5]{Christian Napoli}[orcid=0000-0002-3336-5853]
+
+% Footnote of the fifth author
+%\fnmark[5]
+
+% Email id of the fifth author
+\ead{cnapoli@diag.uniroma1.it}
+
+% URL of the fifth author
+%\ead[url]{}
+
+% Credit authorship
+%\credit{}
+
+% Address/affiliation
+\affiliation[4]{organization={Department of Computer, Control, and Management Engineering, Sapienza University of Rome}, addressline={Via Ariosto 25}, city={Rome},
+%          citysep={}, % Uncomment if no comma needed between city and postcode 
+postcode={00185},
+state={},
+country={Italy}}
+
+% Address/affiliation
+\affiliation[5]{organization={Department of Artificial Intelligence, Częstochowa University of Technology}, addressline={Dąbrowskiego 69}, city={Częstochowa},
+%          citysep={}, % Uncomment if no comma needed between city and postcode
+postcode={42-201},
+state={},
+country={Poland}}
+
+% Corresponding author text
+\cortext[1]{Corresponding author}
+
+
+
+% Footnote text
+%\fntext[1]{}
+
+% For a title note without a number/mark
+%\nonumnote{}
+
+% Here goes the abstract
+\begin{abstract}
+This paper presents Directional Flood-Fill Feature Extraction (DFFE), a novel deterministic dimensionality reduction method dedicated to pattern recognition tasks in images. In contrast to classical statistical and manifold learning techniques, such as Principal Component Analysis (PCA), Linear Discriminant Analysis (LDA), Uniform Manifold Approximation and Projection (UMAP), Truncated SVD, and PaCMAP, which project data into abstract subspaces, DFFE generates a compact feature vector based on the topological and structural properties of the analyzed shape. By simulating fluid dynamics—specifically, a directional "water" flow initiated from the image edges—the algorithm extracts key geometric invariants, such as directionality, spatial segmentation, and the characteristics of enclosed regions. This approach allows for the effective compression of high-dimensional input data (e.g., 784 pixels for MNIST) into a dense vector of 43 interpretable features, reducing dimensionality by more than 94\%. The effectiveness of the method was verified using multiple classifiers (XGBoost, CatBoost, LightGBM, SVM, k-NN, MLP) on diverse datasets, including MNIST, EMNIST, USPS, and the MADBase Arabic digit dataset, which is characterized by complex topology. Experimental results demonstrate that DFFE offers classification accuracy comparable to leading dimensionality reduction techniques and, in the case of complex geometric structures (the Arabic set), outperforms certain statistical methods while ensuring full feature interpretability and computational stability.
+\end{abstract}
+
+% Use if graphical abstract is present
+%\begin{graphicalabstract}
+%\includegraphics{}
+%\end{graphicalabstract}
+
+% Research highlights
+\begin{highlights}
+\item A novel deterministic dimensionality reduction method based on directional flooding.
+\item Fully interpretable features derived from geometric and topological image properties.
+\item Linear complexity ensures fast execution and minimal memory footprint.
+\item Competitive accuracy with PCA, LDA, UMAP and PaCMAP across multiple datasets.
+\end{highlights}
+
+
+%\nocite{*}
+
+% Keywords
+% Each keyword is seperated by \sep
+\begin{keywords}
+ neural networks\sep vector database \sep pattern recognition \sep classification \sep image recognition \sep computer vision
+\end{keywords}
+
+\maketitle
+
+% Main text
+\section{Introduction}
+
+Automatic recognition of handwritten characters remains a fundamental issue in the field of computer vision, serving as a testing ground for feature extraction and classification strategies. Contemporary research on symbol recognition indicates the dominance of deep learning-based methods. As noted by Ahlawat et al., Convolutional Neural Networks, utilizing architectures such as ResNet or MobileNet V2, achieve very high recognition accuracy (in the order of 99.83\%). However, training these models from scratch is time-consuming and requires immense resources \cite{ahlawat2020}.
+
+\textcolor{red}{It should be noted, however, that CNNs address a different problem formulation than the method proposed in this paper. A CNN performs feature extraction and classification jointly, learning its features from large labelled training sets, and the resulting representation is inherently tied to the specific trained network. In contrast, the goal of this work is a lightweight dimensionality reduction step whose feature computation does not rely on class labels, and whose output, a compact vector of interpretable features, can be computed once, stored, and subsequently used with any, even very simple, classifier. Such a representation is particularly attractive in scenarios with limited computational resources, where interpretability is required, or where training and retraining deep models is impractical.}
+
+Classic machine learning algorithms remain an alternative to deep approaches, valued for their speed and interpretability. In particular, the Extreme Gradient Boosting system, described by Chen and Guestrin, has achieved the status of a standard in data mining challenges. Its key advantage in binary image analysis is the sparsity-aware split finding mechanism, which allows zero values to be skipped efficiently, drastically reducing the computational time \cite{chen2016}.
+
+It should be emphasized, however, that the effectiveness of classical classifiers depends on the quality of feature engineering. Historically, prior to the Deep Learning era, methods based on hand-crafted descriptors dominated. In their fundamental work, Dalal and Triggs introduced Histograms of Oriented Gradients (HOG), demonstrating that the analysis of local gradient orientation distributions and contrast normalization allow effective object detection while maintaining robustness to lighting changes and minor geometric shifts \cite{dalal2005}. Despite their high efficacy, these methods generate high-dimensional vectors, leading to the "curse of dimensionality," which degrades classifier performance, as pointed out by Anowar et al. \cite{anowar2021}.
+
+To remedy this, dimensionality reduction (DR) techniques are applied. Among linear methods, Principal Component Analysis (PCA) remains a relevant technique, as confirmed by the research of Fournier and Aloise, which demonstrates its competitiveness against autoencoders on simpler datasets \cite{fournier2019, jolliffe2016}. As a supervised alternative, Anowar et al. point to Linear Discriminant Analysis (LDA), which maximizes inter-class separation \cite{anowar2021}.
+
+In the area of non-linear DR, UMAP (Uniform Manifold Approximation and Projection) is becoming the standard. McInnes et al. based this algorithm on rigorous foundations of Riemannian geometry and category theory, allowing for better preservation of global data structure with higher computational scalability compared to older methods such as t-SNE \cite{mcinnes2018}.
+
+In parallel, Topological Data Analysis (TDA) constitutes a significant theoretical current. As indicated by Wasserman, TDA offers a set of tools for the precise analysis of data shape, regardless of its complex geometry \cite{wasserman2018}. This method allows for the detection of persistent structural features such as loops, holes, or connected image fragments. These invariants encode crucial information about connectivity and spatial voids, remaining remarkably stable even under continuous elastic deformations \cite{wasserman2018, tda_shapes_2025}. The extraction of such geometric features is increasingly recognized as a vital step in modern computer vision, as integrating local topological encoding directly into machine learning pipelines has been shown to significantly enhance the structural understanding of image content \cite{topoimages_2025}. Although TDA provides powerful methods for structure description, its full application can be too computationally burdensome for real-time systems. Furthermore, the push toward purely structural and explainable descriptors, such as the one proposed in this paper, aligns directly with the growing demand for inherently interpretable machine learning models, mitigating the risks associated with high-stakes decisions often delegated to opaque "black-box" systems \cite{rudin2019}.
+
+The main contributions of this work can be summarized as follows:
+
+\begin{enumerate}
+    \item Interpretable feature extraction: 
+    Each element of the DFFE feature vector possesses an unambiguous geometric and physical interpretation resulting directly from the directional flooding process, in contrast to the abstract components generated by methods such as PCA or UMAP.
+    
+    \item Effective dimensionality reduction: 
+    The proposed method enables input data compression of over 90\% (e.g., for the MNIST set, from 784 to approximately 43 dimensions), which significantly reduces computational complexity and memory requirements in subsequent classification stages.
+
+    \item Robustness and broad applicability: 
+    Multi-directional flow simulation ensures resistance to disturbances and partial invariance to rotation. Consequently, DFFE achieves competitive results—and in the case of topologically complex sets like MADBase Arabic digits, outperforms certain statistical and manifold learning techniques (such as LDA and UMAP)—obtaining a classification accuracy of up to 98.78\% when combined with the XGBoost classifier, and up to 98.81\% with LightGBM.
+\end{enumerate}
+
+\section{Formal Problem Definition}\label{sec-problem-formulation}
+
+The objective of this work is not merely classification, but the construction of an effective mapping function that transforms high-dimensional image data into a low-dimensional, topologically significant feature space. Let an image be represented as a binary matrix:
+\[
+I \in \{0,1\}^{m \times n},
+\]
+where the value of $1$ denotes a character pixel, and $0$ background pixel. The raw dimensionality of the input space is $D_{raw} = m \times n$. For standard datasets such as MNIST, $D_{raw} = 784$. \\
+
+We seek a feature extraction function:
+\[
+\Phi: \{0,1\}^{m\times n} \rightarrow \mathbb{R}^k,
+\]
+
+such that $k \ll m \times n$. \\
+
+The resulting feature vector $V = \Phi(I)$ should satisfy two key conditions:
+\begin{enumerate}
+    \item Dimensionality Reduction: The target dimension $k$ must be significantly smaller than the input space dimension to reduce computational complexity. In the proposed method, the value of $k$ is strictly correlated with the adopted image segmentation resolution. In the default configuration, a division into $N=7$ segments was adopted, implying a feature vector dimension of $k=43$. This value constitutes an empirically determined trade-off between maximizing the compression rate and retaining key discriminatory features. Further reduction of parameter $k$ is possible but entails a loss of topological description detail and a measurable drop in classification accuracy.
+    \item Topology Preservation: The distance between feature vectors in the reduced space should reflect structural similarity, not merely pixel correlation. Two images representing the same topological structure (e.g., the digit '8' with two loops) should be mapped closely in the $\mathbb{R}^k$ space, preserving invariance to affine transformations and local elastic deformations.
+\end{enumerate}
+Unlike PCA, which defines $\Phi$ by projecting $I$ onto eigenvectors maximizing variance, the proposed DFFE method defines $\Phi$ procedurally based on directional connectivity. The feature vector $V$ is constructed as a concatenation of sub-vectors obtained from independent simulation runs, where each component represents a normalized area coverage profile obtained by flooding domain $I$ with water from a specific direction.
+
+
+
+\section{Directional Flood-Fill Feature Extraction Algorithm}\label{sec-proposed-method}
+
+The goal of the proposed method is the transformation of the input image matrix into a compact numerical descriptor that encodes the topological structure of the object. Unlike approaches based on raw pixels, DFFE analyzes shape by simulating the physical process of liquid flow. The method is independent of input resolution, allowing its application to diverse datasets (e.g., MNIST, EMNIST, MADBase, Fashion-MNIST) following preliminary normalization. The subsequent steps of the proposed algorithm are described below.
+
+\begin{figure*}
+	\centering
+	\includegraphics[width=.9\textwidth]{images/Flow_diagram.pdf}
+	\caption{Overview of the complete pattern recognition architecture employing 
+    the proposed DFFE method for DR followed by classification.}
+	\label{fig-architecture}
+\end{figure*}
+
+The complete processing pipeline is depicted in Figure~\ref{fig-architecture}. \textcolor{red}{It consists of six consecutive stages, each corresponding to one of the subsections below. First, the input image is normalized and binarized (Stage~1, Section~3.1). Next, the directional flood-fill procedure is executed independently from four sides of the image (Stage~2, Sections~3.2--3.3), and the resulting maps are aggregated over horizontal segments (Stage~3, Section~3.4). The representation is then complemented by additional structural features, namely the inner area, the perimeter, and the segmented pixel density (Stage~4, Section~3.5), and all components are concatenated into the final feature vector (Stage~5, Section~3.6). Stages 1--5 constitute the proposed dimensionality reduction step, whereas in the last stage the resulting vector is passed to an arbitrary classifier (Stage~6), which makes the method independent of the choice of the classification model.}
+
+%\newpage
+\subsection{Preprocessing and Matrix Representation}
+
+The algorithm accepts a grayscale image as input, treated as an intensity matrix. To enable topological analysis, the first step is image binarization using a thresholding function:
+
+\begin{equation}
+a(x) = \begin{cases}
+0, & \text{if } x < \textcolor{red}{\tau}, \\
+1, & \text{if } x \ge \textcolor{red}{\tau}, 
+\end{cases}
+\end{equation}
+where \textcolor{red}{$x \in [0,1]$ denotes the normalized intensity of a pixel and $\tau$} denotes the adopted binarization threshold. In our experiments (based on Bayesian optimization), a threshold value of \textcolor{red}{$\tau = 0.228$} was adopted for normalized pixels. The resulting binary matrix $A \in \{0,1\}^{m \times n}$ constitutes the "terrain map" for the flow simulation.
+
+\subsection{Directional Flood Simulation for Feature Extraction}
+The foundation of the proposed method is the \textit{Directional Flood-Fill Feature Extraction} (DFFE) procedure, the goal of which is to transform the binary shape representation into a unique volumetric profile encoding the topological properties of the object.
+
+\subsubsection*{Physical Concept: Gravitational Intuition} To intuitively understand the algorithm's mechanism, we can use a physical analogy. Imagine the analyzed digit as a convex obstacle (e.g., a wall) erected on a flat surface. If we pour water onto it from above ("following gravity"), the liquid will fill all available valleys and depressions, stopping at the edges of the character.
+
+The key aspect is that the amount of retained water depends on the direction from which it flows. A perfect example is the digit '3', which possesses distinct depressions ("concavities") open to the left side.
+\begin{itemize} 
+    \item When flooding from the top or bottom, the water will simply flow down the sides of the digit. 
+    \item However, if we imagine rotating the digit by 90 degrees (so the openings face upwards), water will flow inside and become trapped.
+\end{itemize} 
+
+By conducting such a "flooding" simulation from four sides (corresponding to a full 360 degrees rotation of the figure), we obtain a unique set of measurements that precisely describes the object's shape. The concept is illustrated in Figure \ref{fig-flooding2}.
+
+
+\begin{figure*}
+   \centering
+    \includegraphics[width=0.99\textwidth]{images/floodNumber.png}
+    \caption{Example of flooding the number '3'}\label{fig-flooding2}
+\end{figure*}
+
+
+\subsubsection*{Implementation: Counter-Propagation Algorithm with Backtracking Constraint}
+In implementation, instead of costly matrix rotation operations, an efficient accessibility analysis strategy was applied, consisting of scanning the image from the edge opposite to the simulated flow direction. The steps for the case of simulating liquid flooding from the left side are presented below:
+
+\begin{enumerate}
+    \item \textbf{Scan Initialization}: A Breadth-First Search (BFS) algorithm is initiated on background nodes (0) located on the right edge of the image.
+    \item \textbf{Propagation and Obstacle Avoidance}: The algorithm penetrates the depth of the image (leftward direction), maintaining freedom of movement in the vertical axis. Upon encountering object pixels (1), BFS bypasses them using available paths in the character's vicinity. This allows for marking not only the space in front of the digit as "visited" but also background areas located geometrically "behind" it (on its left side).
+    \item \textbf{Backtracking Constraint (No-Backtracking)}: A key boundary condition is the blocking of reverse propagation (in the analyzed case: movement to the right). The algorithm cannot return to previously passed matrix columns.
+    \item \textbf{Cavity Detection}: As a consequence of the imposed restrictions, BFS reaches all background areas with the exception of cavities open in the direction opposite to the scanner's movement vector. For example, for the digit '3' scanned from the right, the algorithm will flow around its spine but will be unable to flow into the interior of the concavities, as this would require unauthorized reverse movement.
+    \item \textbf{Logical Inversion}: The result of the process is an auxiliary matrix where the value 0 (unvisited areas) represents exactly those zones that would be flooded given an inflow from the left. The final bitwise negation $(0 \rightarrow 1, 1 \rightarrow 0)$ transforms these areas into a positive feature map.
+\end{enumerate}
+
+This approach allows for obtaining a precise topological map in a single pass with linear complexity $\mathcal{O}(m \cdot n)$, eliminating the risk of erroneously classifying background located behind the object as enclosed space.
+
+
+
+
+\subsection{Directional Flood-Fill Feature Extraction Algorithm}
+
+Let $A \in \{0,1\}^{m \times n}$ denote a binary input image, in which the background and obstacle regions are encoded by 0 and 1, respectively. The proposed algorithm is parameterized by a target direction $s_{target}$ and a boolean flag $B$ that specifies whether backtracking is allowed. Accumulation in the direction $s_{target}$ is simulated by scanning the image from the opposite boundary $s_{source}$. The subsequent steps of the algorithm are presented in detail below.
+
+\begin{enumerate}
+    \item \textbf{Initialization}
+    \begin{itemize}
+        \item $F \leftarrow A$ \hfill // Initialize with obstacles ($1$)
+        \item $Q \leftarrow \emptyset$ \hfill // Queue for BFS
+        \item $V \leftarrow \text{zeros}(m, n)$ \hfill // Visited matrix
+    \end{itemize}
+
+    \item \textbf{Source Selection (Counter-Propagation Setup)}
+    \begin{equation}
+        Q \leftarrow \begin{cases}
+            \{ (i,n) \mid A_{i,n} = 0 \}, & \text{if } s_{target} = \text{left}, \\
+            \{ (i,1) \mid A_{i,1} = 0 \}, & \text{if } s_{target} = \text{right}, \\
+            \{ (m,j) \mid A_{m,j} = 0 \}, & \text{if } s_{target} = \text{top}, \\
+            \{ (1,j) \mid A_{1,j} = 0 \}, & \text{if } s_{target} = \text{bottom}.
+        \end{cases}
+    \end{equation}
+    All valid seed pixels are marked as visited in $V$ and enqueued in $Q$.
+
+    \item \textbf{Propagation}
+    \begin{enumerate}
+        \item While $Q \neq \emptyset$:
+        \begin{enumerate}
+            \item Dequeue $(i,j) \leftarrow Q$
+            \item Set $F_{i,j} \leftarrow 1$ \hfill // Mark accessible space
+            
+            \item Determine neighbors $N(i,j)$. Let $\vec{v}$ be the propagation vector derived from $s_{source}$ (e.g., if scanning from right to left, $\vec{v}=(0, -1)$).
+            
+            \begin{equation}
+                N(i,j) = \begin{cases}
+                    \{(i \pm 1, j), (i, j \pm 1)\} \cap \Omega, & \text{if } B = \texttt{true}, \\
+                    \{(i \pm 1, j), (i, j + v_y), (i + v_x, j)\} \cap \Omega, & \text{if } B = \texttt{false}.
+                \end{cases}
+            \end{equation}
+            where $\Omega$ denotes the image boundaries.
+            
+            \item For each neighbor $(i', j') \in N(i,j)$, if:
+            \begin{itemize}
+                \item $V_{i',j'} = \texttt{false}$,
+                \item $A_{i',j'} = 0$ 
+            \end{itemize}
+            then:
+            \begin{itemize}
+                \item Enqueue $(i',j') \rightarrow Q$
+                \item Mark $V_{i',j'} \leftarrow \texttt{true}$
+            \end{itemize}
+        \end{enumerate}
+    \end{enumerate}
+
+    \item \textbf{Logical Inversion (Feature Extraction)}
+    The matrix $F$ now represents the accessible space (obstacles + reached background). The inverse $W$ identifies inaccessible regions (cavities):
+    \begin{equation}
+        W_{i,j} = 1 - F_{i,j} \quad \forall (i,j)
+    \end{equation}
+    
+    \item \textbf{Output}: Return matrix $W$.
+\end{enumerate}
+
+
+Algorithm~\ref{alg:df_fe} presents a simplified pseudocode of the procedure.
+
+\begin{algorithm}
+\caption{Directional Flood-Fill Feature Extraction}
+\label{alg:df_fe}
+\begin{algorithmic}[1]
+
+\Require Binary image $A \in \{0,1\}^{m \times n}$, target direction $s_{target}$, backtracking flag $B$
+\Ensure Feature map $W$
+
+\State Initialize $F \gets A$, $V \gets \text{zeros}(m,n)$, $Q \gets \emptyset$
+\State Select source boundary $s_{source}$ based on $s_{target}$
+\State Enqueue all background pixels on $s_{source}$ into $Q$ and mark them as visited
+
+\While{$Q \neq \emptyset$}
+    \State $(i,j) \gets \text{Dequeue}(Q)$
+    \State $F_{i,j} \gets 1$
+    \State Determine neighbor set $N(i,j)$ according to $s_{source}$ and flag $B$
+    \ForAll{$(i',j') \in N(i,j)$}
+        \If{$A_{i',j'} = 0$ \textbf{and} $V_{i',j'} = \texttt{false}$}
+            \State Mark $(i',j')$ as visited and enqueue it into $Q$
+        \EndIf
+    \EndFor
+\EndWhile
+
+\State $W \gets 1 - F$
+\State \Return $W$
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Segmentation and Spatial Feature Aggregation}
+
+Direct use of the output matrix $W$ from the simulation stage (with dimensions $m \times n$) would not lead to satisfactory detail. To compress data while maintaining information about the location of topological deformations, a vertical segmentation mechanism (top-down) was applied. For each simulation direction $s$, matrix $W$ is divided into $N$ parallel segments (presented as horizontal stripes in Figure~\ref{fig-segmentation}). 
+The saturation coefficient $v_k$ is calculated as:
+\begin{equation}v_k = \frac{1}{|S_k|} \sum_{(i,j) \in S_k} W_{i,j}, \quad \text{for } k = 1, \dots, N\end{equation}
+where $S_k$ is the set of pixel coordinates in the $k$-th segment, and $|S_k|$ is the total number of pixels in the segment. The value $v_k \in [0,1]$ is interpreted as the saturation coefficient of a given segment. The final directional descriptor is formed by concatenating vectors from all four flooding sides. As an illustration, considering the digit `3' and a partition into $N=3$ segments, the resulting feature vector is given as follows (with values rounded to two decimal places for clarity):
+
+\begin{figure*}
+   \centering
+    \includegraphics[width=0.99\textwidth]{images/Segmentation.png}
+    \caption{Illustrative segmentation for N=3; numerical values may not reflect actual measurements }
+    \label{fig-segmentation}
+\end{figure*} 
+
+
+{\small
+\[
+\overrightarrow{V_0} =
+\big[
+\underbrace{0.05, 0.15, 0.15}_{\text{Left flooding}},
+\underbrace{0.0, 0.01, 0.0}_{\text{Right flooding}},
+\underbrace{0.0, 0.0, 0.0}_{\text{Top flooding}},
+\underbrace{0.01, 0.0, 0.0}_{\text{Bottom flooding}}
+\big].
+\]
+}
+
+%\begin{center}
+%        \includegraphics[width=1\textwidth, height=0.28\textwidth]{images/Segmentation.png}
+%        \caption{ Illustrative segmentation; numerical values may not reflect actual measurements }\label{fig-segmenation}
+%\end{center}
+
+
+
+
+\subsection{Extension of the Method for Digits with Enclosed Regions}
+
+The basic variant of the DFFE algorithm (with backtracking blockade) effectively extracts features of the outer contour and open cavities, but by definition, it does not penetrate completely closed areas (so-called "islands"), characteristic of digits such as '0', '8', '6', or '9'. To eliminate this information gap, the feature vector was extended by three structural parameters:
+
+\subsubsection*{1. Inner Area}
+ To detect and parameterize closed regions, an additional instance of the 
+ \textit{DFFE} algorithm is launched with a modified control parameter: 
+ $B = \text{true}$, allowing back-propagation. In this mode, virtual liquid, 
+ initiated at the image edges, flows around the object from all sides. Areas 
+ that remain unvisited constitute the topological interior of the character, 
+ as illustrated in Figure~\ref{fig-innerarea}.
+
+\subsubsection*{2. Perimeter}
+Another significant discriminator, particularly for distinguishing digits with 
+similar topology (e.g., `1' vs `7'), is the relationship between the 
+character's surface area and its surroundings. This parameter, termed 
+normalized perimeter $P$, describes the physical contact of the liquid with 
+the object's surface and is illustrated in Figure~\ref{fig-perimeter}:
+
+\begin{equation}
+    P = \frac{1}{m \cdot n} \sum_{i=1}^{m} \sum_{j=1}^{n} 1_{C_{i,j}=1} \cdot 
+    \left( \sum_{(k,l) \in \mathcal{N}(i,j)} 1_{C_{k,l}=0} \right),
+\end{equation}
+where $\mathcal{N}(i,j)$ denotes the set of 4-connected neighbors of pixel 
+$(i,j)$, excluding positions outside the image domain, and $1_{\text{condition}}$ 
+is the indicator function, which takes the value 1 when the specified condition 
+holds and 0 otherwise. The resulting perimeter measure is normalized by the 
+total number of pixels in the image, $m \cdot n$.
+
+\subsubsection*{3. Segmented Pixel Density}
+As a complement to negative features describing empty space/water, a density 
+profile of the object itself is appended to the vector. This allows for the 
+differentiation of characters with a similar flooding profile but different 
+``thickness'' or stroke complexity.
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=.9\columnwidth]{images/Submerged.png}
+	\caption{Illustration of the perimeter measure: boundary pixels of the character in contact with 
+        the background.}
+	\label{fig-perimeter}
+\end{figure}
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=.9\columnwidth]{images/InnerArea.png}
+	\caption{Illustration of the inner area: enclosed regions unreachable by the flood fill algorithm with backtracking enabled.}
+	\label{fig-innerarea}
+\end{figure}
+
+%\begin{figure}[h]
+%    \centering
+%    \begin{minipage}{0.45\textwidth}
+%        \centering
+%        \includegraphics[width=\textwidth]{images/Submerged.png}
+%        \caption{Illustration of the perimeter measure: 
+%        boundary pixels of the character in contact with 
+%        the background.}\label{fig-perimeter}
+%    \end{minipage}
+%    \hfill
+%    \begin{minipage}{0.45\textwidth}
+%        \centering
+%        \includegraphics[width=\textwidth]{images/InnerArea.png}
+%        \caption{Illustration of the inner area: enclosed 
+%        regions unreachable by the flood fill algorithm 
+%        with backtracking enabled.}\label{fig-innerarea}
+%    \end{minipage}
+%\end{figure}
+
+
+\subsection{Final Feature Representation}
+The features derived from the three steps above are concatenated to form an extended feature vector. For example, for digit '3' and division into \(N = 3\) segments, the resulting feature vector is: 
+
+\[
+\begin{aligned}
+\overrightarrow{V_1} =
+\big[&
+\underbrace{\mathbf{3.0}}_{\text{label}},
+\underbrace{0.05, 0.15, 0.15}_{\text{Left flooding}},
+\underbrace{0.0, 0.01, 0.0}_{\text{Right flooding}},\\
+&
+\underbrace{0.0, 0.0, 0.0}_{\text{Top flooding}},
+\underbrace{0.01, 0.0, 0.0}_{\text{Bottom flooding}},\\
+&
+\underbrace{0.0, 0.23, 0.0}_{\text{Inner area}},
+\underbrace{0.09, 0.23, 0.04}_{\text{Pixel density}},
+\underbrace{0.17}_{\text{Perimeter}}
+\big].
+\end{aligned}
+\]
+
+
+%\[
+%\overrightarrow{V_1} =
+%\big[
+%\underbrace{\mathbf{3.0}}_{\text{label}},
+%\underbrace{0.05, 0.15, 0.15}_{\text{Left flooding}},
+%\underbrace{0.0, 0.01, 0.0}_{\text{Right flooding}},
+%\underbrace{0.0, 0.0, 0.0}_{\text{Top flooding}},
+%\underbrace{0.01, 0.0, 0.0}_{\text{Bottom flooding}}
+%\underbrace{0.0, 0.23, 0.0}_{\text{Inner area}},
+%\underbrace{0.09, 0.23, 0.04}_{\text{Pixel density}},
+%\underbrace{0.17}_{\text{Perimeter}}
+%\big].
+%\]
+
+
+%\[
+%\overrightarrow{V_1} = [\mathbf{2.0}, 0.05, 0.15, 0.15, 0.0, 0.0, 0.00, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.13, 0.22, 0.1].
+%\]
+
+Note that the first element corresponds to the digit label and is used only in the training phase.
+
+\begin{rmk}
+\normalfont
+In the final implementation, the values were computed for segmentations into \(N = 7\), and feature values were rounded to 17 decimal places. The above example with \(N = 3\) and rounding to two decimal places is presented solely for illustrative purposes.
+\end{rmk}
+
+\section{Results}\label{sec-results}
+
+In this section, we provide a detailed assessment of the proposed DR method. The analysis aims to determine how effectively the reduced feature space retains the essential topological characteristics required for accurate symbol recognition. To this end, we test the method across datasets of varying complexity, spanning from conventional handwritten digits to multi-class alphanumeric symbols, and examine its robustness against changes in stroke thickness, orientation, and the presence of noise.
+
+The DFFE algorithm was benchmarked against several DR algorithms widely recognized in the specialized literature. The comparative analysis included:
+
+\begin{enumerate}
+    \item \textbf{Principal Component Analysis (PCA)} \cite{pca}: A linear DR technique that transforms data into a lower-dimensional space by projecting the original features onto a set of orthogonal axes, chosen to maximize the preservation of total variance of the data.
+    \item \textbf{Linear Discriminant Analysis (LDA)} \citep{fisher1936, rao1948}: A supervised DR method based on discriminant analysis. It projects data onto a lower-dimensional subspace so that the between-class separation is maximized while the within-class variance is minimized.
+    \item \textbf{Uniform Manifold Approximation and Projection (UMAP)} \cite{mcinnes2018}: A non-linear DR technique grounded in Riemannian geometry and algebraic topology. It constructs a high-dimensional graph representation of the data and optimizes a low-dimensional layout to preserve both local and significant aspects of the global topological structure.
+
+    \item \textbf{Truncated Singular Value Decomposition (TruncatedSVD)} \cite{tsvd}: A linear
+    DR technique that factorizes the data matrix using a
+    truncated SVD, retaining only the $k$ largest singular values and their
+    corresponding vectors. Unlike PCA, it operates directly on the data matrix
+    without centering, making it well-suited for sparse inputs.
+
+    \item \textbf{PaCMAP (Pairwise Controlled Manifold Approximation)} \cite{pacmap}: A
+    non-linear DR method that preserves both local and
+    global structure by jointly optimizing three types of point pairs: near
+    neighbors, mid-near pairs, and further pairs. This multi-scale objective
+    mitigates the local-only focus of methods such as t-SNE while maintaining
+    competitive global structure preservation compared to UMAP.
+\end{enumerate}
+
+\textcolor{red}{To mitigate result variations potentially arising from implementation differences, all benchmarked methods were taken from established, publicly available Python implementations: PCA, TruncatedSVD and LDA from the scikit-learn library \cite{scikit-learn}, whereas UMAP and PaCMAP were used through their reference implementations, the \texttt{umap-learn} and \texttt{pacmap} packages \cite{mcinnes2018, pacmap}.}
+
+The baseline for comparison was established by performing classification directly on the original, full-dimensional feature matrices of the datasets, without applying any DR.
+
+
+\begin{enumerate}
+    \item \textbf{MNIST} \cite{mnist}: Contains 70,000 grayscale images of handwritten digits represented by matrices ($28\times28$ pixels), distributed across 10 classes (digits 0--9). The dataset is divided into 60,000 training images and 10,000 testing images.
+    \item \textbf{USPS} \cite{usps}: Features handwritten digits (0--9) represented by $16\times16$ pixel matrices. It includes 7,291 training samples and 2,007 testing samples.
+    \item \textbf{EMNIST-Digits} \cite{emnist}: A larger collection of handwritten digits (0--9) with 240,000 training samples and 40,000 testing samples.
+    \item \textbf{The MADBase database} \cite{arabic}: An Arabic handwritten digit database, containing 60,000 training images and 10,000 test images.
+    \item \textbf{Fashion-MNIST} \cite{fashionmnist}: A collection of images from Zalando's articles, consisting of 60,000 training examples and 10,000 test examples. Each example is a grayscale image ($28\times28$) associated with a label from 10 clothing classes.
+\end{enumerate}
+
+\textcolor{red}{In all experimental setups, the classification performance was assessed exclusively on samples that were not used to train the classifier, ensuring an objective assessment of model performance.} To comprehensively evaluate the utility of the DR techniques across different classification paradigms, every test configuration was executed using six distinct classification algorithms:
+
+\begin{enumerate}
+    \item \textbf{K-Nearest Neighbors (KNN)}: Classifies an object based on the majority class of its $k$ nearest neighbors in the feature space, employing a distance metric to quantify similarity. All KNN tests were performed with the parameter set to \textcolor{red}{$k = 3$}.
+    \item \textbf{Support Vector Machine (SVM)}: A classifier that operates by finding the optimal hyperplane which maximizes the margin separating data points belonging to different classes in the feature space.
+    \item \textbf{Multilayer Perceptron (MLP)}: A neural network composed of non-linearly connected layers of neurons, which learns a mapping from input to output data through weight optimization. All MLP tests used a configuration of \textcolor{red}{800 neurons in a single hidden layer and a maximum of 200 training iterations}.
+    \item \textbf{Extreme Gradient Boosting (XGBoost)}: An ensemble method that constructs a robust classification model by iteratively combining multiple decision trees, minimizing prediction error via gradient optimization.
+    \item \textbf{Categorical Boosting (CatBoost)}\cite{catboost}: An advanced gradient boosting algorithm that utilizes symmetric (oblivious) decision trees to effectively reduce overfitting and execution time. It is particularly recognized for its native and highly efficient handling of categorical features without the need for extensive preprocessing.
+    \item \textbf{Light Gradient Boosting Machine (LightGBM)} \cite{lightgbm}: A highly efficient gradient boosting framework that employs histogram-based algorithms and a leaf-wise tree growth strategy. This architecture significantly accelerates the training process and reduces memory consumption, making it exceptionally well-suited for high-dimensional and large-scale datasets.
+\end{enumerate}
+
+To ensure a rigorous and reliable assessment of the benchmarked methods, all experimental trials across the utilized datasets were conducted using a standard 5-fold cross-validation framework. Under this setup, the dataset is partitioned into five disjoint folds. Each fold serves iteratively as the test set while the remaining four folds are used for training. The final evaluation metrics, including the classification accuracy reported in the subsequent tables, represent the mean and standard deviation accumulated across all five validation folds. This approach mitigates result variations, prevents overfitting, and ensures an objective performance evaluation. \textcolor{red}{The cross-validation was carried out on the official training partition of each dataset (e.g., 60{,}000 images for MNIST, giving 48{,}000 training and 12{,}000 validation images per fold), using stratified folds with shuffling and a fixed random seed (42). Consequently, the fold partitions are identical for all DR methods and classifiers, which enables paired statistical comparisons between methods (Section~\ref{sec-statistics}). The learned projections (PCA, TruncatedSVD, LDA, UMAP and PaCMAP) were fitted once on the complete training partition before it was split into folds, whereas DFFE does not require any fitting; this setting can only favour the learned baseline methods.}
+
+For each test sample, the chosen DR algorithm was applied first, followed by the predictive classification algorithm. The resulting prediction was then compared against the true label. The classification accuracy was calculated as follows:
+
+\begin{equation}
+    \label{eq:accuracy}
+    \text{Accuracy} = \left( \frac{\text{Number of Correct Predictions}}{\text{Total Number of Test Samples}} \right) \times 100\%.
+\end{equation}
+
+\textcolor{red}{Since the proposed method is a DR technique rather than a classifier, the quality of each DR method is assessed extrinsically, i.e., by the performance that the classifiers achieve on the reduced representation; a better DR method retains more class-discriminative information. Besides accuracy, we report the error rate, and the macro-averaged precision, recall and F1-score. For a dataset with $K$ classes, let $TP_c$, $FP_c$ and $FN_c$ denote the numbers of true positives, false positives and false negatives of class $c$. Then
+\begin{equation}
+\begin{aligned}
+    P &= \frac{1}{K}\sum_{c=1}^{K} P_c = \frac{1}{K}\sum_{c=1}^{K} \frac{TP_c}{TP_c + FP_c}, \\
+    R &= \frac{1}{K}\sum_{c=1}^{K} R_c = \frac{1}{K}\sum_{c=1}^{K} \frac{TP_c}{TP_c + FN_c}, \\
+    F_1 &= \frac{1}{K}\sum_{c=1}^{K} \frac{2\,P_c R_c}{P_c + R_c},
+\end{aligned}
+\end{equation}
+where $P_c$ and $R_c$ denote the precision and recall of class $c$. The hyperparameters of the classifiers, identical for all datasets and DR methods, are listed in Table~\ref{tab:classifier_params}.}
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Hyperparameters of the classifiers (identical for all datasets and DR methods; the remaining parameters take the library default values; random seed 42).}}
+    \label{tab:classifier_params}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|l}
+        \hline
+        \textbf{Classifier} & \textbf{Hyperparameters} \\
+        \hline
+        \textcolor{red}{KNN} & \textcolor{red}{$k=3$, uniform weights, Euclidean distance} \\
+        \textcolor{red}{SVM} & \textcolor{red}{polynomial kernel, degree 9, $C=1$, $\gamma=$ scale} \\
+        \textcolor{red}{MLP} & \textcolor{red}{1 hidden layer (800, ReLU), Adam, learning rate $10^{-3}$ (adaptive), $\alpha=10^{-4}$, 200 iterations} \\
+        \textcolor{red}{XGBoost} & \textcolor{red}{600 trees, learning rate 0.1237, max depth 4, $\gamma=0.0597$, subsample 0.6455, colsample 0.5871} \\
+        \textcolor{red}{CatBoost} & \textcolor{red}{500 iterations, learning rate 0.1, depth 6, Bernoulli subsample 0.8, colsample by level 0.8} \\
+        \textcolor{red}{LightGBM} & \textcolor{red}{500 trees, learning rate 0.1, max depth 7, 31 leaves, subsample 0.8, colsample 0.8} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\subsection{Hyperparameter Optimization}
+
+The configurable parameters of the proposed algorithm were tuned using Bayesian Optimization, \textcolor{red}{implemented with the scikit-optimize library \cite{skopt} (Gaussian-process-based minimization).} This optimization procedure was executed across all utilized datasets, running for a total of 200 iterations, preceded by 40 iterations of random initialization. The optimal values identified were Pixel Binarization Threshold: 0.228; Number of Segments ($N$): 7, resulting in a reduction in dimensionality to 43 dimensions and calculated according to the formula: $D = 6 \times N + 1$
+Experimental trials indicated that further increasing $N$ led to diminishing returns in accuracy while significantly increasing  vector size, suggesting that the topological features of the studied glyphs reach a point of informational saturation at this resolution.
+
+
+\subsection{Configuration of Benchmark Algorithms}
+
+To ensure a meaningful comparison of feature encoding efficiency, the target dimensionality for the PCA, TruncatedSVD and UMAP projections was strictly constrained to match the 43 dimensions identified as optimal for the DFFE algorithm. Establishing this parity of representation serves as a uniform information bottleneck, allowing for an objective evaluation of how effectively each technique packs discriminative information into a compact feature space. While variance-based or manifold-learning methods might yield higher accuracy with a larger feature budget, this constraint ensures that any performance differentials are attributable to the quality of the descriptors rather than the sheer volume of preserved data.
+Due to the inherent nature of LDA, imposing the same target dimensionality was not feasible. Therefore, this algorithm was configured to their maximum effective dimensionality: LDA was set to the maximum possible dimension of $K-1$, where $K$ is the number of classes in the respective data set, i.e., 9 for the 10-class datasets.
+
+
+\subsection{Evaluation on Benchmark Datasets}
+
+The comparative analysis across diverse datasets demonstrates that the proposed DFFE method serves as a reliable and versatile DR technique. By extracting topological invariants through simulated fluid dynamics, the algorithm achieves significant DR while preserving the structural information necessary for accurate classification, offering a robust alternative to purely statistical or manifold-based methods.
+
+In the domain of standard handwriting recognition, which includes MNIST, USPS, and EMNIST-Digits, DFFE exhibits performance highly competitive with both the unreduced baseline and traditional variance-maximization techniques (see Tables~\ref{tab:results_mnist}, \ref{tab:results_usps}, and \ref{tab:results_emnist_digits}). Since DFFE relies on the deterministic detection of loops, curves, and open regions, it is naturally suited for character glyphs. On the MNIST dataset using the MLP classifier, DFFE achieves an accuracy of 97.96\%, which effectively matches the full-dimensional data baseline of 97.94\%. This result highlights its superiority over linear supervised methods like LDA, which reaches only 91.60\%. Similarly, on the USPS dataset, DFFE maintains a strong accuracy of 95.95\% with the MLP classifier. As shown in Table~\ref{tab:results_emnist_digits}, the method remains highly effective on the EMNIST-Digits dataset, where DFFE paired with MLP achieves 96.02\%, significantly outperforming the 93.99\% achieved by LDA. The negligible performance drop relative to full-dimensional data confirms that the directional flooding mechanism effectively filters out noise while retaining critical geometric features.
+
+\textcolor{red}{It is worth noting that on the MNIST dataset (Table~\ref{tab:results_mnist}) all DR methods except LDA yield very similar accuracies: apart from the SVM classifier, the differences between them do not exceed two percentage points, and the reduced representations remain close to the full-dimensional baseline. We attribute this convergence to a saturation effect. MNIST is a relatively simple benchmark in which the class-discriminative information is concentrated in a low-dimensional structure; consequently, a 43-dimensional representation is sufficient to retain nearly all of it, regardless of whether the mapping is driven by variance (PCA, TruncatedSVD), neighbourhood preservation (UMAP, PaCMAP), or explicit geometry (DFFE). The remaining errors are therefore likely to stem from the inherent ambiguity of some handwritten samples and from the classifier itself rather than from the DR step. The representational bottleneck becomes visible only for LDA, which is restricted to nine linear components. Importantly, PCA, TruncatedSVD, UMAP and PaCMAP learn their projections from the training data, whereas DFFE applies a fixed geometric procedure that does not require fitting a projection (apart from the global binarization threshold and the number of segments). The fact that such a hand-crafted descriptor reaches the same accuracy ceiling as learned projections indicates that it captures the essential, class-relevant shape information, while additionally offering full interpretability and deterministic behaviour.}
+
+The robustness of the DFFE algorithm across different typographic structures is further validated by the MADBase dataset (see Table~\ref{tab:results_madbase}). Despite the complex morphology of Arabic numerals, DFFE consistently preserves high-fidelity features. Utilizing the XGBoost classifier, DFFE reaches 98.78\%, closely trailing the raw data baseline of 99.06\% and performing on par with PCA (98.84\%). This proves that the fluid-based feature extraction is script-agnostic and generalizes exceptionally well to non-Latin geometries without requiring complex statistical transformations.
+
+The limitations of purely structural extraction become more apparent on datasets characterized by complex textures rather than simple contour-based glyphs, such as Fashion-MNIST (see Table~\ref{tab:results_fashion_mnist}). In scenarios where classification relies heavily on pixel intensity distributions and fine textures rather than clear topological boundaries, global variance-maximization techniques demonstrate a natural advantage. For instance, PCA achieves 88.35\% on Fashion-MNIST with MLP, whereas the structurally constrained DFFE reaches 82.53\%. 
+
+Although the DFFE method does not consistently outperform variance-maximization techniques like PCA or advanced manifold learners like PaCMAP in terms of absolute classification accuracy, it offers a distinct and valuable trade-off. The proposed method generates a compact, deterministic, and highly interpretable feature representation based on explicit topological structures, rather than relying on the statistical variance of the dataset.
+
+In contrast to PCA which optimizes global variance and UMAP which preserves local neighborhoods stochastically, DFFE explicitly encodes directional connectivity, enclosed regions, and stroke continuity. These factors are of particular significance in glyph and character recognition tasks, allowing DFFE to deliver performance levels nearly identical to full-dimensional baselines even under aggressive dimensionality reduction, as observed in MNIST, USPS, and MADBase.
+
+An additional, crucial advantage of the proposed DFFE algorithm is its fully deterministic nature. Unlike stochastic embedding methods such as UMAP, which may produce varying topological embeddings across successive runs, DFFE guarantees identical feature representations for identical input data. This characteristic directly addresses the ongoing reproducibility crisis in artificial intelligence and machine learning research, where replicating experiments remains a formidable challenge even with extensive documentation \cite{desai2025}. By eliminating the variance between execution runs caused by random initializations, DFFE ensures strict experimental reproducibility, an essential requirement for building trusted AI systems and facilitating their deployment in safety-critical or auditable domains \cite{semmelrock2025}.
+
+% --- MNIST ---
+\begin{table*}
+    \centering
+    \caption{Classification accuracy (\%) across DR methods
+             for the standard MNIST dataset. Results reported as mean $\pm$ std
+             across cross-validation folds. \textcolor{red}{The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline and is excluded from this comparison.}}
+    \label{tab:results_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.84 \pm 0.13$ & $95.87 \pm 0.18$ & $91.66 \pm 0.21$ & $97.72 \pm 0.12$ & \best{97.73 \pm 0.12} & $97.70 \pm 0.16$ & $97.02 \pm 0.14$ \\
+        Multi-Layer Perceptron & $97.94 \pm 0.12$ & $97.96 \pm 0.08$ & $91.60 \pm 0.13$ & $98.08 \pm 0.19$ & \best{98.19 \pm 0.12} & $97.71 \pm 0.15$ & $96.85 \pm 0.17$ \\
+        Support Vector Machine & $85.47 \pm 0.25$ & $89.25 \pm 0.24$ & $73.68 \pm 0.28$ & $84.70 \pm 0.24$ & $81.02 \pm 0.25$ & \best{97.48 \pm 0.17} & $97.16 \pm 0.15$ \\
+        XGBoost                & $97.93 \pm 0.10$ & \best{97.86 \pm 0.07} & $91.91 \pm 0.16$ & $96.91 \pm 0.07$ & $97.03 \pm 0.10$ & $97.83 \pm 0.13$ & $97.22 \pm 0.07$ \\
+        CatBoost               & $97.14 \pm 0.19$ & $97.32 \pm 0.10$ & $92.06 \pm 0.14$ & $96.12 \pm 0.14$ & $96.19 \pm 0.15$ & \best{97.77 \pm 0.15} & $97.01 \pm 0.17$ \\
+        LightGBM               & $98.16 \pm 0.08$ & \best{97.93 \pm 0.09} & $92.14 \pm 0.08$ & $97.31 \pm 0.10$ & $97.48 \pm 0.12$ & $97.78 \pm 0.10$ & $97.21 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+% --- USPS ---
+\begin{table*}
+    \centering
+    \caption{Classification accuracy (\%) across DR methods
+             for the USPS dataset. Results reported as mean $\pm$ std
+             across cross-validation folds. \textcolor{red}{The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline and is excluded from this comparison.}}
+    \label{tab:results_usps}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.06 \pm 0.16$ & $93.31 \pm 0.27$ & $95.23 \pm 0.33$ & \best{97.49 \pm 0.23} & \best{97.49 \pm 0.23} & $97.26 \pm 0.38$ & $97.35 \pm 0.12$ \\
+        Multi-Layer Perceptron & $97.01 \pm 0.26$ & $95.95 \pm 0.58$ & $94.72 \pm 0.28$ & $97.82 \pm 0.24$ & \best{97.87 \pm 0.34} & $97.44 \pm 0.44$ & $97.00 \pm 0.13$ \\
+        Support Vector Machine & $91.25 \pm 0.70$ & $93.69 \pm 0.60$ & $80.44 \pm 1.39$ & $65.40 \pm 0.95$ & $73.31 \pm 0.86$ & $93.47 \pm 0.71$ & \best{97.02 \pm 0.45} \\
+        XGBoost                & $96.90 \pm 0.23$ & $95.57 \pm 0.80$ & $95.16 \pm 0.34$ & $96.71 \pm 0.50$ & $96.72 \pm 0.23$ & $97.33 \pm 0.45$ & \best{97.61 \pm 0.22} \\
+        CatBoost               & $96.91 \pm 0.34$ & $94.57 \pm 0.88$ & $95.09 \pm 0.39$ & $96.58 \pm 0.50$ & $96.56 \pm 0.49$ & $97.52 \pm 0.39$ & \best{97.60 \pm 0.21} \\
+        LightGBM               & $96.98 \pm 0.40$ & $95.42 \pm 0.81$ & $95.14 \pm 0.51$ & $96.65 \pm 0.42$ & $96.80 \pm 0.25$ & $97.20 \pm 0.40$ & \best{97.61 \pm 0.19} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+% --- EMNIST-Digits ---
+\begin{table*}
+    \centering
+    \caption{Classification accuracy (\%) across DR methods
+             for the EMNIST-Digits dataset. Results reported as mean $\pm$ std
+             across cross-validation folds. \textcolor{red}{The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline and is excluded from this comparison. $^{*}$For LightGBM on this dataset, the minimum sum of Hessians in a leaf was set to 1 instead of the library default ($10^{-3}$), since with the default setting the training diverged numerically in several folds; on MNIST, the same setting changes the mean accuracy of LightGBM by less than 0.3 percentage points.}}
+    \label{tab:results_emnist_digits}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $97.89 \pm 0.05$ & $91.65 \pm 0.10$ & $93.72 \pm 0.11$ & \best{98.56 \pm 0.05} & $98.54 \pm 0.05$ & $98.55 \pm 0.04$ & $98.13 \pm 0.04$ \\
+        Multi-Layer Perceptron & $98.72 \pm 0.08$ & $96.02 \pm 0.12$ & $93.99 \pm 0.07$ & $98.83 \pm 0.05$ & \best{98.91 \pm 0.07} & $98.55 \pm 0.03$ & $98.10 \pm 0.03$ \\
+        Support Vector Machine & $93.82 \pm 0.04$ & $91.12 \pm 0.13$ & $82.19 \pm 0.10$ & $93.76 \pm 0.10$ & $90.26 \pm 0.09$ & \best{98.49 \pm 0.02} & $98.33 \pm 0.05$ \\
+        XGBoost                & $98.82 \pm 0.04$ & $95.65 \pm 0.11$ & $94.07 \pm 0.11$ & $98.03 \pm 0.03$ & $98.04 \pm 0.07$ & \best{98.62 \pm 0.02} & $98.23 \pm 0.03$ \\
+        CatBoost               & $98.47 \pm 0.05$ & $94.92 \pm 0.11$ & $94.04 \pm 0.11$ & $97.48 \pm 0.03$ & $97.53 \pm 0.02$ & \best{98.60 \pm 0.02} & $98.16 \pm 0.03$ \\
+        LightGBM$^{*}$         & \textcolor{red}{$98.94 \pm 0.04$} & \textcolor{red}{$96.11 \pm 0.10$} & \textcolor{red}{$94.16 \pm 0.07$} & \textcolor{red}{$98.44 \pm 0.02$} & \textcolor{red}{$98.48 \pm 0.04$} & \best{98.59 \pm 0.03} & \textcolor{red}{$98.23 \pm 0.03$} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+% --- Arabic Dataset (MADBase) ---
+\begin{table*}
+    \centering
+    \caption{Classification accuracy (\%) across DR methods
+             for the MADBase (Arabic digits) dataset. Results reported as mean $\pm$ std
+             across cross-validation folds. \textcolor{red}{The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline and is excluded from this comparison.}}
+    \label{tab:results_madbase}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $98.68 \pm 0.11$ & $97.02 \pm 0.17$ & $96.88 \pm 0.11$ & \best{98.97 \pm 0.07} & \best{98.97 \pm 0.07} & $98.94 \pm 0.09$ & $98.64 \pm 0.09$ \\
+        Multi-Layer Perceptron & $99.03 \pm 0.12$ & $98.64 \pm 0.09$ & $97.25 \pm 0.13$ & $99.10 \pm 0.07$ & \best{99.12 \pm 0.07} & $98.96 \pm 0.11$ & $98.59 \pm 0.11$ \\
+        Support Vector Machine & $81.16 \pm 0.15$ & $82.89 \pm 0.77$ & $78.72 \pm 0.41$ & $81.22 \pm 0.63$ & $76.05 \pm 0.51$ & \best{98.96 \pm 0.12} & $98.62 \pm 0.14$ \\
+        XGBoost                & $99.06 \pm 0.09$ & $98.78 \pm 0.07$ & $97.24 \pm 0.19$ & $98.84 \pm 0.08$ & $98.84 \pm 0.06$ & \best{98.98 \pm 0.10} & $98.75 \pm 0.09$ \\
+        CatBoost               & $98.48 \pm 0.07$ & $98.20 \pm 0.10$ & $96.98 \pm 0.13$ & $98.43 \pm 0.08$ & $98.42 \pm 0.05$ & \best{98.97 \pm 0.11} & $98.66 \pm 0.11$ \\
+        LightGBM               & $99.17 \pm 0.05$ & $98.81 \pm 0.05$ & $97.34 \pm 0.18$ & \best{98.99 \pm 0.09} & $98.97 \pm 0.08$ & $98.96 \pm 0.10$ & $98.76 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+% --- Fashion-MNIST ---
+\begin{table*}
+    \centering
+    \caption{Classification accuracy (\%) across DR methods
+             for the Fashion-MNIST dataset. Results reported as mean $\pm$ std
+             across cross-validation folds. \textcolor{red}{The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline and is excluded from this comparison.}}
+    \label{tab:results_fashion_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $84.95 \pm 0.18$ & $78.98 \pm 0.26$ & $82.76 \pm 0.31$ & $85.34 \pm 0.49$ & \best{85.35 \pm 0.53} & $81.16 \pm 0.27$ & $80.92 \pm 0.26$ \\
+        Multi-Layer Perceptron & $87.06 \pm 0.41$ & $82.53 \pm 0.49$ & $83.12 \pm 0.71$ & $88.35 \pm 0.50$ & \best{88.40 \pm 0.26} & $82.93 \pm 0.19$ & $78.70 \pm 0.73$ \\
+        Support Vector Machine & $82.18 \pm 0.20$ & $73.34 \pm 0.38$ & $66.89 \pm 0.45$ & $73.23 \pm 0.47$ & $67.60 \pm 0.53$ & $72.08 \pm 0.33$ & \best{83.49 \pm 0.18} \\
+        XGBoost                & $89.00 \pm 0.30$ & $83.37 \pm 0.35$ & $84.68 \pm 0.33$ & $87.92 \pm 0.18$ & \best{87.98 \pm 0.21} & $83.38 \pm 0.34$ & $83.44 \pm 0.21$ \\
+        CatBoost               & $87.94 \pm 0.21$ & $81.84 \pm 0.42$ & $84.98 \pm 0.30$ & $87.23 \pm 0.15$ & \best{87.30 \pm 0.17} & $83.20 \pm 0.26$ & $83.04 \pm 0.11$ \\
+        LightGBM               & $89.18 \pm 0.32$ & $83.52 \pm 0.28$ & $84.51 \pm 0.14$ & $88.15 \pm 0.25$ & \best{88.34 \pm 0.30} & $83.07 \pm 0.21$ & $83.10 \pm 0.13$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+% ======================== REVISION: new subsections ========================
+
+\subsection{\textcolor{red}{Additional Classification Metrics}}
+
+\textcolor{red}{To complement the accuracy results, the macro-averaged precision, recall and F1-score, as well as the error rate, were computed for all combinations of datasets, DR methods and classifiers. As an example, Table~\ref{tab:f1_mnist} presents the macro-averaged F1-score obtained on the MNIST dataset; the complete set of tables (precision, recall, F1-score and error rate for all five datasets) is provided in the Supplementary Material. Since the analysed datasets are balanced or nearly balanced, the macro-averaged F1-score closely follows the accuracy: for MNIST, the differences between the two measures do not exceed 0.15 percentage points for all classifiers except SVM, and the best DR method for each classifier is the same under both measures. For the remaining datasets, these differences do not exceed 0.7 percentage points (again excluding SVM), and the best DR method for each classifier is identical under both measures in all 30 dataset--classifier combinations. Hence, the conclusions drawn from the accuracy tables are not affected by the choice of the performance measure.}
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Macro-averaged F1-score (\%) across DR methods for the MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds. The best result among the DR methods for each classifier is shown in bold; the No DR column serves as a reference baseline. Complete precision, recall, F1-score and error-rate tables for all datasets are given in the Supplementary Material.}}
+    \label{tab:f1_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        \textcolor{red}{K-Nearest Neighbors}    & \textcolor{red}{$96.82 \pm 0.13$} & \textcolor{red}{$95.83 \pm 0.19$} & \textcolor{red}{$91.53 \pm 0.21$} & \textcolor{red}{$97.70 \pm 0.12$} & \best{97.71 \pm 0.12} & \textcolor{red}{$97.69 \pm 0.16$} & \textcolor{red}{$97.00 \pm 0.14$} \\
+        \textcolor{red}{Multi-Layer Perceptron} & \textcolor{red}{$97.93 \pm 0.13$} & \textcolor{red}{$97.94 \pm 0.08$} & \textcolor{red}{$91.49 \pm 0.14$} & \textcolor{red}{$98.07 \pm 0.19$} & \best{98.18 \pm 0.12} & \textcolor{red}{$97.69 \pm 0.16$} & \textcolor{red}{$96.83 \pm 0.17$} \\
+        \textcolor{red}{Support Vector Machine} & \textcolor{red}{$87.12 \pm 0.23$} & \textcolor{red}{$90.12 \pm 0.18$} & \textcolor{red}{$77.34 \pm 0.30$} & \textcolor{red}{$86.50 \pm 0.16$} & \textcolor{red}{$83.77 \pm 0.16$} & \best{97.46 \pm 0.17} & \textcolor{red}{$97.15 \pm 0.15$} \\
+        \textcolor{red}{XGBoost}                & \textcolor{red}{$97.92 \pm 0.10$} & \best{97.84 \pm 0.07} & \textcolor{red}{$91.80 \pm 0.16$} & \textcolor{red}{$96.89 \pm 0.07$} & \textcolor{red}{$97.00 \pm 0.10$} & \textcolor{red}{$97.82 \pm 0.13$} & \textcolor{red}{$97.21 \pm 0.07$} \\
+        \textcolor{red}{CatBoost}               & \textcolor{red}{$97.13 \pm 0.20$} & \textcolor{red}{$97.30 \pm 0.10$} & \textcolor{red}{$91.95 \pm 0.14$} & \textcolor{red}{$96.09 \pm 0.15$} & \textcolor{red}{$96.16 \pm 0.15$} & \best{97.75 \pm 0.16} & \textcolor{red}{$96.99 \pm 0.18$} \\
+        \textcolor{red}{LightGBM}               & \textcolor{red}{$98.15 \pm 0.08$} & \best{97.92 \pm 0.10} & \textcolor{red}{$92.04 \pm 0.09$} & \textcolor{red}{$97.29 \pm 0.10$} & \textcolor{red}{$97.46 \pm 0.12$} & \textcolor{red}{$97.76 \pm 0.10$} & \textcolor{red}{$97.20 \pm 0.09$} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\subsection{\textcolor{red}{Statistical Analysis}}\label{sec-statistics}
+
+\textcolor{red}{To verify whether the observed differences between the DR methods are statistically significant, we followed the procedure recommended by Dem\v{s}ar~\cite{demsar2006} for comparing multiple methods over multiple test cases. Each combination of a dataset and a classifier ($5 \times 6 = 30$ cases) was treated as a separate test case, and the six DR methods were ranked within each case according to the mean cross-validation accuracy (rank 1 denotes the best method; the No DR baseline was excluded). The Friedman test rejects the null hypothesis that all DR methods perform equally ($\chi^2_F = 50.01$, $p = 1.4 \cdot 10^{-9}$; for the F1-score $\chi^2_F = 48.36$, $p = 3.0 \cdot 10^{-9}$). In the subsequent Nemenyi post-hoc test, two methods differ significantly at $\alpha = 0.05$ if their average ranks differ by at least the critical difference $CD = 1.38$. Additionally, DFFE was compared with each of the remaining methods using the Wilcoxon signed-rank test with the Holm correction for multiple comparisons. The results are summarized in Table~\ref{tab:statistics}.}
+
+\textcolor{red}{According to the Nemenyi test, DFFE does not differ significantly from UMAP and LDA, whereas the differences with respect to PaCMAP and TruncatedSVD exceed the critical difference, and the difference with respect to PCA is at its boundary (1.38). The pairwise Wilcoxon tests confirm that DFFE significantly outperforms LDA, does not differ significantly from TruncatedSVD, and is significantly outperformed by PCA, UMAP and PaCMAP (Table~\ref{tab:statistics}). The analysis based on the F1-score leads to the same conclusions.}
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Statistical comparison of the DR methods over 30 test cases (5 datasets $\times$ 6 classifiers). Average Friedman ranks (1 = best) for accuracy and macro-F1, and pairwise comparison of DFFE with each method based on accuracy: number of DFFE wins/losses, mean difference (DFFE minus method, percentage points) and Holm-adjusted $p$-value of the Wilcoxon signed-rank test. Nemenyi critical difference: $CD = 1.38$ ($\alpha = 0.05$).}}
+    \label{tab:statistics}
+    \begin{tabular}{l|cc|ccc}
+        \hline
+        \textbf{Method} & \textbf{Rank (Acc)} & \textbf{Rank (F1)} & \textbf{W/L} & \textbf{$\Delta$ [pp]} & \textbf{$p_{\mathrm{Holm}}$} \\
+        \hline
+        \textcolor{red}{PaCMAP}       & \textcolor{red}{2.57} & \textcolor{red}{2.60} & \textcolor{red}{6/24}  & \textcolor{red}{$-2.31$} & \textcolor{red}{0.0001} \\
+        \textcolor{red}{TruncatedSVD} & \textcolor{red}{2.65} & \textcolor{red}{2.68} & \textcolor{red}{8/22}  & \textcolor{red}{$-0.51$} & \textcolor{red}{0.0549} \\
+        \textcolor{red}{PCA}          & \textcolor{red}{2.88} & \textcolor{red}{2.85} & \textcolor{red}{7/23}  & \textcolor{red}{$-0.81$} & \textcolor{red}{0.0097} \\
+        \textcolor{red}{UMAP}         & \textcolor{red}{3.33} & \textcolor{red}{3.33} & \textcolor{red}{9/21}  & \textcolor{red}{$-2.42$} & \textcolor{red}{0.0017} \\
+        \textcolor{red}{DFFE}         & \textcolor{red}{4.27} & \textcolor{red}{4.27} & \textcolor{red}{--}    & \textcolor{red}{--}      & \textcolor{red}{--} \\
+        \textcolor{red}{LDA}          & \textcolor{red}{5.30} & \textcolor{red}{5.27} & \textcolor{red}{22/8}  & \textcolor{red}{$+2.53$} & \textcolor{red}{0.0097} \\
+        \hline
+    \end{tabular}
+\end{table*}
+
+\subsection{\textcolor{red}{Ablation Study}}
+
+\textcolor{red}{To quantify the contribution of the individual components of the proposed directional water-flow mechanism, an ablation study was carried out on two handwritten digit datasets of different resolution (MNIST, $28\times28$, and USPS, $16\times16$) with two classifiers of different type, KNN (distance-based) and LightGBM (tree-based), using the same cross-validation protocol as in the main experiments. Two kinds of variants were considered: (i) removing groups of features from the complete 43-dimensional DFFE vector, and (ii) recomputing the vector with a modified component (no subtraction of the inner area from the directional flood maps, a different number of segments $N$, a different binarization threshold $\tau$). The results are presented in Table~\ref{tab:ablation}.}
+
+\textcolor{red}{The directional flood maps constitute the core of the method for handwritten digits: removing them reduces the accuracy on MNIST from 95.87\% to 82.58\% (KNN) and from 97.93\% to 86.56\% (LightGBM). At the same time, they are not sufficient on their own (80.84\% and 84.56\%), which shows that the directional features and the structural descriptors are complementary. Removing the inner area or the segmented pixel density lowers the accuracy on MNIST by 1.5--2.6 percentage points, and the density profile alone, which corresponds to a simple downsampling of the image, reaches only 73.70\% and 77.29\%. The horizontal floods (from the left and right) carry considerably more information than the vertical ones (94.77\% vs. 87.43\% for KNN on MNIST). On USPS, the drop caused by removing the directional floods is smaller (0.8--0.9 percentage points). Regarding the number of segments, $N = 3$ results in a clear loss of accuracy on both datasets, whereas increasing $N$ from 7 to 10 enlarges the vector from 43 to 61 dimensions without improving the accuracy (a gain of 0.1 percentage points for LightGBM on MNIST and losses in the remaining cases); this justifies the choice of $N = 7$. The binarization threshold has little influence on MNIST and a moderate influence on USPS (a decrease of up to 4.0 percentage points for $\tau = 0.5$).}
+% TODO (authors): interpretation of the rows "w/o perimeter" and "No inner-area correction of floods"
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Ablation study of the DFFE components: classification accuracy (\%, mean $\pm$ std over 5 cross-validation folds). Dim. denotes the length of the resulting feature vector. Variants above the line remove feature groups from the complete DFFE vector; variants below the line recompute the vector with a modified component (default: $N = 7$, $\tau = 0.228$).}}
+    \label{tab:ablation}
+    \begin{tabular}{l|c|cc|cc}
+        \hline
+        & & \multicolumn{2}{c|}{\textbf{MNIST}} & \multicolumn{2}{c}{\textbf{USPS}} \\
+        \textbf{Variant} & \textbf{Dim.} & \textbf{KNN} & \textbf{LightGBM} & \textbf{KNN} & \textbf{LightGBM} \\
+        \hline
+        \textcolor{red}{Complete DFFE} & \textcolor{red}{43} & \textcolor{red}{$95.87 \pm 0.18$} & \textcolor{red}{$97.93 \pm 0.09$} & \textcolor{red}{$93.31 \pm 0.27$} & \textcolor{red}{$95.42 \pm 0.81$} \\
+        \textcolor{red}{w/o perimeter} & \textcolor{red}{42} & \textcolor{red}{$95.84 \pm 0.16$} & \textcolor{red}{$97.80 \pm 0.15$} & \textcolor{red}{$93.32 \pm 0.28$} & \textcolor{red}{$95.38 \pm 0.82$} \\
+        \textcolor{red}{w/o pixel density} & \textcolor{red}{36} & \textcolor{red}{$93.30 \pm 0.17$} & \textcolor{red}{$96.19 \pm 0.17$} & \textcolor{red}{$90.10 \pm 0.39$} & \textcolor{red}{$93.87 \pm 0.60$} \\
+        \textcolor{red}{w/o inner area} & \textcolor{red}{36} & \textcolor{red}{$93.39 \pm 0.14$} & \textcolor{red}{$96.47 \pm 0.13$} & \textcolor{red}{$90.66 \pm 0.24$} & \textcolor{red}{$93.49 \pm 0.91$} \\
+        \textcolor{red}{w/o directional floods} & \textcolor{red}{15} & \textcolor{red}{$82.58 \pm 0.15$} & \textcolor{red}{$86.56 \pm 0.21$} & \textcolor{red}{$92.39 \pm 0.51$} & \textcolor{red}{$94.66 \pm 0.56$} \\
+        \textcolor{red}{Directional floods only} & \textcolor{red}{28} & \textcolor{red}{$80.84 \pm 0.29$} & \textcolor{red}{$84.56 \pm 0.08$} & \textcolor{red}{$67.84 \pm 0.93$} & \textcolor{red}{$71.64 \pm 1.27$} \\
+        \textcolor{red}{Pixel density only} & \textcolor{red}{7} & \textcolor{red}{$73.70 \pm 0.21$} & \textcolor{red}{$77.29 \pm 0.41$} & \textcolor{red}{$80.65 \pm 0.80$} & \textcolor{red}{$83.23 \pm 0.76$} \\
+        \textcolor{red}{Horizontal floods only (L+R)} & \textcolor{red}{29} & \textcolor{red}{$94.77 \pm 0.21$} & \textcolor{red}{$97.14 \pm 0.21$} & \textcolor{red}{$93.43 \pm 0.36$} & \textcolor{red}{$95.50 \pm 0.83$} \\
+        \textcolor{red}{Vertical floods only (T+B)} & \textcolor{red}{29} & \textcolor{red}{$87.43 \pm 0.27$} & \textcolor{red}{$91.90 \pm 0.15$} & \textcolor{red}{$92.17 \pm 0.42$} & \textcolor{red}{$94.79 \pm 0.54$} \\
+        \hline
+        \textcolor{red}{No inner-area subtraction} & \textcolor{red}{43} & \textcolor{red}{$95.85 \pm 0.14$} & \textcolor{red}{$97.83 \pm 0.10$} & \textcolor{red}{$94.47 \pm 0.55$} & \textcolor{red}{$96.57 \pm 0.50$} \\
+        \textcolor{red}{$N = 3$ segments} & \textcolor{red}{19} & \textcolor{red}{$91.24 \pm 0.34$} & \textcolor{red}{$95.68 \pm 0.24$} & \textcolor{red}{$86.61 \pm 0.63$} & \textcolor{red}{$90.59 \pm 0.67$} \\
+        \textcolor{red}{$N = 5$ segments} & \textcolor{red}{31} & \textcolor{red}{$94.65 \pm 0.08$} & \textcolor{red}{$97.36 \pm 0.21$} & \textcolor{red}{$92.68 \pm 0.60$} & \textcolor{red}{$95.35 \pm 0.54$} \\
+        \textcolor{red}{$N = 10$ segments} & \textcolor{red}{61} & \textcolor{red}{$95.25 \pm 0.15$} & \textcolor{red}{$98.02 \pm 0.06$} & \textcolor{red}{$90.55 \pm 0.44$} & \textcolor{red}{$95.05 \pm 0.25$} \\
+        \textcolor{red}{Threshold $\tau = 0.1$} & \textcolor{red}{43} & \textcolor{red}{$95.56 \pm 0.17$} & \textcolor{red}{$97.78 \pm 0.12$} & \textcolor{red}{$91.13 \pm 0.35$} & \textcolor{red}{$94.60 \pm 0.37$} \\
+        \textcolor{red}{Threshold $\tau = 0.5$} & \textcolor{red}{43} & \textcolor{red}{$96.00 \pm 0.08$} & \textcolor{red}{$97.91 \pm 0.08$} & \textcolor{red}{$89.29 \pm 0.80$} & \textcolor{red}{$92.96 \pm 0.34$} \\
+        \hline
+    \end{tabular}
+\end{table*}
+
+\subsection{\textcolor{red}{Computational Complexity, Memory Requirements and Scalability}}
+
+\textcolor{red}{\textit{Theoretical complexity.} For a single image of size $m \times n$, DFFE performs five flood-fill passes (four directional passes and one pass with backtracking used for the inner area) and aggregates the resulting maps over $N$ segments. In each pass, every pixel is pushed onto the stack and visited at most once and has at most four neighbours; hence, the time complexity of the extraction is $\mathcal{O}(m \cdot n)$ per image and $\mathcal{O}(M \cdot m \cdot n)$ for a dataset of $M$ images. The working memory consists of a few auxiliary matrices of the image size (visited flags, flood maps and the stack), i.e., $\mathcal{O}(m \cdot n)$, and does not depend on the number of samples. DFFE has no fitting stage: the feature vector of a new sample is computed independently of the training data, so no model has to be stored, and the extraction of different images can be trivially parallelized. In contrast, the learned DR methods require a fitting stage on the training set, whose cost grows with the number of samples, and the manifold learning methods (UMAP, PaCMAP) additionally have to keep the neighbourhood structure or the training data themselves in order to embed new samples. The reduced representation also lowers the memory needed to store the data: 43 instead of 784 values per MNIST image (a reduction of 94.5\%).}
+
+\textcolor{red}{\textit{Experimental setup.} All timing experiments were performed on a single workstation (AMD Ryzen~7~2700, 8 cores / 16 threads, 64~GB RAM) using the same implementations and hyperparameters as in the accuracy experiments. DFFE was implemented in Python and processed the images sequentially, one by one; the remaining methods used the library implementations with their default parallelization (UMAP runs single-threaded when a fixed random seed is set).}
+
+\textcolor{red}{\textit{Cost of the DR step.} Table~\ref{tab:dr_cost} reports the cost of fitting each DR method on 48{,}000 MNIST training images and of embedding 12{,}000 unseen images. DFFE requires neither fitting nor a stored model, whereas UMAP and PaCMAP need 96--164~s for fitting and 356--529~MB of stored data to embed new samples.}
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Cost of the DR step on MNIST: fitting on 48{,}000 training images and embedding of 12{,}000 unseen images (median of three runs; a single run for UMAP and PaCMAP). Stored model denotes the memory that must be kept to embed new samples.}}
+    \label{tab:dr_cost}
+    \begin{tabular}{l|cccc}
+        \hline
+        \textbf{Method} & \textbf{Fit [s]} & \textbf{Transform [s]} & \textbf{Per image [ms]} & \textbf{Stored model [MB]} \\
+        \hline
+        \textcolor{red}{DFFE}         & \textcolor{red}{--}     & \textcolor{red}{1.13}  & \textcolor{red}{0.094} & \textcolor{red}{0} \\
+        \textcolor{red}{LDA}          & \textcolor{red}{4.70}   & \textcolor{red}{0.05}  & \textcolor{red}{0.004} & \textcolor{red}{0.19} \\
+        \textcolor{red}{PCA}          & \textcolor{red}{0.44}   & \textcolor{red}{0.03}  & \textcolor{red}{0.002} & \textcolor{red}{0.28} \\
+        \textcolor{red}{TruncatedSVD} & \textcolor{red}{1.20}   & \textcolor{red}{0.03}  & \textcolor{red}{0.002} & \textcolor{red}{0.27} \\
+        \textcolor{red}{PaCMAP}       & \textcolor{red}{164.33} & \textcolor{red}{9.20}  & \textcolor{red}{0.767} & \textcolor{red}{356.30} \\
+        \textcolor{red}{UMAP}         & \textcolor{red}{95.91}  & \textcolor{red}{23.36} & \textcolor{red}{1.947} & \textcolor{red}{528.62} \\
+        \hline
+    \end{tabular}
+\end{table*}
+
+\textcolor{red}{\textit{Time reduction in the classification stage.} Table~\ref{tab:clf_time} presents the training and testing times of the classifiers for each representation. Compared with the full 784-dimensional data, the DFFE representation reduces, e.g., the training time of XGBoost from 1017.7~s to 50.1~s (about 20 times) and the prediction time of KNN from 34.4~s to 3.4~s, while the accuracy remains at a similar level (Table~\ref{tab:results_mnist}). The training time of MLP is not reduced, as it is dominated by the fixed number of training iterations and the size of the hidden layer rather than by the input dimension. The training and testing times obtained with DFFE are of the same order as those obtained with the other 43-dimensional representations.}
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Training / testing time [s] of the classifiers on MNIST (48{,}000 training and 12{,}000 test images, one cross-validation fold) for each representation.}}
+    \label{tab:clf_time}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{Flood Fill} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        \textcolor{red}{K-Nearest Neighbors}    & \textcolor{red}{0.1 / 34.43}   & \textcolor{red}{0.0 / 3.40}  & \textcolor{red}{0.1 / 0.54}  & \textcolor{red}{0.0 / 3.39}   & \textcolor{red}{0.0 / 3.36}  & \textcolor{red}{0.0 / 3.41}   & \textcolor{red}{0.0 / 3.47} \\
+        \textcolor{red}{Multi-Layer Perceptron} & \textcolor{red}{199.4 / 0.15}  & \textcolor{red}{220.8 / 0.05} & \textcolor{red}{153.3 / 0.05} & \textcolor{red}{54.3 / 0.05}  & \textcolor{red}{56.9 / 0.06} & \textcolor{red}{165.1 / 0.05} & \textcolor{red}{77.2 / 0.05} \\
+        \textcolor{red}{Support Vector Machine} & \textcolor{red}{449.6 / 62.92} & \textcolor{red}{46.6 / 4.96} & \textcolor{red}{32.1 / 5.07} & \textcolor{red}{146.5 / 10.74} & \textcolor{red}{92.1 / 7.24} & \textcolor{red}{11.8 / 1.80}  & \textcolor{red}{1362.0 / 1.25} \\
+        \textcolor{red}{XGBoost}                & \textcolor{red}{1017.7 / 0.78} & \textcolor{red}{50.1 / 0.74} & \textcolor{red}{34.6 / 0.74} & \textcolor{red}{68.2 / 0.73}  & \textcolor{red}{66.8 / 0.72} & \textcolor{red}{61.5 / 0.74}  & \textcolor{red}{73.8 / 0.73} \\
+        \textcolor{red}{CatBoost}               & \textcolor{red}{66.1 / 0.03}   & \textcolor{red}{18.7 / 0.01} & \textcolor{red}{15.1 / 0.01} & \textcolor{red}{38.2 / 0.01}  & \textcolor{red}{38.6 / 0.01} & \textcolor{red}{35.6 / 0.01}  & \textcolor{red}{36.2 / 0.01} \\
+        \textcolor{red}{LightGBM}               & \textcolor{red}{19.2 / 0.98}   & \textcolor{red}{9.8 / 0.94}  & \textcolor{red}{7.0 / 1.09}  & \textcolor{red}{11.8 / 1.02}  & \textcolor{red}{11.9 / 0.98} & \textcolor{red}{9.2 / 1.06}   & \textcolor{red}{9.6 / 1.05} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\textcolor{red}{\textit{Scalability.} The scalability with respect to the number of samples was evaluated on random subsets of the EMNIST-Digits training set containing from 10{,}000 to 240{,}000 images (Table~\ref{tab:scalability}). The time required by DFFE grows linearly with the number of samples and is comparable to that of LDA; PCA and TruncatedSVD are faster, whereas UMAP and PaCMAP are slower by more than an order of magnitude. The scalability with respect to the image size was evaluated by upscaling MNIST images: the extraction time per image amounts to 0.115, 0.188, 0.557 and 2.137~ms for resolutions of $28\times28$, $56\times56$, $112\times112$ and $224\times224$ pixels, respectively. For larger images, the time grows proportionally to the number of pixels, in agreement with the $\mathcal{O}(m \cdot n)$ complexity, while for small images it is dominated by a constant per-image overhead.}
+% TODO (authors): framing of the comparison with PCA/TruncatedSVD in terms of speed
+
+\begin{table*}
+    \centering
+    \caption{\textcolor{red}{Scalability of the DR step on EMNIST-Digits: total time [s] needed to compute the reduced representation of $M$ images (including the fitting stage for the learned methods).}}
+    \label{tab:scalability}
+    \begin{tabular}{r|cccccc}
+        \hline
+        \textbf{$M$} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        \textcolor{red}{10{,}000}  & \textcolor{red}{0.9}  & \textcolor{red}{1.2}  & \textcolor{red}{0.2} & \textcolor{red}{0.3} & \textcolor{red}{20.5}   & \textcolor{red}{33.3} \\
+        \textcolor{red}{30{,}000}  & \textcolor{red}{3.3}  & \textcolor{red}{3.3}  & \textcolor{red}{0.4} & \textcolor{red}{0.9} & \textcolor{red}{85.0}   & \textcolor{red}{43.1} \\
+        \textcolor{red}{60{,}000}  & \textcolor{red}{5.8}  & \textcolor{red}{6.2}  & \textcolor{red}{0.7} & \textcolor{red}{1.6} & \textcolor{red}{226.4}  & \textcolor{red}{104.6} \\
+        \textcolor{red}{120{,}000} & \textcolor{red}{11.7} & \textcolor{red}{13.2} & \textcolor{red}{1.2} & \textcolor{red}{3.2} & \textcolor{red}{487.1}  & \textcolor{red}{247.8} \\
+        \textcolor{red}{240{,}000} & \textcolor{red}{23.4} & \textcolor{red}{26.5} & \textcolor{red}{2.4} & \textcolor{red}{6.4} & \textcolor{red}{1072.6} & \textcolor{red}{575.5} \\
+        \hline
+    \end{tabular}
+\end{table*}
+
+
+\section{Conclusions}\label{sec-conclusion}
+
+This paper presents a novel, deterministic DR method inspired by fluid dynamics. The proposed DFFE method serves as a highly interpretable alternative to classical statistical techniques and modern manifold learning methods, particularly in domains where structural topology is more critical than dataset variance.
+
+The key findings derived from the conducted experimental studies can be formulated as follows:
+
+\begin{enumerate}
+\item \textbf{High Fidelity of Topological Mapping:} DFFE demonstrated exceptional efficacy in extracting low-dimensional features from images with distinct geometric structures. On the MNIST dataset, the method achieved results that matched the full-dimensional baseline (97.96\% vs. 97.94\% for MLP), significantly outperforming supervised linear reductions like LDA (91.60\%). On the USPS dataset, DFFE yielded a strong 95.95\% accuracy, confirming that the simulated flooding effectively encodes critical shape invariants.
+
+\item \textbf{\textcolor{red}{Applicability to a Non-Latin Script:}} \textcolor{red}{Experiments on the MADBase Arabic numerals dataset showed good retention of discriminative information, with DFFE achieving up to 98.81\% (LightGBM) and 98.78\% (XGBoost), without any modification of the method. This suggests that the extracted features are not tied to a particular writing system. Confirming this observation for a broader range of scripts and writing styles remains a subject of future work.}
+
+\item \textbf{Limitations in Texture Analysis:} Studies on the Fashion-MNIST dataset revealed the natural boundary of topological reduction. For objects defined primarily by texture and grayscale pixel distributions rather than contour boundaries, statistical variance methods like PCA (88.35\% for MLP) maintain an advantage over DFFE (82.53\%). This highlights a clear complementary relationship between statistical and structural DR methodologies.
+\end{enumerate}
+
+\textcolor{red}{The properties of the proposed method make it well suited for real-time applications, e.g., automatic reading of postal codes, bank cheques and handwritten forms, or character recognition on mobile and embedded devices. First, DFFE processes each image independently: the feature vector of a new sample is computed without access to the training data, in contrast to manifold learning methods such as UMAP and PaCMAP, which require the training data or a neighbourhood graph to embed new samples. Second, feature extraction consists of a small, fixed number of flood-fill passes, each with linear complexity $\mathcal{O}(m \cdot n)$, and requires only a few auxiliary matrices of the image size; hence, the processing time per sample is predictable and independent of the size of the training set. Third, the deterministic nature of the method guarantees identical outputs for identical inputs, which is essential in auditable systems. Finally, the compact representation substantially reduces both the memory footprint of the stored data and the cost of the subsequent classification stage. The practical feasibility of this approach has been confirmed in preliminary experiments with a prototype implementation on a low-cost microcontroller, in which the entire DFFE-reduced training set was stored in external memory and digits drawn on an attached display were recognized on the fly using a k-NN classifier. Building on these encouraging observations, we are currently conducting research on real-time applications of DFFE in both embedded systems and software applications, which will be the subject of future work.}
+
+While the current results are promising, they point toward several significant directions for the further development of the method. These include the implementation of grid-type segmentation, the application of feature vector component weighting, the aggregation of results from multiple simulated orientations to enhance robustness, and the utilization of multithreading to improve computational efficiency. In conclusion, the proposed DFFE approach offers a versatile, interpretable, and mathematically stable framework for dimensionality reduction. By combining fast execution speeds with minimal resource requirements, this highly efficient method possesses an application potential that extends significantly beyond digit classification tasks.
+
+% To print the credit authorship contribution details
+\printcredits
+
+%% Loading bibliography style file
+%\bibliographystyle{model1-num-names}
+\bibliographystyle{cas-model2-names}
+
+% Loading bibliography database
+\bibliography{Literatura}
+
+% Biography
+%\bio{}
+% Here goes the biography details.
+%\endbio
+
+%\bio{pic1}
+% Here goes the biography details.
+%\endbio
+
+\end{document}
+

@@ -1,0 +1,138 @@
+{'cpu': 'AMD64 Family 23 Model 8 Stepping 2, AuthenticAMD', 'python': '3.11.9'}
+A No Reduction       fit=    0.00s transform=   0.02s model=    0.00MB
+A No Reduction       fit=    0.00s transform=   0.02s model=    0.00MB
+A No Reduction       fit=    0.00s transform=   0.02s model=    0.00MB
+A DFFE (Flood Fill)  fit=    0.00s transform=   1.16s model=    0.00MB
+A DFFE (Flood Fill)  fit=    0.00s transform=   1.13s model=    0.00MB
+A DFFE (Flood Fill)  fit=    0.00s transform=   1.13s model=    0.00MB
+A LDA                fit=    4.67s transform=   0.05s model=    0.19MB
+A LDA                fit=    4.70s transform=   0.05s model=    0.19MB
+A LDA                fit=    4.72s transform=   0.05s model=    0.19MB
+A PCA                fit=    0.44s transform=   0.03s model=    0.28MB
+A PCA                fit=    0.44s transform=   0.03s model=    0.28MB
+A PCA                fit=    0.44s transform=   0.03s model=    0.28MB
+A TruncatedSVD       fit=    1.18s transform=   0.03s model=    0.27MB
+A TruncatedSVD       fit=    1.20s transform=   0.03s model=    0.27MB
+A TruncatedSVD       fit=    1.21s transform=   0.03s model=    0.27MB
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+A PaCMAP             fit=  164.33s transform=   9.20s model=  356.30MB
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+A UMAP               fit=   95.91s transform=  23.36s model=  528.62MB
+B No Reduction       KNN       train=    0.06s test=  34.43s acc=0.9700
+B No Reduction       SVM       train=  449.56s test=  62.92s acc=0.8536
+B No Reduction       MLP       train=  199.37s test=   0.15s acc=0.9785
+B No Reduction       XGBoost   train= 1017.70s test=   0.78s acc=0.9792
+B No Reduction       CatBoost  train=   66.08s test=   0.03s acc=0.9722
+B No Reduction       LightGBM  train=   19.16s test=   0.98s acc=0.9810
+Applying flood_fill dimensionality reduction...
+B DFFE (Flood Fill)  KNN       train=    0.00s test=   3.40s acc=0.9608
+B DFFE (Flood Fill)  SVM       train=   46.64s test=   4.96s acc=0.8891
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:690: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.
+  warnings.warn(
+B DFFE (Flood Fill)  MLP       train=  220.78s test=   0.05s acc=0.9810
+B DFFE (Flood Fill)  XGBoost   train=   50.13s test=   0.74s acc=0.9797
+B DFFE (Flood Fill)  CatBoost  train=   18.67s test=   0.01s acc=0.9745
+B DFFE (Flood Fill)  LightGBM  train=    9.80s test=   0.94s acc=0.9800
+Applying lda dimensionality reduction...
+Reduced dimensions from 784 to 9
+B LDA                KNN       train=    0.13s test=   0.54s acc=0.9154
+B LDA                SVM       train=   32.14s test=   5.07s acc=0.7378
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:690: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.
+  warnings.warn(
+B LDA                MLP       train=  153.29s test=   0.05s acc=0.9180
+B LDA                XGBoost   train=   34.57s test=   0.74s acc=0.9168
+B LDA                CatBoost  train=   15.15s test=   0.01s acc=0.9211
+B LDA                LightGBM  train=    7.00s test=   1.09s acc=0.9206
+Applying pca dimensionality reduction...
+Reduced dimensions from 784 to 43
+B PCA                KNN       train=    0.00s test=   3.39s acc=0.9783
+B PCA                SVM       train=  146.51s test=  10.74s acc=0.8478
+B PCA                MLP       train=   54.31s test=   0.05s acc=0.9822
+B PCA                XGBoost   train=   68.21s test=   0.73s acc=0.9680
+B PCA                CatBoost  train=   38.15s test=   0.01s acc=0.9613
+B PCA                LightGBM  train=   11.78s test=   1.02s acc=0.9722
+Applying tsvd dimensionality reduction...
+Reduced dimensions from 784 to 43
+B TruncatedSVD       KNN       train=    0.01s test=   3.36s acc=0.9781
+B TruncatedSVD       SVM       train=   92.12s test=   7.24s acc=0.8072
+B TruncatedSVD       MLP       train=   56.87s test=   0.06s acc=0.9829
+B TruncatedSVD       XGBoost   train=   66.75s test=   0.72s acc=0.9703
+B TruncatedSVD       CatBoost  train=   38.63s test=   0.01s acc=0.9614
+B TruncatedSVD       LightGBM  train=   11.90s test=   0.98s acc=0.9751
+Applying pacmap dimensionality reduction...
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+Fitting PaCMAP on training data with PCA initialization...
+Reduced dimensions from 784 to 43
+B PaCMAP             KNN       train=    0.01s test=   3.41s acc=0.9790
+B PaCMAP             SVM       train=   11.84s test=   1.80s acc=0.9770
+B PaCMAP             MLP       train=  165.12s test=   0.05s acc=0.9780
+B PaCMAP             XGBoost   train=   61.50s test=   0.74s acc=0.9794
+B PaCMAP             CatBoost  train=   35.64s test=   0.01s acc=0.9790
+B PaCMAP             LightGBM  train=    9.16s test=   1.06s acc=0.9788
+Applying umap dimensionality reduction...
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+Reduced dimensions from 784 to 43
+B UMAP               KNN       train=    0.00s test=   3.47s acc=0.9710
+B UMAP               SVM       train= 1362.05s test=   1.25s acc=0.9728
+B UMAP               MLP       train=   77.17s test=   0.05s acc=0.9701
+B UMAP               XGBoost   train=   73.80s test=   0.73s acc=0.9732
+B UMAP               CatBoost  train=   36.23s test=   0.01s acc=0.9716
+B UMAP               LightGBM  train=    9.61s test=   1.05s acc=0.9722
+D side=  28 per_image=0.115ms
+D side=  56 per_image=0.188ms
+D side= 112 per_image=0.557ms
+D side= 224 per_image=2.137ms
+C n=  10000 DFFE (Flood Fill)       0.95s
+C n=  10000 PCA                     0.21s
+C n=  10000 TruncatedSVD            0.27s
+C n=  10000 LDA                     1.16s
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+C n=  10000 UMAP                   33.27s
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+C n=  10000 PaCMAP                 20.48s
+C n=  30000 DFFE (Flood Fill)       3.30s
+C n=  30000 PCA                     0.45s
+C n=  30000 TruncatedSVD            0.91s
+C n=  30000 LDA                     3.33s
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+C n=  30000 UMAP                   43.08s
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+C n=  30000 PaCMAP                 85.05s
+C n=  60000 DFFE (Flood Fill)       5.76s
+C n=  60000 PCA                     0.67s
+C n=  60000 TruncatedSVD            1.58s
+C n=  60000 LDA                     6.23s
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+C n=  60000 UMAP                  104.58s
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+C n=  60000 PaCMAP                226.40s
+C n= 120000 DFFE (Flood Fill)      11.74s
+C n= 120000 PCA                     1.23s
+C n= 120000 TruncatedSVD            3.23s
+C n= 120000 LDA                    13.19s
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+C n= 120000 UMAP                  247.75s
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+C n= 120000 PaCMAP                487.06s
+C n= 240000 DFFE (Flood Fill)      23.40s
+C n= 240000 PCA                     2.37s
+C n= 240000 TruncatedSVD            6.39s
+C n= 240000 LDA                    26.47s
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+C n= 240000 UMAP                  575.52s
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+C n= 240000 PaCMAP               1072.61s

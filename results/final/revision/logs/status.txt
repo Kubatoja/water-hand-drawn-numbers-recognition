@@ -1,0 +1,11 @@
+2026-10-13T23:15:01 START ablation
+2026-10-13T23:37:06 END   ablation (exit 0)
+2026-10-13T23:37:06 START emnist
+2026-10-14T00:15:10 RESTART (LightGBM stabilised: min_sum_hessian_in_leaf=1.0)
+2026-10-14T00:15:21 START emnist
+2026-10-14T01:45:03 END   emnist (exit 0)
+2026-10-14T01:45:03 START mnist_lgbm_check
+2026-10-14T01:57:11 END   mnist_lgbm_check (exit 0)
+2026-10-14T01:57:11 START timing
+2026-10-14T04:20:46 END   timing (exit 0)
+2026-10-14T04:20:46 ALL DONE

@@ -1,0 +1,83 @@
+[No Reduction] features (240000, 784) in 0.3s
+  LightGBM  fold 1: acc=0.9892 train=90.5s test=3.93s
+  LightGBM  fold 2: acc=0.9888 train=87.0s test=5.14s
+  LightGBM  fold 3: acc=0.9894 train=104.5s test=3.81s
+  LightGBM  fold 4: acc=0.9898 train=86.8s test=3.82s
+  LightGBM  fold 5: acc=0.9898 train=85.6s test=3.77s
+Applying flood_fill dimensionality reduction...
+[DFFE (Flood Fill)] features (240000, 43) in 30.2s
+  LightGBM  fold 1: acc=0.9605 train=27.3s test=4.81s
+  LightGBM  fold 2: acc=0.9609 train=22.4s test=4.15s
+  LightGBM  fold 3: acc=0.9615 train=20.5s test=4.09s
+  LightGBM  fold 4: acc=0.9627 train=20.1s test=4.16s
+  LightGBM  fold 5: acc=0.9600 train=20.7s test=4.11s
+Applying lda dimensionality reduction...
+Reduced dimensions from 784 to 9
+[LDA] features (240000, 9) in 26.4s
+  LightGBM  fold 1: acc=0.9410 train=16.7s test=3.95s
+  LightGBM  fold 2: acc=0.9407 train=16.0s test=3.96s
+  LightGBM  fold 3: acc=0.9420 train=15.9s test=3.95s
+  LightGBM  fold 4: acc=0.9422 train=16.2s test=4.18s
+  LightGBM  fold 5: acc=0.9422 train=15.8s test=3.96s
+  CatBoost  fold 1: acc=0.9394 train=49.6s test=0.04s
+  CatBoost  fold 2: acc=0.9393 train=49.3s test=0.04s
+  CatBoost  fold 3: acc=0.9416 train=49.1s test=0.04s
+  CatBoost  fold 4: acc=0.9415 train=49.0s test=0.05s
+  CatBoost  fold 5: acc=0.9404 train=49.0s test=0.04s
+Applying pca dimensionality reduction...
+Reduced dimensions from 784 to 43
+[PCA] features (240000, 43) in 2.7s
+  LightGBM  fold 1: acc=0.9845 train=31.0s test=4.14s
+  LightGBM  fold 2: acc=0.9843 train=30.3s test=4.44s
+  LightGBM  fold 3: acc=0.9842 train=30.5s test=4.19s
+  LightGBM  fold 4: acc=0.9846 train=32.6s test=4.13s
+  LightGBM  fold 5: acc=0.9842 train=30.3s test=4.10s
+  CatBoost  fold 1: acc=0.9743 train=107.2s test=0.05s
+  CatBoost  fold 2: acc=0.9747 train=105.9s test=0.05s
+  CatBoost  fold 3: acc=0.9747 train=105.7s test=0.06s
+  CatBoost  fold 4: acc=0.9753 train=105.7s test=0.05s
+  CatBoost  fold 5: acc=0.9749 train=105.7s test=0.05s
+Applying tsvd dimensionality reduction...
+Reduced dimensions from 784 to 43
+[TruncatedSVD] features (240000, 43) in 6.1s
+  LightGBM  fold 1: acc=0.9851 train=29.8s test=3.99s
+  LightGBM  fold 2: acc=0.9847 train=30.0s test=3.99s
+  LightGBM  fold 3: acc=0.9843 train=29.3s test=3.98s
+  LightGBM  fold 4: acc=0.9851 train=30.0s test=4.43s
+  LightGBM  fold 5: acc=0.9845 train=30.0s test=4.03s
+  CatBoost  fold 1: acc=0.9753 train=105.6s test=0.05s
+  CatBoost  fold 2: acc=0.9754 train=105.7s test=0.05s
+  CatBoost  fold 3: acc=0.9756 train=105.7s test=0.06s
+  CatBoost  fold 4: acc=0.9753 train=105.7s test=0.05s
+  CatBoost  fold 5: acc=0.9751 train=105.8s test=0.05s
+Applying pacmap dimensionality reduction...
+Warning: random state is set to 42.
+Note: `n_components != 2` have not been thoroughly tested.
+Fitting PaCMAP on training data with PCA initialization...
+Reduced dimensions from 784 to 43
+[PaCMAP] features (240000, 43) in 1073.5s
+  LightGBM  fold 1: acc=0.9854 train=21.7s test=4.03s
+  LightGBM  fold 2: acc=0.9861 train=20.3s test=4.00s
+  LightGBM  fold 3: acc=0.9858 train=20.5s test=4.21s
+  LightGBM  fold 4: acc=0.9861 train=20.4s test=4.02s
+  LightGBM  fold 5: acc=0.9862 train=20.7s test=4.04s
+  CatBoost  fold 1: acc=0.9854 train=99.2s test=0.05s
+  CatBoost  fold 2: acc=0.9862 train=99.1s test=0.05s
+  CatBoost  fold 3: acc=0.9860 train=99.2s test=0.05s
+  CatBoost  fold 4: acc=0.9862 train=99.5s test=0.05s
+  CatBoost  fold 5: acc=0.9863 train=99.2s test=0.05s
+Applying umap dimensionality reduction...
+C:\SKNGradient\water-hand-drawn-numbers-recognition\.venv\Lib\site-packages\umap\umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+Reduced dimensions from 784 to 43
+[UMAP] features (240000, 43) in 607.8s
+  LightGBM  fold 1: acc=0.9825 train=22.7s test=4.51s
+  LightGBM  fold 2: acc=0.9824 train=22.7s test=4.81s
+  LightGBM  fold 3: acc=0.9819 train=22.8s test=4.35s
+  LightGBM  fold 4: acc=0.9828 train=22.8s test=4.36s
+  LightGBM  fold 5: acc=0.9821 train=23.1s test=4.28s
+  CatBoost  fold 1: acc=0.9816 train=101.2s test=0.05s
+  CatBoost  fold 2: acc=0.9816 train=100.9s test=0.04s
+  CatBoost  fold 3: acc=0.9812 train=101.3s test=0.04s
+  CatBoost  fold 4: acc=0.9824 train=101.0s test=0.04s
+  CatBoost  fold 5: acc=0.9814 train=100.9s test=0.04s

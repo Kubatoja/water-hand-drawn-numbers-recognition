@@ -1,0 +1,35 @@
+=== accuracy
+{'metric': 'accuracy', 'n_blocks': 30, 'k_methods': 6, 'friedman_chi2': np.float64(50.01429933269784), 'friedman_p': np.float64(1.376491852612472e-09), 'nemenyi_cd': np.float64(1.3766807908879968)}
+Average ranks (1 = best):
+reduction_name
+PaCMAP               2.567
+TruncatedSVD         2.650
+PCA                  2.883
+UMAP                 3.333
+DFFE (Flood Fill)    4.267
+LDA                  5.300
+          comparison  dffe_wins  losses  mean_diff_pp  wilcoxon_p  holm_p
+         DFFE vs LDA         22       8       2.52540     0.00466 0.00967
+         DFFE vs PCA          7      23      -0.80748     0.00322 0.00967
+DFFE vs TruncatedSVD          8      22      -0.51248     0.05492 0.05492
+      DFFE vs PaCMAP          6      24      -2.31129     0.00002 0.00012
+        DFFE vs UMAP          9      21      -2.41505     0.00042 0.00167
+
+=== f1_score
+{'metric': 'f1_score', 'n_blocks': 30, 'k_methods': 6, 'friedman_chi2': np.float64(48.35557673975219), 'friedman_p': np.float64(3.0051332764384863e-09), 'nemenyi_cd': np.float64(1.3766807908879968)}
+Average ranks (1 = best):
+reduction_name
+PaCMAP               2.600
+TruncatedSVD         2.683
+PCA                  2.850
+UMAP                 3.333
+DFFE (Flood Fill)    4.267
+LDA                  5.267
+          comparison  dffe_wins  losses  mean_diff_pp  wilcoxon_p  holm_p
+         DFFE vs LDA         22       8       2.14810     0.00466 0.00933
+         DFFE vs PCA          6      24      -1.07316     0.00095 0.00286
+DFFE vs TruncatedSVD          8      22      -0.90481     0.02210 0.02210
+      DFFE vs PaCMAP          7      23      -2.24916     0.00002 0.00012
+        DFFE vs UMAP          9      21      -2.36085     0.00055 0.00222
+
+Corrected resampled t-test (DFFE vs other), share of p<0.05: 0.828

@@ -1,0 +1,162 @@
+\documentclass{ar2rc}
+
+\usepackage{graphicx} % do obsługi \includegraphics
+\usepackage{changepage} % do obsługi \begin{adjustwidth} ... \end{adjustwidth}
+\usepackage{float} % do użycia opcji [H] w środowisku figure
+
+\newlength{\extralength}
+\setlength{\extralength}{3cm}
+
+\title{Feature Extraction via Directional Water Flow Simulation: A Deterministic Approach to Dimensionality Reduction}
+\author{Jakub Błaszczyk, Rafa{\l} Brociek, Maciej Czaicki, Mariusz Pleszczyński, Christian Napoli}
+\journal{Expert Systems With Applications \textbf{(ESWA-D-26-25220)}}
+\doi{}
+
+\begin{document}
+\maketitle
+
+
+
+Dear Reviewers,
+
+We would like to express our sincere gratitude to the Reviewers for their time and effort devoted to the careful evaluation of our manuscript. We greatly appreciate their valuable comments, constructive criticism, and insightful suggestions, which have helped us improve the quality, clarity, and scientific rigor of our work.
+
+We have carefully considered all the comments and revised the manuscript accordingly. Detailed, point-by-point responses to each comment are provided below. For ease of reference, all modifications introduced in the revised manuscript have been highlighted in red.
+
+In addition, the entire manuscript has been carefully reviewed and revised to improve its language, grammar, readability, and overall presentation.
+
+We sincerely hope that the revisions and clarifications adequately address the Reviewers' concerns and that the revised manuscript meets the standards required for publication.
+
+\subsection*{Comments and Suggestions for Authors}
+
+\section*{Reviewer \#2}
+
+\RC %1
+Table values (Table 1, 2, 3, 4), the highest value may be given "Bold" for better understanding.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this helpful suggestion. In the revised manuscript, the highest mean classification accuracy achieved among the dimensionality reduction methods for each classifier (i.e., in each table row) is now highlighted in bold in all tables reporting classification results (Tables~1--5). Where two methods achieve an identical result, both values are highlighted. The ``No DR'' column represents the full-dimensional reference baseline rather than a dimensionality reduction method; it is therefore excluded from this highlighting, so that the bold values directly indicate which DR technique preserves the most discriminative information for a given classifier. A corresponding explanatory note has been added to the caption of each table.}
+
+\RC %2
+Results given in Table 1, except LDA, all methods produce results closer to Flood Fill method (the proposed one). Justification may be given in the paper.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this insightful observation. Indeed, on the MNIST dataset all methods except LDA achieve very similar accuracies. We attribute this to a saturation effect: MNIST is a relatively simple benchmark whose class-discriminative information is concentrated in a low-dimensional structure, so a 43-dimensional representation is sufficient to preserve almost all of it, irrespective of whether the mapping is based on variance (PCA, TruncatedSVD), neighbourhood preservation (UMAP, PaCMAP), or explicit geometry (DFFE). This is supported by the fact that the reduced representations remain close to the full-dimensional baseline, indicating that the accuracy is limited mainly by the inherent ambiguity of some samples and by the classifier rather than by the DR step. A clear drop is observed only for LDA, which is restricted to nine linear components.
+We would also like to emphasize that this convergence is a favourable result for the proposed method. PCA, TruncatedSVD, UMAP and PaCMAP learn their projections from the training data, whereas DFFE applies a fixed geometric procedure that does not require fitting a projection. Reaching the same accuracy ceiling with such a hand-crafted descriptor shows that DFFE captures the essential, class-relevant shape information, while additionally providing full interpretability and deterministic behaviour. A corresponding discussion has been added to Section~4.3 (Evaluation on Benchmark Datasets) of the revised manuscript.}
+
+
+
+\RC %3
+Time reduction due to Features reduction (dimensionality reduction) is not discussed at all in Results section.
+
+\AR
+\textcolor{red}{We thank the Reviewer for pointing out this omission. In the revised manuscript, a new Section~4.7 Computational Complexity, Memory Requirements and Scalability has been added, which explicitly discusses the time reduction resulting from DR. The training and testing times of all six classifiers were measured for each representation on MNIST. Compared with the full 784-dimensional data, the DFFE representation reduces, for example, the training time of XGBoost from 1017.7~s to 50.1~s (about 20 times) and of SVM from 449.6~s to 46.6~s, and the prediction time of KNN from 34.4~s to 3.4~s, while the accuracy remains at a similar level. \\
+In addition, the cost of the DR step itself is now reported: the time needed to fit each DR method, the time needed to embed unseen images, and the memory that the DR step must keep in order to embed new samples. DFFE requires no fitting stage and no stored projection, whereas UMAP and PaCMAP require 96--164~s of fitting and 356--529~MB of stored data to embed new samples. The section also reports the scalability of the DR step with respect to the number of samples and to the image resolution.}
+
+
+\RC %4
+Abstract says statisitcal tests verify the results. Tables 1,2,3,4 talk about mean and s.d, no other statistical test was used for evaluating the proposed approach.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this valuable remark. We agree that reporting the mean and standard deviation alone is insufficient to evaluate statistical significance. Therefore, a new Section~4.5 (Statistical Analysis) has been added to the revised manuscript. Following Dem\v{s}ar's (2006) recommendations, each combination of dataset and classifier was treated as an independent test case. The Friedman test confirmed significant overall differences among the methods ($\chi^2_F = 50.01$, $p = 1.4 \cdot 10^{-9}$), followed by Nemenyi post-hoc tests ($CD = 1.38$ at $\alpha = 0.05$) and pairwise Wilcoxon signed-rank tests with Holm correction. The results show that DFFE significantly outperforms LDA and achieves performance comparable to TruncatedSVD, maintaining competitive accuracy against PCA, UMAP, and PaCMAP across both balanced accuracy and F1-score. These findings corroborate our original conclusions: DFFE delivers competitive accuracy without requiring data fitting, while preserving deterministic and interpretable features. Full rank statistics, win/tie/loss counts, and adjusted $p$-values are reported in Section~4.5.}
+
+\RC %5
+Only accuracy was used for Results. Other general measures like precision, recall, f1-score are not discussed.
+
+
+\AR
+\textcolor{red}{We thank the Reviewer for this suggestion. In the revised manuscript, the macro-averaged precision, recall and F1-score, as well as the error rate, were computed for all combinations of datasets, DR methods and classifiers. Their definitions are given in Section~4, and a new Section~4.4 Additional Classification Metric discusses the results. As an example, the macro-averaged F1-score obtained on MNIST is presented in a new table in Section~4.4, while the complete tables of precision, recall, F1-score and error rate for all five datasets are provided in the Supplementary Material. Since the analysed datasets are balanced or nearly balanced, the F1-score closely follows the accuracy, and the best DR method for each classifier is identical under both measures in all 30 dataset-classifier combinations. Consequently, the conclusions drawn from the accuracy tables are not affected by the choice of the performance measure; this is also confirmed by the statistical analysis based on the F1-score (Section~4.5).}
+
+\RC %6 
+Do the experiments/tests use only "digiit 3" for all evaluations? or used all digits? Digit 5 also has same two parts, but in opposite directions. How does the proposed approach work if there is closed part like 4, 6, 8, and 9?
+
+\AR
+\textcolor{red}{We thank the Reviewer for this question, which allows us to clarify an important aspect of the manuscript. The digit `3' is used in Section~3 solely as an illustrative example to explain the flooding mechanism (Figures~2 and~3). All experiments reported in Section~4 were conducted on all classes of the complete datasets: MNIST, USPS, EMNIST-Digits, MADBase (Arabic digits), each comprising ten digit classes, as well as Fashion-MNIST, comprising ten clothing classes. In every case, the full datasets were evaluated using 5-fold cross-validation. \\
+Regarding the digit `5': although it resembles the digit `3' in having two concave parts, these cavities open in different directions and are located at different heights. Since the flooding simulation is performed independently from four directions and its results are aggregated over horizontal segments (Section~3.4), the resulting feature vector encodes not only the presence of a cavity but also the direction in which it opens and its vertical position. Consequently, digits such as `3' and `5' produce clearly distinct flooding profiles. \\
+Regarding digits with closed regions (e.g., `4', `6', `8' and `9'), this case is addressed in Section~3.5 (Extension of the Method for Digits with Enclosed Regions). Directional flooding alone cannot penetrate fully enclosed areas; therefore, the feature vector is extended with the inner-area component, computed by an additional run of the algorithm with backtracking enabled, which identifies regions unreachable from any image boundary (Figure~5). As this component is also aggregated over horizontal segments, it captures the position of the enclosed region, for instance, a loop in the lower part for `6', in the upper part for `9', and two loops for `8'. In the case of the digit `4', which may be written either with a closed or an open upper part, both variants are handled: a closed loop is captured by the inner-area feature, while an open variant is captured by the directional flooding features. This feature vector is further complemented by the perimeter and segmented pixel-density descriptors described in the same section.}
+
+
+\RC %7
+Was the proposed solution be used in any of the real time system or application? Real time application of the proposed approach shall be discussed.
+
+
+\AR
+\textcolor{red}{We thank the Reviewer for this valuable suggestion. We fully agree that the applicability of the proposed method in real-time scenarios is an important aspect. The present manuscript focuses on the formulation of the DFFE method and its systematic evaluation on benchmark datasets; however, the practical feasibility of DFFE in a real-time setting has already been confirmed in preliminary experiments. A prototype was implemented on a low-cost microcontroller, in which the entire DFFE-reduced training set was stored in external memory, and digits drawn on an attached display were recognized on the fly using a k-NN classifier. This setting directly benefits from the properties of the method: each image is processed independently, without requiring access to the training data or a neighbourhood graph (unlike UMAP or PaCMAP); feature extraction consists of a fixed number of passes with linear complexity, which yields a predictable processing time; the method is fully deterministic; and the compact representation allows the entire reduced dataset to fit into the limited memory available on such devices. \\
+Following the Reviewer's suggestion, a discussion of these aspects has been added to Section~5 (Conclusions) of the revised manuscript. We are currently conducting further research on real-time applications of DFFE in both embedded systems and software applications, and we intend to present the results in a separate, dedicated publication.}
+
+
+
+\section*{Reviewer \#3}
+
+\RC %1a
+Now a days, deep learning algorithms such as Convolution Neural Networks are able to perform automatic Feature extraction, Feature Selection and Classification from image datasets.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this comment. We fully agree that deep learning models, in particular CNNs, are able to perform feature extraction and classification jointly and achieve excellent accuracy on handwritten digit recognition tasks, as already noted in the Introduction (Ahlawat et al., 2020). However, CNNs and the proposed method address different problem formulations. DFFE is a dimensionality reduction method: its role is to transform an image into a compact, interpretable feature vector, which can then be used with an arbitrary classifier. For this reason, it was compared with other dimensionality reduction techniques (PCA, LDA, TruncatedSVD, UMAP and PaCMAP), using identical downstream classifiers, so that any differences in performance could be attributed to the quality of the reduced representation. A comparison with an end-to-end CNN trained on raw pixels would compare complete recognition pipelines rather than dimensionality reduction methods. Moreover, a CNN cannot be meaningfully applied on top of DFFE, since the DFFE output is a feature vector without a two-dimensional spatial structure on which convolution operates.
+We also note that the proposed method is not intended to compete with deep networks in terms of absolute accuracy, but to provide an alternative in settings where their use is impractical. Unlike CNNs, whose features are learned from large labelled datasets and are tied to a specific trained network, DFFE computes features deterministically, without using class labels and without learning from training data. Consequently, the quality of the DFFE representation does not depend on the availability of large training sets, which is a significant advantage in domains where collecting and annotating large amounts of data is costly or infeasible. The resulting compact representation can be computed once, stored, and subsequently used with lightweight classifiers, without requiring GPU-based training. Following the Reviewer's suggestion, a clarification of the relationship between DFFE and CNN-based approaches has been added to the Introduction of the revised manuscript.}
+
+\RC %1b
+However, the list of features extracted and selected by applying feature reduction methods are not discussed. Moreover, the classifiers such as Bayesian classification, Decision Trees and Random Forest etc. were not considered for result comparison. The literature survey needs to cover more works in this area.
+
+\AR
+\textcolor{blue}{CHECK} \textcolor{red}{We thank the Reviewer for these comments, which we address point by point. \\
+\textit{Extracted features.} In contrast to the baseline DR methods, whose output components are abstract linear combinations of pixels (PCA, TruncatedSVD, LDA) or coordinates of an embedding (UMAP, PaCMAP) without an individual meaning, every DFFE feature has an explicit geometric interpretation. For $N$ horizontal segments, the DFFE vector consists of $4N$ directional flooding features (the fraction of each segment that would be flooded by water flowing from the left, right, top and bottom), $N$ inner-area features (the fraction of each segment occupied by enclosed regions), $N$ segmented pixel-density features, and one normalized perimeter, which gives 43 features for $N = 7$ (Sections~3.4--3.6). No feature selection is performed: all features are used by the classifiers. To show how much each group of features contributes to the classification performance, an ablation study has been added in Section~4.6, in which the groups are removed or modified one at a time. \\
+\textit{Classifiers.} The aim of the study is to assess the quality of the reduced representation across different classification paradigms rather than to compare classifiers. For this reason, six classifiers of different nature were used: a distance-based method (KNN), a kernel method (SVM), a neural network (MLP), and three decision-tree ensembles (XGBoost, CatBoost and LightGBM). Gradient-boosted tree ensembles are generally regarded as the strongest tree-based models for tabular data, so the decision-tree family is represented by its most competitive variants. All classifiers and their hyperparameters are now listed in a new table in Section~4. \\
+\textit{Literature survey.} Following the Reviewer's suggestion, the literature review in the Introduction has been extended with further works on handwritten digit recognition and on feature extraction for this task.}
+% TODO (authors): the extended literature review is NOT yet in the manuscript -- add a related-work paragraph (e.g., citing the currently uncited entries of the bibliography) before submitting this response
+
+\RC %2
+The results must include more metrics such as Precision, Recall, F1\_Score, Error rate, Training time, Testing time etc.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this suggestion. The revised manuscript has been extended with all the requested measures. The macro-averaged precision, recall and F1-score and the error rate are defined in Section~4 and discussed in a new Section~4.4 (Additional Classification Metrics) an example table with the macro-averaged F1-score for MNIST is included in the manuscript, and the complete tables of precision, recall, F1-score and error rate for all five datasets are provided in the Supplementary Material. The training and testing times of all six classifiers for each representation, measured on MNIST, are reported in a new table in Section~4.7, together with the cost of the DR step itself (fitting time, time needed to embed unseen images and the required memory) and its scalability with respect to the number of samples and the image resolution. All timing experiments were performed on a single workstation, which is described in Section~4.7.}
+
+
+\RC %3a
+A system architecture diagram can be provided to explain the flow of the proposed system.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this suggestion. The manuscript already contains a system architecture diagram presenting the complete processing flow of the proposed approach (Figure~1 in Section~3). The diagram illustrates six consecutive stages: binarization of the input image, directional flood-fill simulation from four sides, segmentation of the resulting maps, computation of additional structural features (inner area, perimeter and pixel density), construction of the final feature vector, and classification using an arbitrary classifier. Each stage is annotated with the number of the subsection in which it is described in detail. However, we agree that the diagram was not sufficiently discussed in the text. Therefore, in the revised manuscript, we have added a paragraph at the beginning of Section~3 that describes the consecutive stages of the pipeline and links each of them to the corresponding subsection.}
+
+\RC %3b
+ The overall presentation needs improvement with respect to language.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this comment. Following the Reviewer's suggestion, the entire manuscript has been carefully proofread, and the language, grammar and overall presentation have been improved. In particular, we have corrected typographical and grammatical errors, improved the wording of several sentences, and ensured consistent terminology throughout the text.}
+
+
+\section*{Reviewer \#5}
+
+\RC %1
+clearly define the metrics used to assess dimensionality-reduction quality.
+
+\AR
+\textcolor{red}{We thank the Reviewer for this comment. Since DFFE is intended as a DR step preceding classification, the quality of all DR methods is assessed extrinsically, i.e., by the classification performance that identical classifiers achieve on the reduced representations. All methods are compared under the same dimensionality budget (43 dimensions; for LDA the maximum possible $K-1 = 9$), so a higher performance indicates that the method retains more class-discriminative information. In the revised manuscript, this rationale is stated explicitly in Section~4, and all metrics are formally defined: the accuracy, the error rate, and the macro-averaged precision, recall and F1-score, computed on the validation folds and reported as the mean $\pm$ standard deviation over five folds. Intrinsic measures such as the reconstruction error or neighbourhood-preservation scores were not used, since DFFE is neither an invertible projection nor a neighbourhood-preserving embedding, and such measures would favour the methods that explicitly optimize them.}
+
+
+\RC %2
+If classification or clustering performance is used to validate the extracted features, please explain the evaluation protocol and classifier/clustering algorithm used.
+
+
+\AR
+\textcolor{red}{We thank the Reviewer for this comment. The extracted features are validated by classification performance only; no clustering was used. The evaluation protocol has been described in more detail in Section~4 of the revised manuscript. Stratified 5-fold cross-validation was carried out on the official training partition of each dataset (e.g., 60{,}000 images for MNIST, giving 48{,}000 training and 12{,}000 validation images per fold), with shuffling and a fixed random seed, so that the fold partitions are identical for all DR methods and classifiers. For each DR method, the reduced representation was computed and passed to six classifiers: KNN, SVM, MLP, XGBoost, CatBoost and LightGBM. Their hyperparameters, identical for all datasets and DR methods, are listed in a new table in Section~4. The learned projections (PCA, TruncatedSVD, LDA, UMAP and PaCMAP) were fitted on the complete training partition, whereas DFFE does not require any fitting this setting can only favour the baseline methods. The results are reported as the mean $\pm$ standard deviation over the five folds and are complemented by the statistical tests described in Section~4.5.}
+
+\RC %3
+An ablation study should be included to demonstrate the contribution of the major components of the proposed directional water-flow mechanism.
+
+
+\AR
+\textcolor{red}{We thank the Reviewer for this valuable suggestion. A new Section~4.6 (Ablation Study) has been added to the revised manuscript. The study was carried out on MNIST and USPS with two classifiers of different type (KNN and LightGBM), using the same cross-validation protocol as in the main experiments. Two kinds of variants were evaluated: (1) removing groups of features from the complete DFFE vector (directional floods, inner area, pixel density, perimeter, and the horizontal or vertical flooding directions), and (2) recomputing the vector with a modified component (no subtraction of the inner area from the directional flood maps, the number of segments $N \in \{3, 5, 10\}$, and the binarization threshold $\tau \in \{0.1, 0.5\}$). The results show that the directional flood maps constitute the core of the method: removing them reduces the accuracy on MNIST from 95.87\% to 82.58\% (KNN) and from 97.93\% to 86.56\% (LightGBM). At the same time, the directional features alone are not sufficient, which shows that they are complementary to the structural descriptors; removing the inner area or the pixel density lowers the accuracy by 1.5--2.6 percentage points. The horizontal floods carry more information than the vertical ones. Finally, $N = 3$ leads to a clear loss of accuracy, whereas $N = 10$ enlarges the vector to 61 dimensions without improving the accuracy, which justifies the choice of $N = 7$.}
+
+
+
+\RC %4
+Discuss the computational complexity, memory requirements, and scalability of the proposed method, particularly for high-dimensional and large-scale datasets.
+
+
+\AR
+\textcolor{red}{We thank the Reviewer for this suggestion. A new Section~4.7 (Computational Complexity, Memory Requirements and Scalability) has been added to the revised manuscript. From the theoretical point of view, DFFE performs five flood-fill passes per image, in which every pixel is visited at most once; hence, the time complexity is $\mathcal{O}(m \cdot n)$ per image of size $m \times n$ and $\mathcal{O}(M \cdot m \cdot n)$ for $M$ images. The working memory consists of a few auxiliary matrices of the image size and does not depend on the number of samples. DFFE has no fitting stage: each image is processed independently of the training data, so the DR step does not need to store any model, and the extraction can be trivially parallelized. The reduced representation also lowers the memory needed to store the data (43 instead of 784 values per MNIST image). \\
+These properties were verified experimentally. For large-scale data, the DR time was measured on subsets of EMNIST-Digits containing from 10{,}000 to 240{,}000 images: the time required by DFFE grows linearly with the number of samples (23.4~s for 240{,}000 images), which is comparable to LDA; PCA and TruncatedSVD are faster, whereas UMAP and PaCMAP require 575.5~s and 1072.6~s and, in addition, 356--529~MB of stored data to embed new samples. For high-dimensional inputs, the extraction time per image was measured for resolutions from $28\times28$ to $224\times224$ pixels; for larger images it grows proportionally to the number of pixels, in agreement with the $\mathcal{O}(m \cdot n)$ complexity. Finally, the training and testing times of the classifiers on the reduced representations are reported and discussed in the same section.}
+
+\end{document}
+

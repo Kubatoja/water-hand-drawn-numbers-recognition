@@ -1,0 +1,379 @@
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged F1-score (\%) across DR methods for the MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:f1_score_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.82 \pm 0.13$ & $95.83 \pm 0.19$ & $91.53 \pm 0.21$ & $97.70 \pm 0.12$ & \best{97.71 \pm 0.12} & $97.69 \pm 0.16$ & $97.00 \pm 0.14$ \\
+        Multi-Layer Perceptron & $97.93 \pm 0.13$ & $97.94 \pm 0.08$ & $91.49 \pm 0.14$ & $98.07 \pm 0.19$ & \best{98.18 \pm 0.12} & $97.69 \pm 0.16$ & $96.83 \pm 0.17$ \\
+        Support Vector Machine & $87.12 \pm 0.23$ & $90.12 \pm 0.18$ & $77.34 \pm 0.30$ & $86.50 \pm 0.16$ & $83.77 \pm 0.16$ & \best{97.46 \pm 0.17} & $97.15 \pm 0.15$ \\
+        XGBoost                & $97.92 \pm 0.10$ & \best{97.84 \pm 0.07} & $91.80 \pm 0.16$ & $96.89 \pm 0.07$ & $97.00 \pm 0.10$ & $97.82 \pm 0.13$ & $97.21 \pm 0.07$ \\
+        CatBoost               & $97.13 \pm 0.20$ & $97.30 \pm 0.10$ & $91.95 \pm 0.14$ & $96.09 \pm 0.15$ & $96.16 \pm 0.15$ & \best{97.75 \pm 0.16} & $96.99 \pm 0.18$ \\
+        LightGBM               & $98.15 \pm 0.08$ & \best{97.92 \pm 0.10} & $92.04 \pm 0.09$ & $97.29 \pm 0.10$ & $97.46 \pm 0.12$ & $97.76 \pm 0.10$ & $97.20 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged F1-score (\%) across DR methods for the USPS dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:f1_score_usps}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $95.73 \pm 0.25$ & $92.77 \pm 0.29$ & $94.72 \pm 0.38$ & \best{97.24 \pm 0.23} & $97.24 \pm 0.23$ & $96.96 \pm 0.40$ & $97.10 \pm 0.17$ \\
+        Multi-Layer Perceptron & $96.72 \pm 0.30$ & $95.53 \pm 0.61$ & $94.09 \pm 0.26$ & $97.58 \pm 0.25$ & \best{97.64 \pm 0.35} & $97.14 \pm 0.47$ & $96.68 \pm 0.18$ \\
+        Support Vector Machine & $91.41 \pm 0.59$ & $93.28 \pm 0.66$ & $81.47 \pm 0.95$ & $66.37 \pm 1.18$ & $75.86 \pm 0.76$ & $91.81 \pm 0.91$ & \best{96.75 \pm 0.52} \\
+        XGBoost                & $96.58 \pm 0.21$ & $95.20 \pm 0.84$ & $94.59 \pm 0.30$ & $96.35 \pm 0.58$ & $96.37 \pm 0.22$ & $97.02 \pm 0.51$ & \best{97.38 \pm 0.21} \\
+        CatBoost               & $96.56 \pm 0.36$ & $94.12 \pm 0.90$ & $94.50 \pm 0.39$ & $96.16 \pm 0.54$ & $96.15 \pm 0.50$ & $97.24 \pm 0.41$ & \best{97.38 \pm 0.23} \\
+        LightGBM               & $96.65 \pm 0.43$ & $95.04 \pm 0.84$ & $94.56 \pm 0.49$ & $96.28 \pm 0.43$ & $96.46 \pm 0.25$ & $96.87 \pm 0.46$ & \best{97.40 \pm 0.20} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged F1-score (\%) across DR methods for the EMNIST-Digits dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:f1_score_emnist_digits}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $97.88 \pm 0.05$ & $91.60 \pm 0.11$ & $93.69 \pm 0.11$ & \best{98.56 \pm 0.05} & $98.54 \pm 0.05$ & $98.55 \pm 0.04$ & $98.13 \pm 0.04$ \\
+        Multi-Layer Perceptron & $98.73 \pm 0.08$ & $96.02 \pm 0.12$ & $93.99 \pm 0.07$ & $98.83 \pm 0.05$ & \best{98.91 \pm 0.07} & $98.55 \pm 0.03$ & $98.10 \pm 0.03$ \\
+        Support Vector Machine & $94.10 \pm 0.04$ & $91.20 \pm 0.13$ & $84.45 \pm 0.09$ & $94.27 \pm 0.08$ & $91.19 \pm 0.07$ & \best{98.49 \pm 0.02} & $98.33 \pm 0.05$ \\
+        XGBoost                & $98.82 \pm 0.04$ & $95.65 \pm 0.11$ & $94.06 \pm 0.11$ & $98.03 \pm 0.03$ & $98.04 \pm 0.07$ & \best{98.62 \pm 0.02} & $98.23 \pm 0.03$ \\
+        CatBoost               & $98.47 \pm 0.05$ & $94.91 \pm 0.10$ & $94.03 \pm 0.11$ & $97.48 \pm 0.03$ & $97.53 \pm 0.02$ & \best{98.60 \pm 0.04} & $98.16 \pm 0.04$ \\
+        LightGBM               & $98.94 \pm 0.04$ & $96.11 \pm 0.10$ & $94.16 \pm 0.07$ & $98.44 \pm 0.02$ & $98.48 \pm 0.04$ & \best{98.59 \pm 0.03} & $98.23 \pm 0.03$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged F1-score (\%) across DR methods for the Arabic dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:f1_score_arabic}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $98.68 \pm 0.11$ & $97.03 \pm 0.17$ & $96.88 \pm 0.11$ & \best{98.97 \pm 0.07} & $98.97 \pm 0.07$ & $98.93 \pm 0.09$ & $98.63 \pm 0.09$ \\
+        Multi-Layer Perceptron & $99.03 \pm 0.12$ & $98.64 \pm 0.09$ & $97.25 \pm 0.13$ & $99.10 \pm 0.07$ & \best{99.12 \pm 0.07} & $98.96 \pm 0.11$ & $98.59 \pm 0.11$ \\
+        Support Vector Machine & $84.10 \pm 0.11$ & $84.13 \pm 0.66$ & $81.98 \pm 0.30$ & $84.13 \pm 0.43$ & $79.80 \pm 0.39$ & \best{98.96 \pm 0.12} & $98.62 \pm 0.14$ \\
+        XGBoost                & $99.05 \pm 0.09$ & $98.78 \pm 0.07$ & $97.24 \pm 0.19$ & $98.83 \pm 0.08$ & $98.84 \pm 0.05$ & \best{98.98 \pm 0.10} & $98.75 \pm 0.09$ \\
+        CatBoost               & $98.48 \pm 0.07$ & $98.20 \pm 0.10$ & $96.98 \pm 0.13$ & $98.43 \pm 0.08$ & $98.42 \pm 0.05$ & \best{98.97 \pm 0.11} & $98.66 \pm 0.11$ \\
+        LightGBM               & $99.17 \pm 0.05$ & $98.81 \pm 0.05$ & $97.34 \pm 0.18$ & \best{98.99 \pm 0.09} & $98.97 \pm 0.08$ & $98.96 \pm 0.10$ & $98.75 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged F1-score (\%) across DR methods for the Fashion-MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:f1_score_fashion_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $84.83 \pm 0.20$ & $78.75 \pm 0.30$ & $82.63 \pm 0.30$ & $85.28 \pm 0.49$ & \best{85.29 \pm 0.53} & $80.98 \pm 0.30$ & $80.76 \pm 0.25$ \\
+        Multi-Layer Perceptron & $87.05 \pm 0.37$ & $82.48 \pm 0.43$ & $83.05 \pm 0.70$ & $88.33 \pm 0.52$ & \best{88.39 \pm 0.27} & $82.77 \pm 0.24$ & $78.02 \pm 0.60$ \\
+        Support Vector Machine & $82.25 \pm 0.22$ & $73.11 \pm 0.35$ & $70.71 \pm 0.42$ & $75.76 \pm 0.46$ & $70.08 \pm 0.48$ & $73.01 \pm 0.31$ & \best{83.33 \pm 0.20} \\
+        XGBoost                & $88.97 \pm 0.31$ & $83.31 \pm 0.35$ & $84.59 \pm 0.32$ & $87.90 \pm 0.16$ & \best{87.94 \pm 0.21} & $83.22 \pm 0.34$ & $83.35 \pm 0.22$ \\
+        CatBoost               & $87.90 \pm 0.19$ & $81.71 \pm 0.43$ & $84.86 \pm 0.28$ & $87.15 \pm 0.14$ & \best{87.21 \pm 0.16} & $83.00 \pm 0.27$ & $82.93 \pm 0.11$ \\
+        LightGBM               & $89.16 \pm 0.33$ & $83.53 \pm 0.28$ & $84.46 \pm 0.13$ & $88.12 \pm 0.24$ & \best{88.32 \pm 0.30} & $82.99 \pm 0.19$ & $83.05 \pm 0.14$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged precision (\%) across DR methods for the MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:precision_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.90 \pm 0.12$ & $95.88 \pm 0.19$ & $91.57 \pm 0.21$ & $97.72 \pm 0.12$ & \best{97.73 \pm 0.12} & $97.69 \pm 0.16$ & $97.04 \pm 0.14$ \\
+        Multi-Layer Perceptron & $97.93 \pm 0.13$ & $97.95 \pm 0.08$ & $91.52 \pm 0.14$ & $98.07 \pm 0.19$ & \best{98.18 \pm 0.11} & $97.69 \pm 0.16$ & $96.87 \pm 0.17$ \\
+        Support Vector Machine & $91.78 \pm 0.20$ & $92.58 \pm 0.14$ & $88.85 \pm 0.20$ & $92.56 \pm 0.08$ & $91.42 \pm 0.08$ & \best{97.46 \pm 0.17} & $97.17 \pm 0.15$ \\
+        XGBoost                & $97.92 \pm 0.10$ & \best{97.85 \pm 0.08} & $91.80 \pm 0.17$ & $96.88 \pm 0.07$ & $97.00 \pm 0.10$ & $97.82 \pm 0.13$ & $97.24 \pm 0.07$ \\
+        CatBoost               & $97.13 \pm 0.20$ & $97.31 \pm 0.11$ & $91.95 \pm 0.14$ & $96.09 \pm 0.15$ & $96.16 \pm 0.15$ & \best{97.75 \pm 0.16} & $97.03 \pm 0.17$ \\
+        LightGBM               & $98.15 \pm 0.08$ & \best{97.92 \pm 0.10} & $92.04 \pm 0.09$ & $97.29 \pm 0.10$ & $97.46 \pm 0.12$ & $97.77 \pm 0.11$ & $97.23 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged precision (\%) across DR methods for the USPS dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:precision_usps}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.14 \pm 0.28$ & $93.45 \pm 0.42$ & $94.94 \pm 0.38$ & \best{97.36 \pm 0.28} & $97.36 \pm 0.28$ & $97.03 \pm 0.36$ & $97.19 \pm 0.17$ \\
+        Multi-Layer Perceptron & $96.77 \pm 0.22$ & $95.72 \pm 0.55$ & $94.16 \pm 0.27$ & $97.62 \pm 0.24$ & \best{97.68 \pm 0.36} & $97.18 \pm 0.45$ & $96.74 \pm 0.18$ \\
+        Support Vector Machine & $93.31 \pm 0.26$ & $93.77 \pm 0.58$ & $90.33 \pm 0.66$ & $90.81 \pm 0.70$ & $90.22 \pm 0.74$ & $93.40 \pm 0.82$ & \best{96.85 \pm 0.49} \\
+        XGBoost                & $96.67 \pm 0.22$ & $95.36 \pm 0.96$ & $94.65 \pm 0.41$ & $96.43 \pm 0.64$ & $96.44 \pm 0.22$ & $97.07 \pm 0.53$ & \best{97.47 \pm 0.20} \\
+        CatBoost               & $96.63 \pm 0.42$ & $94.32 \pm 1.03$ & $94.57 \pm 0.40$ & $96.23 \pm 0.56$ & $96.26 \pm 0.46$ & $97.28 \pm 0.40$ & \best{97.47 \pm 0.22} \\
+        LightGBM               & $96.71 \pm 0.51$ & $95.20 \pm 0.97$ & $94.59 \pm 0.55$ & $96.35 \pm 0.45$ & $96.56 \pm 0.25$ & $96.91 \pm 0.48$ & \best{97.47 \pm 0.16} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged precision (\%) across DR methods for the EMNIST-Digits dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:precision_emnist_digits}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $97.90 \pm 0.05$ & $91.64 \pm 0.10$ & $93.69 \pm 0.11$ & \best{98.56 \pm 0.05} & $98.55 \pm 0.05$ & $98.55 \pm 0.04$ & $98.14 \pm 0.04$ \\
+        Multi-Layer Perceptron & $98.73 \pm 0.08$ & $96.05 \pm 0.11$ & $94.01 \pm 0.07$ & $98.83 \pm 0.05$ & \best{98.91 \pm 0.07} & $98.55 \pm 0.03$ & $98.11 \pm 0.02$ \\
+        Support Vector Machine & $95.07 \pm 0.05$ & $91.66 \pm 0.13$ & $90.69 \pm 0.08$ & $95.77 \pm 0.03$ & $93.91 \pm 0.05$ & \best{98.49 \pm 0.02} & $98.34 \pm 0.05$ \\
+        XGBoost                & $98.82 \pm 0.04$ & $95.65 \pm 0.11$ & $94.06 \pm 0.11$ & $98.03 \pm 0.03$ & $98.04 \pm 0.07$ & \best{98.62 \pm 0.02} & $98.24 \pm 0.03$ \\
+        CatBoost               & $98.47 \pm 0.05$ & $94.91 \pm 0.10$ & $94.03 \pm 0.11$ & $97.48 \pm 0.03$ & $97.53 \pm 0.02$ & \best{98.60 \pm 0.04} & $98.17 \pm 0.04$ \\
+        LightGBM               & $98.94 \pm 0.04$ & $96.11 \pm 0.10$ & $94.16 \pm 0.07$ & $98.44 \pm 0.02$ & $98.48 \pm 0.04$ & \best{98.59 \pm 0.03} & $98.24 \pm 0.03$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged precision (\%) across DR methods for the Arabic dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:precision_arabic}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $98.69 \pm 0.10$ & $97.05 \pm 0.17$ & $96.89 \pm 0.11$ & \best{98.97 \pm 0.06} & $98.97 \pm 0.07$ & $98.94 \pm 0.09$ & $98.64 \pm 0.09$ \\
+        Multi-Layer Perceptron & $99.03 \pm 0.12$ & $98.64 \pm 0.09$ & $97.26 \pm 0.12$ & $99.10 \pm 0.07$ & \best{99.12 \pm 0.07} & $98.96 \pm 0.11$ & $98.60 \pm 0.10$ \\
+        Support Vector Machine & $92.80 \pm 0.08$ & $88.89 \pm 0.22$ & $92.04 \pm 0.04$ & $92.74 \pm 0.05$ & $91.74 \pm 0.07$ & \best{98.96 \pm 0.12} & $98.62 \pm 0.14$ \\
+        XGBoost                & $99.06 \pm 0.09$ & $98.78 \pm 0.07$ & $97.24 \pm 0.19$ & $98.84 \pm 0.08$ & $98.84 \pm 0.06$ & \best{98.98 \pm 0.10} & $98.76 \pm 0.08$ \\
+        CatBoost               & $98.48 \pm 0.07$ & $98.21 \pm 0.10$ & $96.98 \pm 0.13$ & $98.43 \pm 0.08$ & $98.42 \pm 0.06$ & \best{98.97 \pm 0.11} & $98.67 \pm 0.11$ \\
+        LightGBM               & $99.17 \pm 0.05$ & $98.81 \pm 0.05$ & $97.34 \pm 0.17$ & \best{98.99 \pm 0.09} & $98.97 \pm 0.08$ & $98.97 \pm 0.10$ & $98.76 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged precision (\%) across DR methods for the Fashion-MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:precision_fashion_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $85.00 \pm 0.22$ & $78.82 \pm 0.30$ & $82.72 \pm 0.29$ & $85.38 \pm 0.48$ & \best{85.38 \pm 0.51} & $81.08 \pm 0.29$ & $80.85 \pm 0.23$ \\
+        Multi-Layer Perceptron & $87.20 \pm 0.31$ & $82.62 \pm 0.41$ & $83.15 \pm 0.67$ & $88.34 \pm 0.49$ & \best{88.40 \pm 0.28} & $82.94 \pm 0.31$ & $79.09 \pm 0.88$ \\
+        Support Vector Machine & $83.33 \pm 0.25$ & $75.20 \pm 0.34$ & $83.26 \pm 0.47$ & \best{84.69 \pm 0.39} & $78.89 \pm 0.13$ & $77.60 \pm 0.28$ & $83.38 \pm 0.20$ \\
+        XGBoost                & $88.97 \pm 0.30$ & $83.30 \pm 0.35$ & $84.58 \pm 0.32$ & $87.90 \pm 0.15$ & \best{87.94 \pm 0.21} & $83.27 \pm 0.33$ & $83.38 \pm 0.23$ \\
+        CatBoost               & $87.90 \pm 0.20$ & $81.67 \pm 0.43$ & $84.86 \pm 0.29$ & $87.13 \pm 0.14$ & \best{87.20 \pm 0.16} & $83.10 \pm 0.27$ & $83.00 \pm 0.12$ \\
+        LightGBM               & $89.16 \pm 0.34$ & $83.57 \pm 0.29$ & $84.47 \pm 0.12$ & $88.14 \pm 0.24$ & \best{88.33 \pm 0.29} & $83.01 \pm 0.17$ & $83.08 \pm 0.15$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged recall (\%) across DR methods for the MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:recall_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $96.78 \pm 0.13$ & $95.81 \pm 0.19$ & $91.54 \pm 0.21$ & $97.69 \pm 0.12$ & \best{97.70 \pm 0.12} & $97.69 \pm 0.16$ & $96.98 \pm 0.14$ \\
+        Multi-Layer Perceptron & $97.93 \pm 0.13$ & $97.94 \pm 0.08$ & $91.49 \pm 0.13$ & $98.07 \pm 0.19$ & \best{98.18 \pm 0.12} & $97.70 \pm 0.15$ & $96.81 \pm 0.17$ \\
+        Support Vector Machine & $85.23 \pm 0.24$ & $89.10 \pm 0.25$ & $73.43 \pm 0.30$ & $84.54 \pm 0.26$ & $80.70 \pm 0.26$ & \best{97.47 \pm 0.17} & $97.13 \pm 0.15$ \\
+        XGBoost                & $97.92 \pm 0.10$ & \best{97.84 \pm 0.07} & $91.81 \pm 0.15$ & $96.89 \pm 0.06$ & $97.01 \pm 0.10$ & $97.82 \pm 0.13$ & $97.19 \pm 0.07$ \\
+        CatBoost               & $97.12 \pm 0.19$ & $97.30 \pm 0.10$ & $91.96 \pm 0.13$ & $96.09 \pm 0.15$ & $96.16 \pm 0.14$ & \best{97.76 \pm 0.15} & $96.97 \pm 0.17$ \\
+        LightGBM               & $98.15 \pm 0.08$ & \best{97.92 \pm 0.10} & $92.05 \pm 0.08$ & $97.29 \pm 0.10$ & $97.46 \pm 0.12$ & $97.76 \pm 0.10$ & $97.18 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged recall (\%) across DR methods for the USPS dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:recall_usps}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $95.43 \pm 0.25$ & $92.31 \pm 0.23$ & $94.57 \pm 0.40$ & \best{97.14 \pm 0.19} & $97.14 \pm 0.19$ & $96.93 \pm 0.44$ & $97.03 \pm 0.16$ \\
+        Multi-Layer Perceptron & $96.69 \pm 0.39$ & $95.42 \pm 0.71$ & $94.09 \pm 0.28$ & $97.56 \pm 0.29$ & \best{97.61 \pm 0.37} & $97.13 \pm 0.48$ & $96.65 \pm 0.18$ \\
+        Support Vector Machine & $90.32 \pm 0.77$ & $92.93 \pm 0.72$ & $78.60 \pm 1.60$ & $61.31 \pm 1.14$ & $70.43 \pm 0.89$ & $92.06 \pm 0.83$ & \best{96.69 \pm 0.55} \\
+        XGBoost                & $96.51 \pm 0.25$ & $95.10 \pm 0.78$ & $94.58 \pm 0.23$ & $96.29 \pm 0.51$ & $96.31 \pm 0.23$ & $97.00 \pm 0.50$ & \best{97.32 \pm 0.23} \\
+        CatBoost               & $96.51 \pm 0.31$ & $93.99 \pm 0.82$ & $94.49 \pm 0.39$ & $96.11 \pm 0.52$ & $96.06 \pm 0.53$ & $97.22 \pm 0.43$ & \best{97.31 \pm 0.25} \\
+        LightGBM               & $96.63 \pm 0.36$ & $94.95 \pm 0.73$ & $94.58 \pm 0.44$ & $96.24 \pm 0.40$ & $96.39 \pm 0.27$ & $96.87 \pm 0.45$ & \best{97.36 \pm 0.24} \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged recall (\%) across DR methods for the EMNIST-Digits dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:recall_emnist_digits}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $97.89 \pm 0.05$ & $91.65 \pm 0.10$ & $93.72 \pm 0.11$ & \best{98.56 \pm 0.05} & $98.55 \pm 0.05$ & $98.55 \pm 0.04$ & $98.13 \pm 0.04$ \\
+        Multi-Layer Perceptron & $98.72 \pm 0.08$ & $96.02 \pm 0.12$ & $93.99 \pm 0.07$ & $98.83 \pm 0.05$ & \best{98.91 \pm 0.07} & $98.55 \pm 0.03$ & $98.10 \pm 0.03$ \\
+        Support Vector Machine & $93.82 \pm 0.04$ & $91.12 \pm 0.13$ & $82.19 \pm 0.10$ & $93.76 \pm 0.10$ & $90.26 \pm 0.09$ & \best{98.49 \pm 0.02} & $98.33 \pm 0.05$ \\
+        XGBoost                & $98.82 \pm 0.04$ & $95.65 \pm 0.11$ & $94.07 \pm 0.11$ & $98.03 \pm 0.03$ & $98.04 \pm 0.07$ & \best{98.62 \pm 0.02} & $98.23 \pm 0.03$ \\
+        CatBoost               & $98.47 \pm 0.05$ & $94.92 \pm 0.10$ & $94.04 \pm 0.11$ & $97.48 \pm 0.03$ & $97.53 \pm 0.02$ & \best{98.60 \pm 0.04} & $98.16 \pm 0.04$ \\
+        LightGBM               & $98.94 \pm 0.04$ & $96.11 \pm 0.10$ & $94.16 \pm 0.07$ & $98.44 \pm 0.02$ & $98.48 \pm 0.04$ & \best{98.59 \pm 0.03} & $98.23 \pm 0.03$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged recall (\%) across DR methods for the Arabic dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:recall_arabic}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $98.68 \pm 0.11$ & $97.03 \pm 0.17$ & $96.88 \pm 0.11$ & \best{98.97 \pm 0.07} & $98.97 \pm 0.07$ & $98.94 \pm 0.09$ & $98.64 \pm 0.09$ \\
+        Multi-Layer Perceptron & $99.03 \pm 0.12$ & $98.64 \pm 0.09$ & $97.25 \pm 0.13$ & $99.10 \pm 0.07$ & \best{99.12 \pm 0.07} & $98.96 \pm 0.11$ & $98.59 \pm 0.11$ \\
+        Support Vector Machine & $81.16 \pm 0.15$ & $82.89 \pm 0.77$ & $78.72 \pm 0.41$ & $81.22 \pm 0.63$ & $76.05 \pm 0.51$ & \best{98.96 \pm 0.12} & $98.62 \pm 0.14$ \\
+        XGBoost                & $99.06 \pm 0.09$ & $98.78 \pm 0.07$ & $97.24 \pm 0.19$ & $98.83 \pm 0.08$ & $98.84 \pm 0.06$ & \best{98.98 \pm 0.10} & $98.75 \pm 0.09$ \\
+        CatBoost               & $98.48 \pm 0.07$ & $98.20 \pm 0.10$ & $96.98 \pm 0.13$ & $98.43 \pm 0.08$ & $98.42 \pm 0.05$ & \best{98.97 \pm 0.11} & $98.66 \pm 0.11$ \\
+        LightGBM               & $99.17 \pm 0.05$ & $98.81 \pm 0.05$ & $97.34 \pm 0.18$ & \best{98.99 \pm 0.09} & $98.97 \pm 0.08$ & $98.96 \pm 0.10$ & $98.75 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification macro-averaged recall (\%) across DR methods for the Fashion-MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:recall_fashion_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $84.95 \pm 0.18$ & $78.98 \pm 0.26$ & $82.76 \pm 0.31$ & $85.34 \pm 0.49$ & \best{85.35 \pm 0.53} & $81.16 \pm 0.27$ & $80.92 \pm 0.26$ \\
+        Multi-Layer Perceptron & $87.06 \pm 0.41$ & $82.53 \pm 0.49$ & $83.12 \pm 0.71$ & $88.35 \pm 0.50$ & \best{88.40 \pm 0.26} & $82.93 \pm 0.19$ & $78.70 \pm 0.73$ \\
+        Support Vector Machine & $82.18 \pm 0.20$ & $73.34 \pm 0.38$ & $66.89 \pm 0.45$ & $73.23 \pm 0.47$ & $67.60 \pm 0.53$ & $72.08 \pm 0.33$ & \best{83.49 \pm 0.18} \\
+        XGBoost                & $89.00 \pm 0.30$ & $83.37 \pm 0.35$ & $84.68 \pm 0.33$ & $87.92 \pm 0.18$ & \best{87.98 \pm 0.21} & $83.38 \pm 0.34$ & $83.44 \pm 0.21$ \\
+        CatBoost               & $87.94 \pm 0.21$ & $81.84 \pm 0.42$ & $84.98 \pm 0.30$ & $87.23 \pm 0.15$ & \best{87.30 \pm 0.17} & $83.19 \pm 0.26$ & $83.04 \pm 0.11$ \\
+        LightGBM               & $89.18 \pm 0.32$ & $83.52 \pm 0.28$ & $84.51 \pm 0.14$ & $88.15 \pm 0.25$ & \best{88.35 \pm 0.30} & $83.07 \pm 0.21$ & $83.10 \pm 0.13$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification error rate (\%) across DR methods for the MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:error_rate_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $3.16 \pm 0.13$ & $4.13 \pm 0.18$ & \best{8.34 \pm 0.21} & $2.28 \pm 0.12$ & $2.27 \pm 0.12$ & $2.30 \pm 0.16$ & $2.98 \pm 0.14$ \\
+        Multi-Layer Perceptron & $2.05 \pm 0.12$ & $2.04 \pm 0.08$ & \best{8.40 \pm 0.13} & $1.92 \pm 0.19$ & $1.81 \pm 0.12$ & $2.29 \pm 0.15$ & $3.15 \pm 0.17$ \\
+        Support Vector Machine & $14.53 \pm 0.25$ & $10.75 \pm 0.24$ & \best{26.32 \pm 0.28} & $15.30 \pm 0.24$ & $18.98 \pm 0.25$ & $2.52 \pm 0.17$ & $2.84 \pm 0.15$ \\
+        XGBoost                & $2.07 \pm 0.10$ & $2.14 \pm 0.07$ & \best{8.09 \pm 0.16} & $3.09 \pm 0.07$ & $2.97 \pm 0.10$ & $2.17 \pm 0.13$ & $2.78 \pm 0.07$ \\
+        CatBoost               & $2.86 \pm 0.19$ & $2.68 \pm 0.10$ & \best{7.94 \pm 0.14} & $3.88 \pm 0.14$ & $3.81 \pm 0.15$ & $2.23 \pm 0.15$ & $2.99 \pm 0.17$ \\
+        LightGBM               & $1.84 \pm 0.08$ & $2.07 \pm 0.09$ & \best{7.86 \pm 0.08} & $2.69 \pm 0.10$ & $2.52 \pm 0.12$ & $2.22 \pm 0.10$ & $2.79 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification error rate (\%) across DR methods for the USPS dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:error_rate_usps}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $3.94 \pm 0.16$ & \best{6.69 \pm 0.27} & $4.77 \pm 0.33$ & $2.51 \pm 0.23$ & $2.51 \pm 0.23$ & $2.74 \pm 0.38$ & $2.65 \pm 0.12$ \\
+        Multi-Layer Perceptron & $2.99 \pm 0.26$ & $4.05 \pm 0.58$ & \best{5.28 \pm 0.28} & $2.18 \pm 0.24$ & $2.13 \pm 0.34$ & $2.56 \pm 0.44$ & $3.00 \pm 0.13$ \\
+        Support Vector Machine & $8.75 \pm 0.70$ & $6.31 \pm 0.60$ & $19.56 \pm 1.39$ & \best{34.60 \pm 0.95} & $26.69 \pm 0.86$ & $6.53 \pm 0.71$ & $2.98 \pm 0.45$ \\
+        XGBoost                & $3.10 \pm 0.23$ & $4.43 \pm 0.80$ & \best{4.84 \pm 0.34} & $3.29 \pm 0.50$ & $3.28 \pm 0.23$ & $2.67 \pm 0.45$ & $2.39 \pm 0.22$ \\
+        CatBoost               & $3.09 \pm 0.34$ & \best{5.43 \pm 0.88} & $4.91 \pm 0.39$ & $3.42 \pm 0.50$ & $3.44 \pm 0.49$ & $2.48 \pm 0.39$ & $2.40 \pm 0.21$ \\
+        LightGBM               & $3.02 \pm 0.40$ & $4.58 \pm 0.81$ & \best{4.86 \pm 0.51} & $3.35 \pm 0.42$ & $3.20 \pm 0.25$ & $2.80 \pm 0.40$ & $2.39 \pm 0.19$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification error rate (\%) across DR methods for the EMNIST-Digits dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:error_rate_emnist_digits}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $2.11 \pm 0.05$ & \best{8.35 \pm 0.10} & $6.28 \pm 0.11$ & $1.44 \pm 0.05$ & $1.46 \pm 0.05$ & $1.45 \pm 0.04$ & $1.87 \pm 0.04$ \\
+        Multi-Layer Perceptron & $1.28 \pm 0.08$ & $3.98 \pm 0.12$ & \best{6.01 \pm 0.07} & $1.17 \pm 0.05$ & $1.09 \pm 0.07$ & $1.45 \pm 0.03$ & $1.90 \pm 0.03$ \\
+        Support Vector Machine & $6.18 \pm 0.04$ & $8.88 \pm 0.13$ & \best{17.81 \pm 0.10} & $6.24 \pm 0.10$ & $9.74 \pm 0.09$ & $1.51 \pm 0.02$ & $1.67 \pm 0.05$ \\
+        XGBoost                & $1.18 \pm 0.04$ & $4.35 \pm 0.11$ & \best{5.93 \pm 0.11} & $1.97 \pm 0.03$ & $1.96 \pm 0.07$ & $1.38 \pm 0.02$ & $1.77 \pm 0.03$ \\
+        CatBoost               & $1.53 \pm 0.05$ & $5.08 \pm 0.10$ & \best{5.96 \pm 0.11} & $2.52 \pm 0.03$ & $2.47 \pm 0.02$ & $1.40 \pm 0.04$ & $1.84 \pm 0.04$ \\
+        LightGBM               & $1.06 \pm 0.04$ & $3.89 \pm 0.10$ & \best{5.84 \pm 0.07} & $1.56 \pm 0.02$ & $1.52 \pm 0.04$ & $1.41 \pm 0.03$ & $1.77 \pm 0.03$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification error rate (\%) across DR methods for the Arabic dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:error_rate_arabic}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $1.32 \pm 0.11$ & $2.97 \pm 0.17$ & \best{3.12 \pm 0.11} & $1.03 \pm 0.07$ & $1.03 \pm 0.07$ & $1.07 \pm 0.09$ & $1.36 \pm 0.09$ \\
+        Multi-Layer Perceptron & $0.97 \pm 0.12$ & $1.36 \pm 0.09$ & \best{2.75 \pm 0.13} & $0.90 \pm 0.07$ & $0.88 \pm 0.07$ & $1.04 \pm 0.11$ & $1.41 \pm 0.11$ \\
+        Support Vector Machine & $18.84 \pm 0.15$ & $17.11 \pm 0.77$ & $21.28 \pm 0.41$ & $18.78 \pm 0.63$ & \best{23.95 \pm 0.51} & $1.04 \pm 0.12$ & $1.38 \pm 0.14$ \\
+        XGBoost                & $0.95 \pm 0.09$ & $1.22 \pm 0.07$ & \best{2.76 \pm 0.19} & $1.17 \pm 0.08$ & $1.16 \pm 0.06$ & $1.02 \pm 0.10$ & $1.25 \pm 0.09$ \\
+        CatBoost               & $1.52 \pm 0.07$ & $1.80 \pm 0.10$ & \best{3.02 \pm 0.13} & $1.57 \pm 0.08$ & $1.58 \pm 0.05$ & $1.03 \pm 0.11$ & $1.34 \pm 0.11$ \\
+        LightGBM               & $0.83 \pm 0.05$ & $1.19 \pm 0.05$ & \best{2.66 \pm 0.18} & $1.01 \pm 0.09$ & $1.03 \pm 0.08$ & $1.04 \pm 0.10$ & $1.25 \pm 0.09$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \caption{Classification error rate (\%) across DR methods for the Fashion-MNIST dataset. Results reported as mean $\pm$ std across cross-validation folds.}
+    \label{tab:error_rate_fashion_mnist}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{l|ccccccc}
+        \hline
+        \textbf{Classifier} & \textbf{No DR} & \textbf{DFFE} & \textbf{LDA} & \textbf{PCA} & \textbf{TruncatedSVD} & \textbf{PaCMAP} & \textbf{UMAP} \\
+        \hline
+        K-Nearest Neighbors    & $15.05 \pm 0.18$ & \best{21.02 \pm 0.26} & $17.24 \pm 0.31$ & $14.66 \pm 0.49$ & $14.65 \pm 0.53$ & $18.84 \pm 0.27$ & $19.07 \pm 0.26$ \\
+        Multi-Layer Perceptron & $12.94 \pm 0.41$ & $17.47 \pm 0.49$ & $16.88 \pm 0.71$ & $11.65 \pm 0.50$ & $11.60 \pm 0.26$ & $17.07 \pm 0.19$ & \best{21.30 \pm 0.73} \\
+        Support Vector Machine & $17.82 \pm 0.20$ & $26.66 \pm 0.38$ & \best{33.11 \pm 0.45} & $26.77 \pm 0.47$ & $32.40 \pm 0.53$ & $27.92 \pm 0.33$ & $16.51 \pm 0.18$ \\
+        XGBoost                & $11.00 \pm 0.30$ & \best{16.63 \pm 0.35} & $15.32 \pm 0.33$ & $12.08 \pm 0.18$ & $12.02 \pm 0.21$ & $16.62 \pm 0.34$ & $16.56 \pm 0.21$ \\
+        CatBoost               & $12.05 \pm 0.21$ & \best{18.16 \pm 0.42} & $15.02 \pm 0.30$ & $12.77 \pm 0.15$ & $12.70 \pm 0.17$ & $16.80 \pm 0.26$ & $16.96 \pm 0.11$ \\
+        LightGBM               & $10.82 \pm 0.32$ & $16.48 \pm 0.28$ & $15.49 \pm 0.14$ & $11.85 \pm 0.25$ & $11.66 \pm 0.30$ & \best{16.93 \pm 0.21} & $16.90 \pm 0.13$ \\
+        \hline
+    \end{tabular}}
+\end{table*}
